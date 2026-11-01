@@ -1,0 +1,13 @@
+{
+  "name": "trustbridge-workspace",
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix mobile start",
+    "web": "npm --prefix mobile run web",
+    "typecheck": "npm --prefix mobile run typecheck",
+    "test": "npm --prefix mobile test",
+    "export:web": "npm --prefix mobile run export:web",
+    "lint": "npm --prefix mobile run lint",
+    "test:ui": "npm --prefix mobile run test:ui"
+  }
+}
