@@ -1,0 +1,79 @@
+name: Build Android preview APK
+
+on:
+  push:
+    branches: [main, preview, 'ui/**']
+    paths:
+      - '.github/workflows/android-apk.yml'
+      - 'mobile/app.json'
+      - 'mobile/app.config.*'
+      - 'mobile/package.json'
+      - 'mobile/package-lock.json'
+      - 'mobile/plugins/**'
+      - 'scripts/build-preview-apk.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-preview-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    name: Compile standalone preview APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      CI: '1'
+      EXPO_NO_TELEMETRY: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Validate source before compiling
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test
+      - name: Generate native Android project
+        run: npx --no-install expo prebuild --platform android --no-install
+      - name: Compile bundled ARM64 preview
+        run: bash ../scripts/build-preview-apk.sh
+      - name: Upload installable APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: TrustBridge-preview-APK-${{ github.run_number }}
+          path: artifacts/*.apk
+          if-no-files-found: error
+          retention-days: 30
+      - name: Write download instructions
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo '## TrustBridge preview APK'
+            echo ''
+            echo 'Download the **TrustBridge-preview-APK** artifact below this run, extract the ZIP, and install the APK on an ARM64 Android device.'
+            echo ''
+            echo 'Standalone JavaScript bundle included: no Metro server or Expo Go required.'
+            echo ''
+            echo 'Internal UI preview, signed with the Expo template development key. Not a store release. All records are fictional and sign-in is a design preview.'
+            echo ''
+            echo "Run: $RUN_URL"
+          } >> "$GITHUB_STEP_SUMMARY"
