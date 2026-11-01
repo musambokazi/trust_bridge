@@ -41,3 +41,7 @@ npm run test:ui
 ```
 
 The browser checks cover supplier search, invoice validation, result navigation, history filters, password visibility, session reset and all five tabs at 320, 390, 768 and 1280 pixels. Physical-device keyboard and safe-area acceptance remain part of the team’s device testing.
+
+## Android APK
+
+The [Android preview workflow](.github/workflows/android-apk.yml) produces a standalone installable ARM64 APK in its Actions artifacts. See [download and signing notes](docs/ANDROID_PREVIEW_BUILD.md).

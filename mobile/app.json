@@ -7,11 +7,18 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#101112",
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router"
+    ],
     "web": {
       "bundler": "metro",
       "output": "single",
       "name": "TrustBridge UI Preview"
-    }
+    },
+    "android": {
+      "package": "za.co.devpeeps.trustbridge",
+      "versionCode": 1
+    },
+    "runtimeVersion": "1.0.1"
   }
 }
