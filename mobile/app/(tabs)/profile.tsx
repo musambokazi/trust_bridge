@@ -76,15 +76,16 @@ export default function Profile() {
             <Muted>ACME Traders · Demo member</Muted>
           </View>
         </View>
-        <View style={styles.paper}>
+        <View style={[styles.paper, { backgroundColor: c.bg, borderWidth: 1, borderColor: c.line }]}>
           <Input
+            dark
             label="Preview display name"
             value={name}
             onChangeText={setName}
             maxLength={40}
             autoComplete="off"
           />
-          <Txt style={styles.mutedOnPaper}>
+          <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
             Changes apply to this session only.
           </Txt>
         </View>

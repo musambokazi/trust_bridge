@@ -33,12 +33,13 @@ export default function SignIn() {
             Your workspace. Your suppliers. A clearer view before you pay.
           </Muted>
         </View>
-        <View style={styles.paper}>
-          <Txt style={styles.paperTitle}>Sign in</Txt>
-          <Txt style={styles.mutedOnPaper}>
+        <View style={[styles.paper, { backgroundColor: c.bg, borderWidth: 1, borderColor: c.line }]}>
+          <Txt style={[styles.paperTitle, { color: c.white }]}>Sign in</Txt>
+          <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
             Design preview only. Do not enter real credentials.
           </Txt>
           <Input
+            dark
             label="Email address"
             placeholder="you@company.example"
             autoCapitalize="none"
@@ -52,6 +53,7 @@ export default function SignIn() {
             autoComplete="off"
           />
           <Input
+            dark
             label="Password"
             placeholder="Enter a demo password"
             ref={pass}
@@ -76,7 +78,7 @@ export default function SignIn() {
               >
                 <Icon
                   name={visible ? "eye-off-outline" : "eye-outline"}
-                  color={c.paperMuted}
+                  color={c.muted}
                   size={20}
                 />
               </Pressable>
@@ -93,7 +95,7 @@ export default function SignIn() {
             }}
           />
           {message && (
-            <Txt accessibilityRole="alert" style={styles.mutedOnPaper}>
+            <Txt accessibilityRole="alert" style={[styles.mutedOnPaper, { color: c.muted }]}>
               {message}
             </Txt>
           )}
