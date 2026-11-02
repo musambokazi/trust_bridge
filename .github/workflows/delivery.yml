@@ -1,0 +1,181 @@
+name: Release APKs and publish Expo updates
+on:
+  push:
+    branches: [main]
+    paths: ['mobile/**', 'scripts/**', '.github/workflows/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: trustbridge-delivery-main
+  cancel-in-progress: false
+jobs:
+  validate:
+    uses: ./.github/workflows/checks.yml
+  plan:
+    name: Link Expo and plan release
+    environment: preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      build: ${{ steps.plan.outputs.build }}
+      version: ${{ steps.plan.outputs.version }}
+      project_id: ${{ steps.plan.outputs.project_id }}
+      owner: ${{ steps.plan.outputs.owner }}
+      native_hash: ${{ steps.plan.outputs.native_hash }}
+      preview_channel: ${{ steps.plan.outputs.preview_channel }}
+      production_channel: ${{ steps.plan.outputs.production_channel }}
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+      - name: Link Expo project
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_ACCOUNT: ${{ vars.EXPO_ACCOUNT }}
+        run: node ../scripts/setup-expo-project.mjs
+      - id: plan
+        name: Keep runtime fixed and compile only missing app versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node ../scripts/plan-release.mjs
+  build:
+    name: EAS Android APK (${{ matrix.variant }})
+    needs: [validate, plan]
+    if: needs.plan.outputs.build == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [preview, production]
+    environment: ${{ matrix.variant }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      APP_VARIANT: ${{ matrix.variant }}
+      EXPO_PROJECT_ID: ${{ needs.plan.outputs.project_id }}
+      EXPO_ACCOUNT: ${{ needs.plan.outputs.owner }}
+      TRUSTBRIDGE_UPDATE_CHANNEL: ${{ matrix.variant == 'preview' && needs.plan.outputs.preview_channel || needs.plan.outputs.production_channel }}
+      CI: '1'
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+      - run: node ../scripts/configure-expo-profile.mjs
+      - run: node ../scripts/ensure-expo-channel.mjs
+      - name: Generate the internal demo signing fixture
+        run: |
+          npx --no-install expo prebuild --platform android --no-install
+          node - <<'NODE'
+          const fs = require('node:fs');
+          if (!fs.existsSync('android/app/debug.keystore')) throw Error('Missing template preview key');
+          fs.writeFileSync('credentials.json', JSON.stringify({ android: { keystore: { keystorePath: 'android/app/debug.keystore', keystorePassword: 'android', keyAlias: 'androiddebugkey', keyPassword: 'android' } } }));
+          NODE
+      - name: Build standalone APK on Expo EAS
+        run: npx --yes eas-cli@27.2.0 build --platform android --profile "$APP_VARIANT" --non-interactive --wait --json > eas-build.json
+      - name: Download the finished APK
+        env:
+          APP_VERSION: ${{ needs.plan.outputs.version }}
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const raw = JSON.parse(fs.readFileSync('eas-build.json', 'utf8'));
+          const build = Array.isArray(raw) ? raw[0] : raw;
+          if (build.status !== 'FINISHED' || !build.artifacts?.buildUrl?.startsWith('https://')) throw Error('EAS did not return a finished APK');
+          fs.writeFileSync('apk-url.txt', build.artifacts.buildUrl);
+          console.log('EAS build:', build.id);
+          NODE
+          mkdir -p ../artifacts
+          curl --fail --location --retry 3 --output "../artifacts/TrustBridge-${APP_VERSION}-${APP_VARIANT}.apk" "$(cat apk-url.txt)"
+          test -s "../artifacts/TrustBridge-${APP_VERSION}-${APP_VARIANT}.apk"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: APK-${{ matrix.variant }}
+          path: artifacts/*.apk
+          if-no-files-found: error
+          retention-days: 30
+  release:
+    name: Publish GitHub Releases downloads
+    needs: [plan, build]
+    if: needs.plan.outputs.build == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: APK-*
+          path: apks
+          merge-multiple: true
+      - name: Create versioned release with both APKs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APP_VERSION: ${{ needs.plan.outputs.version }}
+          NATIVE_HASH: ${{ needs.plan.outputs.native_hash }}
+          EXPO_PROJECT_ID: ${{ needs.plan.outputs.project_id }}
+        run: |
+          cat > release-notes.md <<EOF_NOTES
+          TrustBridge ${APP_VERSION} — internal hackathon UI demonstration.
+
+          Download the preview APK or the production-channel APK below. They install side by side and both use the fixed OTA runtime **1.0.1**.
+
+          App version: ${APP_VERSION}
+          Native compatibility: \`${NATIVE_HASH}\`
+          Expo project: ${EXPO_PROJECT_ID}
+          Source: ${GITHUB_SHA}
+
+          Fictional supplier data; live sign-in and backend verification are not connected. Both APKs use the Expo template development signing key for this internal demonstration. The production channel name is an update destination, not a claim of production readiness or store signing.
+          EOF_NOTES
+          gh release create "v${APP_VERSION}" apks/*.apk --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "TrustBridge ${APP_VERSION}" --notes-file release-notes.md --prerelease
+  update:
+    name: Expo OTA (${{ matrix.variant }})
+    needs: [validate, plan, build, release]
+    if: always() && needs.validate.result == 'success' && needs.plan.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') && (needs.release.result == 'success' || needs.release.result == 'skipped')
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [preview, production]
+    environment: ${{ matrix.variant }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      APP_VARIANT: ${{ matrix.variant }}
+      EXPO_PROJECT_ID: ${{ needs.plan.outputs.project_id }}
+      EXPO_ACCOUNT: ${{ needs.plan.outputs.owner }}
+      TRUSTBRIDGE_UPDATE_CHANNEL: ${{ matrix.variant == 'preview' && needs.plan.outputs.preview_channel || needs.plan.outputs.production_channel }}
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+      - run: node ../scripts/configure-expo-profile.mjs
+      - run: node ../scripts/ensure-expo-channel.mjs
+      - name: Publish compatible OTA from main
+        run: npx --yes eas-cli@27.2.0 update --channel "$TRUSTBRIDGE_UPDATE_CHANNEL" --environment "$APP_VARIANT" --platform android --message "main ${GITHUB_SHA}" --non-interactive

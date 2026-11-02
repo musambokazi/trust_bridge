@@ -14,3 +14,9 @@ artifacts/
 *.apk
 *.jks
 *.keystore
+
+# CI-only Expo linking/signing files
+mobile/credentials.json
+mobile/app.config.js.bootstrap
+mobile/eas-build.json
+mobile/release-plan.json

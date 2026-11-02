@@ -42,6 +42,8 @@ npm run test:ui
 
 The browser checks cover supplier search, invoice validation, result navigation, history filters, password visibility, session reset and all five tabs at 320, 390, 768 and 1280 pixels. Physical-device keyboard and safe-area acceptance remain part of the team’s device testing.
 
-## Android APK
+## Android APKs and OTA updates
 
-The [Android preview workflow](.github/workflows/android-apk.yml) produces a standalone installable ARM64 APK in its Actions artifacts. See [download and signing notes](docs/ANDROID_PREVIEW_BUILD.md).
+Source changes are made on **main**. Runtime version stays fixed at **1.0.1**; app versions change only when a new compiled release is required. The [delivery workflow](.github/workflows/delivery.yml) builds preview and production APKs on Expo EAS, publishes them under GitHub **Releases**, and publishes compatible OTA updates to both environments. Existing app releases are reused for UI-only updates.
+
+See [delivery, token setup and signing notes](docs/ANDROID_PREVIEW_BUILD.md).

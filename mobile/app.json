@@ -19,6 +19,12 @@
       "package": "za.co.devpeeps.trustbridge",
       "versionCode": 2
     },
-    "runtimeVersion": "1.0.1"
+    "runtimeVersion": "1.0.1",
+    "owner": "musambokazi",
+    "extra": {
+      "eas": {
+        "projectId": "c6dde76a-9bb6-45ed-89f8-94e37776ec11"
+      }
+    }
   }
 }

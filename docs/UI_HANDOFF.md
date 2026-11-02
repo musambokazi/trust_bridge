@@ -29,4 +29,4 @@ The floating bar combines the compact silhouette found in Bible Diaries/Exegomai
 
 ## Scope
 
-No database, backend functions, user accounts, telemetry, deployment, EAS configuration or app release is created by this frontend change. The team retains ownership of integration and deployment.
+The UI does not implement a database, backend functions, real user accounts or telemetry. GitHub Actions and Expo delivery are documented in ANDROID_PREVIEW_BUILD.md; the backend remains for team integration.
