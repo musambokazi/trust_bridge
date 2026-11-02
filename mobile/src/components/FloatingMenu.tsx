@@ -33,7 +33,7 @@ export function FloatingMenu() {
     [reduced, setReduced] = useState(false);
   const previous = useRef(0),
     x = useRef(new Animated.Value(0)).current;
-  const cell = Math.max(0, (width - 12) / 5),
+  const cell = Math.max(0, (width - 14) / 5),
     target = active * cell;
   useEffect(() => {
     let alive = true;
@@ -106,14 +106,14 @@ export function FloatingMenu() {
             <Icon
               name={t.icon as IconName}
               size={19}
-              color={active === i ? c.ink : "#686D73"}
+              color={active === i ? c.ink : c.muted}
             />
             <Txt
               style={{
                 fontSize: 9,
                 lineHeight: 13,
                 fontWeight: active === i ? "700" : "500",
-                color: active === i ? c.ink : "#686D73",
+                color: active === i ? c.ink : c.muted,
               }}
             >
               {t.label}
@@ -132,7 +132,9 @@ const s = StyleSheet.create({
     padding: 6,
     flexDirection: "row",
     borderRadius: 24,
-    backgroundColor: c.white,
+    backgroundColor: c.bg,
+    borderWidth: 1,
+    borderColor: c.line,
     shadowColor: "#000000",
     shadowOffset: { width: 0, height: 9 },
     shadowOpacity: 0.3,

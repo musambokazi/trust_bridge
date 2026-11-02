@@ -74,26 +74,26 @@ export default function CheckInvoice() {
             selected demo record.
           </Muted>
         </View>
-        <View style={styles.paper}>
+        <View style={[styles.paper, { backgroundColor: c.bg, borderWidth: 1, borderColor: c.line }]}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <View
               style={{
-                backgroundColor: c.orangeSoft,
+                backgroundColor: c.surface,
                 padding: 9,
                 borderRadius: 10,
               }}
             >
-              <Icon name="document-text-outline" color={c.warning} size={20} />
+              <Icon name="document-text-outline" color={c.orange} size={20} />
             </View>
             <View style={{ gap: 3 }}>
-              <Txt style={styles.paperTitle}>Invoice details</Txt>
-              <Txt style={styles.mutedOnPaper}>
+              <Txt style={[styles.paperTitle, { color: c.white }]}>Invoice details</Txt>
+              <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
                 Manual entry · UI demonstration
               </Txt>
             </View>
           </View>
           <View style={{ gap: 8 }}>
-            <Txt style={styles.label}>Supplier record</Txt>
+            <Txt style={[styles.label, { color: c.white }]}>Supplier record</Txt>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Select supplier"
@@ -101,7 +101,8 @@ export default function CheckInvoice() {
               style={{
                 minHeight: 50,
                 borderWidth: 1,
-                borderColor: errors.supplierId ? c.warning : c.paperLine,
+                borderColor: errors.supplierId ? c.orange : c.line,
+                backgroundColor: c.surface,
                 borderRadius: 12,
                 paddingHorizontal: 13,
                 flexDirection: "row",
@@ -110,24 +111,25 @@ export default function CheckInvoice() {
                 gap: 8,
               }}
             >
-              <Txt style={{ color: supplier ? c.ink : c.paperMuted, flex: 1 }}>
+              <Txt style={{ color: input.supplierId ? c.white : c.muted, flex: 1 }}>
                 {supplier?.name ||
                   (input.supplierId === "unknown"
                     ? "Supplier not listed"
                     : "Choose a supplier")}
               </Txt>
-              <Icon name="chevron-down" color={c.paperMuted} size={17} />
+              <Icon name="chevron-down" color={c.muted} size={17} />
             </Pressable>
             {errors.supplierId && (
               <Txt
                 accessibilityRole="alert"
-                style={{ color: c.warning, fontSize: 12 }}
+                style={{ color: c.orange, fontSize: 12 }}
               >
                 {errors.supplierId}
               </Txt>
             )}
           </View>
           <Input
+            dark
             label="Invoice number"
             placeholder="e.g. INV-1043"
             value={input.invoiceNumber}
@@ -140,6 +142,7 @@ export default function CheckInvoice() {
             maxLength={80}
           />
           <Input
+            dark
             label="Amount (ZAR)"
             placeholder="e.g. 12450.00"
             value={input.amount}
@@ -153,6 +156,7 @@ export default function CheckInvoice() {
             maxLength={14}
           />
           <Input
+            dark
             label="Supplier name on invoice"
             placeholder="Enter the name as shown"
             value={input.supplierName}
@@ -165,6 +169,7 @@ export default function CheckInvoice() {
             maxLength={160}
           />
           <Input
+            dark
             label="Bank reference on invoice"
             placeholder="e.g. DEMO4318"
             value={input.bankReference}
@@ -177,7 +182,7 @@ export default function CheckInvoice() {
             returnKeyType="done"
             onSubmitEditing={submit}
           />
-          <Txt style={styles.mutedOnPaper}>
+          <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
             Use fictional information in this preview. The live service and
             secure storage are not connected.
           </Txt>

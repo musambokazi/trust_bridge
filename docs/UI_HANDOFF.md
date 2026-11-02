@@ -2,7 +2,7 @@
 
 ## Design
 
-A charcoal workspace with editorial headings, open list rows and restrained white reading/form panels. Orange is reserved for primary actions, selected navigation and discrepancy emphasis. Orange button labels are dark for contrast; warnings on white use dark brown. Ratios describe the overall visual hierarchy rather than a fixed pixel count on every screen.
+A charcoal workspace with editorial headings and open list rows. The Check invoice form and floating navigation use black surfaces with light text; selected navigation and primary actions use orange. White reading panels remain on assessment and reference detail screens. Orange is reserved for primary actions, selected navigation and discrepancy emphasis. Orange button labels are dark for contrast; warnings on white use dark brown. Ratios describe the overall visual hierarchy rather than a fixed pixel count on every screen.
 
 The floating bar combines the compact silhouette found in Bible Diaries/Exegomai with the measured animated indicator behaviour reviewed in VIMBA. It has five routes: Home, Suppliers, Check, History and Profile. It respects safe-area insets, hides for native keyboards, supports screen-reader tab labels/selection and honours reduced motion. Main content reserves bottom space for the overlay. Supplier and assessment detail pages use back navigation.
 

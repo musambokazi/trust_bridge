@@ -192,34 +192,34 @@ export function ScreenHeader({
 }
 export const Input = React.forwardRef<
   React.ComponentRef<typeof TextInput>,
-  TextInputProps & { label: string; error?: string; suffix?: React.ReactNode }
->(function Input({ label, error, suffix, style, ...props }, ref) {
+  TextInputProps & { label: string; error?: string; suffix?: React.ReactNode; dark?: boolean }
+>(function Input({ label, error, suffix, dark = false, style, ...props }, ref) {
   return (
     <View style={{ gap: 8 }}>
-      <Txt style={styles.label}>{label}</Txt>
+      <Txt style={[styles.label, dark && { color: c.white }]}>{label}</Txt>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           borderWidth: 1,
-          borderColor: error ? c.warning : c.paperLine,
+          borderColor: error ? (dark ? c.orange : c.warning) : (dark ? c.line : c.paperLine),
           borderRadius: 12,
-          backgroundColor: "#FFFFFF",
+          backgroundColor: dark ? c.surface : "#FFFFFF",
         }}
       >
         <TextInput
           {...props}
           ref={ref}
           accessibilityLabel={label}
-          placeholderTextColor="#757B80"
-          style={[styles.input, style]}
+          placeholderTextColor={dark ? c.muted : "#757B80"}
+          style={[styles.input, dark && { color: c.white }, style]}
         />
         {suffix}
       </View>
       {error && (
         <Txt
           accessibilityRole="alert"
-          style={{ color: c.warning, fontSize: 12 }}
+          style={{ color: dark ? c.orange : c.warning, fontSize: 12 }}
         >
           {error}
         </Txt>
