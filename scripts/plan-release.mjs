@@ -7,6 +7,14 @@ if (app.runtimeVersion !== '1.0.1') throw Error('The OTA runtime must remain 1.0
 if (app.version !== pkg.version || !/^\d+\.\d+\.\d+$/.test(app.version)) throw Error('Use matching semantic app versions in app.json and package.json.');
 // Conservative: any production dependency/config change gets an isolated channel.
 const native = { dependencies: Object.entries(lock.packages).filter(([k, p]) => k && !p.dev).map(([path, p]) => ({ path, version: p.version, integrity: p.integrity })), plugins: app.plugins, androidPackage: app.android.package, orientation: app.orientation, userInterfaceStyle: app.userInterfaceStyle, config: readFileSync('app.config.js', 'utf8') };
+// Asset bytes are native build inputs too, including future replacements at the same path.
+const imagePaths = new Set();
+function collectImages(value) {
+  if (typeof value === 'string' && /\.(png|jpe?g|webp)$/i.test(value) && !/^https?:/.test(value)) imagePaths.add(value);
+  else if (value && typeof value === 'object') Object.values(value).forEach(collectImages);
+}
+collectImages({ icon: app.icon, android: app.android, splash: app.splash, plugins: app.plugins });
+if (imagePaths.size) native.assets = [...imagePaths].sort().map(path => ({ path, sha256: createHash('sha256').update(readFileSync(path)).digest('hex') }));
 const hash = createHash('sha256').update(JSON.stringify(native)).digest('hex');
 if (process.argv.includes('--write-baseline')) { writeFileSync('runtime-baseline.json', JSON.stringify({ nativeHash: hash }, null, 2) + '\n'); process.exit(0); }
 const first = read('runtime-baseline.json').nativeHash;

@@ -33,7 +33,7 @@ The linking workflow prints only the public project ID and owner. `app.config.js
 
 ## Download
 
-Open the repository's **Releases**, select **TrustBridge 1.0.1**, and download either `TrustBridge-1.0.1-preview.apk` or `TrustBridge-1.0.1-production.apk`. Expo also shows the corresponding builds. These are APK files, not Play Store AAB files; no Metro server or Expo Go is required.
+Open the repository's **Releases**, select the desired version (currently **TrustBridge 1.0.2**), and download either `TrustBridge-1.0.2-preview.apk` or `TrustBridge-1.0.2-production.apk`. Expo also shows the corresponding builds. These are APK files, not Play Store AAB files; no Metro server or Expo Go is required.
 
 ## Demo signing and scope
 

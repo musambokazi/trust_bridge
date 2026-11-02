@@ -3,21 +3,39 @@
     "name": "TrustBridge",
     "slug": "trustbridge",
     "scheme": "trustbridge",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#101112",
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/branding/splash-icon.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#000000",
+          "dark": {
+            "image": "./assets/branding/splash-icon.png",
+            "backgroundColor": "#000000"
+          }
+        }
+      ]
     ],
     "web": {
       "bundler": "metro",
       "output": "single",
-      "name": "TrustBridge UI Preview"
+      "name": "TrustBridge UI Preview",
+      "favicon": "./assets/branding/favicon.png"
     },
     "android": {
       "package": "za.co.devpeeps.trustbridge",
-      "versionCode": 2
+      "versionCode": 3,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/branding/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      }
     },
     "runtimeVersion": "1.0.1",
     "owner": "musambokazi",
@@ -25,6 +43,7 @@
       "eas": {
         "projectId": "c6dde76a-9bb6-45ed-89f8-94e37776ec11"
       }
-    }
+    },
+    "icon": "./assets/branding/icon.png"
   }
 }
