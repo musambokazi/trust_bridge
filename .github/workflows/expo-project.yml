@@ -1,0 +1,35 @@
+name: Configure Expo project
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/expo-project.yml', 'scripts/setup-expo-project.mjs']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  configure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+      - name: Link the team's Expo project
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_ACCOUNT: ${{ vars.EXPO_ACCOUNT }}
+        run: node ../scripts/setup-expo-project.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Expo-project-configuration
+          path: mobile/app.json
+          retention-days: 7

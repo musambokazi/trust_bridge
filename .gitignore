@@ -1,0 +1,16 @@
+node_modules/
+.expo/
+dist/
+dist-android/
+.env
+.env.*
+!.env.example
+.DS_Store
+
+# Generated native projects and APK outputs
+mobile/android/
+mobile/ios/
+artifacts/
+*.apk
+*.jks
+*.keystore
