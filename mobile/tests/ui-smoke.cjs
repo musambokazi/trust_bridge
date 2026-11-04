@@ -116,6 +116,8 @@ const server = http.createServer((req, res) => {
     await p
       .getByRole("textbox", { name: "Preview display name" })
       .fill("Team member");
+    await p.waitForURL("**/settings/account");
+    await p.getByRole("button", { name: "Go back", exact: true }).click();
     await p.getByRole("heading", { name: "Team member", exact: true }).waitFor();
     await p.getByRole("button", { name: "Privacy in this preview" }).click();
     await p
@@ -123,6 +125,26 @@ const server = http.createServer((req, res) => {
         exact: false,
       })
       .waitFor();
+    await p.waitForURL("**/settings/privacy");
+    await p.getByRole("button", { name: "Go back", exact: true }).click();
+    for (const [id, title] of [
+      ["workspace", "Your workspace"],
+      ["security", "Security & access"],
+      ["display", "Reading & display"],
+      ["reset", "Reset demo checks"],
+      ["about", "About TrustBridge"],
+    ]) {
+      await p.getByRole("button", { name: title, exact: true }).click();
+      await p.waitForURL(`**/settings/${id}`);
+      await p.getByRole("heading", { name: title, exact: true }).waitFor();
+      if (id === "display") {
+        await p.getByRole("button", { name: "A+", exact: true }).click();
+        await p.getByText("105%", { exact: true }).waitFor();
+      }
+      if (id === "reset") await p.getByRole("button", { name: "Keep my checks" }).click();
+      else await p.getByRole("button", { name: "Go back", exact: true }).click();
+      await p.waitForURL("**/profile");
+    }
     await p.getByRole("button", { name: "View sign-in design" }).click();
     await p
       .getByRole("textbox", { name: "Email address", exact: true })
