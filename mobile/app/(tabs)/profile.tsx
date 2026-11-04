@@ -1,23 +1,19 @@
 import React, { useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import {
   Button,
   DemoNote,
-  Eyebrow,
-  Heading,
   Icon,
+  type IconName,
   Input,
   Muted,
   Page,
-  ScreenHeader,
-  SectionTitle,
   Txt,
-  styles,
 } from "../../src/components/ui";
 import { useDemo } from "../../src/state/DemoState";
 import { color as c } from "../../src/theme";
-const info: Record<string, { title: string; body: string }> = {
+const info = {
   workspace: {
     title: "Your workspace",
     body: "ACME Traders is a fictional workspace. This UI demonstrates an organisation-specific supplier directory and assessment history. Team invitations, organisation membership and role-based permissions will be supplied by the backend team.",
@@ -35,158 +31,142 @@ const info: Record<string, { title: string; body: string }> = {
     body: "TrustBridge helps businesses compare invoice details with approved supplier reference records, understand discrepancies and decide what to independently verify before payment. It does not prove fraud or guarantee an invoice is authentic. Frontend concept 0.1.0 · NEMISA hackathon.",
   },
 };
+
+function SettingsRow({
+  title, description, icon, onPress, expanded,
+}: {
+  title: string;
+  description: string;
+  icon: IconName;
+  onPress: () => void;
+  expanded?: boolean;
+}) {
+  const { scale } = useDemo();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityHint={description}
+      accessibilityState={expanded === undefined ? undefined : { expanded }}
+      onPress={onPress}
+      style={({ pressed }) => [layout.row, pressed && layout.pressed]}
+    >
+      <View style={layout.icon}>
+        <Icon name={icon} color={expanded ? c.orange : c.muted} />
+      </View>
+      <View style={layout.copy}>
+        <Txt style={[{ fontSize: 17 * scale, lineHeight: 23 * scale }, expanded && layout.active]}>
+          {title}
+        </Txt>
+        <Muted>{description}</Muted>
+      </View>
+    </Pressable>
+  );
+}
+
 export default function Profile() {
   const { name, setName, scale, setScale, reset } = useDemo();
-  const [open, setOpen] = useState<string | null>(null),
-    [resetConfirm, setResetConfirm] = useState(false);
+  const [open, setOpen] = useState<string | null>(null);
+  const toggle = (key: string) => setOpen((current) => current === key ? null : key);
   return (
     <>
-      <ScreenHeader />
-      <Page>
-        <View style={{ gap: 12 }}>
-          <Eyebrow>YOUR WORKSPACE, YOUR WAY</Eyebrow>
-          <Heading>Make yourself{"\n"}at home.</Heading>
+      <View style={layout.header}>
+        <View style={layout.copy}>
+          <Txt accessibilityRole="header" style={layout.title}>{name.trim() || "Demo user"}</Txt>
+          <Muted>Settings · ACME Traders</Muted>
         </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 15,
-            paddingVertical: 7,
-          }}
-        >
-          <View
-            style={{
-              width: 60,
-              height: 60,
-              borderRadius: 20,
-              backgroundColor: c.orange,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Txt style={{ color: c.ink, fontSize: 23, fontWeight: "600" }}>
-              {name.charAt(0).toUpperCase() || "T"}
-            </Txt>
-          </View>
-          <View style={{ gap: 4 }}>
-            <Txt style={{ fontSize: 21, fontWeight: "600" }}>
-              {name || "Demo user"}
-            </Txt>
-            <Muted>ACME Traders · Demo member</Muted>
-          </View>
-        </View>
-        <View style={[styles.paper, { backgroundColor: c.bg, borderWidth: 1, borderColor: c.line }]}>
-          <Input
-            dark
-            label="Preview display name"
-            value={name}
-            onChangeText={setName}
-            maxLength={40}
-            autoComplete="off"
-          />
-          <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
-            Changes apply to this session only.
-          </Txt>
-        </View>
-        <View>
-          <SectionTitle title="Reading & display" />
-          <Muted>Adjust the body text to suit you.</Muted>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginTop: 16,
-            }}
-          >
-            <Button
-              secondary
-              title="A−"
-              disabled={scale <= 0.85}
-              onPress={() =>
-                setScale(Math.max(0.85, +(scale - 0.05).toFixed(2)))
-              }
+      </View>
+      <Page style={layout.page}>
+        <SettingsRow
+          title="Account"
+          description="Edit your preview display name"
+          icon="person-outline"
+          expanded={open === "account"}
+          onPress={() => toggle("account")}
+        />
+        {open === "account" && (
+          <View style={layout.details}>
+            <Input
+              dark
+              label="Preview display name"
+              value={name}
+              onChangeText={setName}
+              maxLength={40}
+              autoComplete="off"
             />
-            <Txt accessibilityLiveRegion="polite">
-              {Math.round(scale * 100)}%
-            </Txt>
-            <Button
-              secondary
-              title="A+"
-              disabled={scale >= 1.3}
-              onPress={() =>
-                setScale(Math.min(1.3, +(scale + 0.05).toFixed(2)))
-              }
-            />
+            <Muted>Changes apply to this session only.</Muted>
           </View>
-        </View>
-        <View>
-          <SectionTitle title="Workspace & information" />
-          {Object.entries(info).map(([key, item]) => (
-            <View
-              key={key}
-              style={{ borderBottomWidth: 1, borderColor: c.line }}
-            >
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ expanded: open === key }}
-                onPress={() => setOpen(open === key ? null : key)}
-                style={{
-                  minHeight: 66,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Txt>{item.title}</Txt>
-                <Icon
-                  name={open === key ? "chevron-up" : "chevron-forward"}
-                  color={c.muted}
-                  size={16}
-                />
-              </Pressable>
-              {open === key && (
-                <View style={{ paddingBottom: 20 }}>
-                  <Muted>{item.body}</Muted>
-                </View>
-              )}
+        )}
+        {([
+          ["workspace", "Organisation and team access", "business-outline"],
+          ["privacy", "What this demo stores and shares", "lock-closed-outline"],
+          ["security", "Authentication and permissions", "shield-checkmark-outline"],
+        ] as const).map(([key, description, icon]) => (
+          <React.Fragment key={key}>
+            <SettingsRow title={info[key].title} description={description} icon={icon} expanded={open === key} onPress={() => toggle(key)} />
+            {open === key && <View style={layout.details}><Muted>{info[key].body}</Muted></View>}
+          </React.Fragment>
+        ))}
+        <SettingsRow
+          title="Reading & display"
+          description={`Body text size · ${Math.round(scale * 100)}%`}
+          icon="text-outline"
+          expanded={open === "display"}
+          onPress={() => toggle("display")}
+        />
+        {open === "display" && (
+          <View style={layout.details}>
+            <View style={layout.scale}>
+              <Button secondary title="A−" disabled={scale <= 0.85} onPress={() => setScale(Math.max(0.85, +(scale - 0.05).toFixed(2)))} />
+              <Txt accessibilityLiveRegion="polite">{Math.round(scale * 100)}%</Txt>
+              <Button secondary title="A+" disabled={scale >= 1.3} onPress={() => setScale(Math.min(1.3, +(scale + 0.05).toFixed(2)))} />
             </View>
-          ))}
-        </View>
-        <Button
-          secondary
+          </View>
+        )}
+        <SettingsRow
           title="View sign-in design"
-          icon="arrow-forward"
+          description="Open the account preview"
+          icon="log-in-outline"
           onPress={() => router.push("/sign-in")}
         />
-        {resetConfirm ? (
-          <View style={{ gap: 14 }}>
+        <SettingsRow
+          title="Reset demo checks"
+          description="Clear checks created in this session"
+          icon="refresh-outline"
+          expanded={open === "reset"}
+          onPress={() => toggle("reset")}
+        />
+        {open === "reset" && (
+          <View style={layout.details}>
             <Txt>Remove checks created in this demo session?</Txt>
-            <Button
-              title="Reset demo checks"
-              onPress={() => {
-                reset();
-                setResetConfirm(false);
-              }}
-            />
-            <Button
-              secondary
-              title="Keep my checks"
-              onPress={() => setResetConfirm(false)}
-            />
+            <Button title="Confirm reset" onPress={() => { reset(); setOpen(null); }} />
+            <Button secondary title="Keep my checks" onPress={() => setOpen(null)} />
           </View>
-        ) : (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => setResetConfirm(true)}
-            style={{ minHeight: 44, justifyContent: "center" }}
-          >
-            <Txt style={{ color: c.orange }}>Reset demo checks</Txt>
-          </Pressable>
         )}
-        <DemoNote />
+        <SettingsRow
+          title={info.about.title}
+          description="What the app does and how to use the preview"
+          icon="information-circle-outline"
+          expanded={open === "about"}
+          onPress={() => toggle("about")}
+        />
+        {open === "about" && <View style={layout.details}><Muted>{info.about.body}</Muted></View>}
+        <View style={layout.footer}><DemoNote /></View>
       </Page>
     </>
   );
 }
+
+const layout = StyleSheet.create({
+  header: { width: "100%", maxWidth: 640, alignSelf: "center", paddingHorizontal: 24, paddingVertical: 16 },
+  title: { fontSize: 24, lineHeight: 32, fontWeight: "600" },
+  page: { gap: 0, paddingTop: 0, paddingHorizontal: 12 },
+  row: { flexDirection: "row", alignItems: "center", gap: 16, minHeight: 76, paddingHorizontal: 12, paddingVertical: 12, borderRadius: 12 },
+  icon: { width: 32, alignItems: "center" },
+  copy: { flex: 1, gap: 3 },
+  pressed: { backgroundColor: c.surface },
+  active: { color: c.orange },
+  details: { paddingLeft: 60, paddingRight: 12, paddingBottom: 14, gap: 12 },
+  scale: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 },
+  footer: { paddingHorizontal: 12, marginTop: 12 },
+});

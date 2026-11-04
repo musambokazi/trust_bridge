@@ -112,9 +112,11 @@ const server = http.createServer((req, res) => {
     await p.getByRole("tab", { name: "No discrepancies", exact: true }).click();
     await p.getByText("No assessments here yet.", { exact: true }).waitFor();
     await tabs().getByRole("tab", { name: "Profile", exact: true }).click();
+    await p.getByRole("button", { name: "Account", exact: true }).click();
     await p
       .getByRole("textbox", { name: "Preview display name" })
       .fill("Team member");
+    await p.getByRole("heading", { name: "Team member", exact: true }).waitFor();
     await p.getByRole("button", { name: "Privacy in this preview" }).click();
     await p
       .getByText("This preview uses fictional supplier records.", {
