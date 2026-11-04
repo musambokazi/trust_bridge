@@ -160,7 +160,7 @@ const server = http.createServer((req, res) => {
     await p.getByRole("button", { name: "Privacy and policy" }).click();
     await p.waitForURL("**/settings/privacy");
     for (const [id, title] of [["privacy-notice", "Privacy notice"], ["terms", "Terms of service"]]) {
-      await p.getByRole("button", { name: title, exact: true }).click();
+      await p.getByRole("link", { name: title, exact: true }).click();
       await p.waitForURL(`**/settings/${id}`);
       await p.getByRole("heading", { name: /^35\./ }).waitFor();
       await p.getByRole("button", { name: "Go back", exact: true }).click();
@@ -181,11 +181,11 @@ const server = http.createServer((req, res) => {
       }
       if (id === "workspace") {
         for (const [route, label] of [["workspace-type", "Company or individual"], ["team-access", "Team access"]]) {
-          await p.getByRole("button", { name: label, exact: true }).click();
+          await p.getByRole("link", { name: label, exact: true }).click();
           await p.waitForURL(`**/settings/${route}`);
           await p.getByRole("button", { name: "Go back", exact: true }).click();
         }
-        await p.getByRole("button", { name: "Supplier directory", exact: true }).click();
+        await p.getByRole("link", { name: "Supplier directory", exact: true }).click();
         await p.getByRole("textbox", { name: "Search suppliers" }).waitFor();
         await p.goBack();
         await p.waitForURL("**/settings/workspace");

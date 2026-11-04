@@ -145,7 +145,7 @@ export function Brand() {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
       <Image
-        source={require("../../assets/branding/splash-icon.png")}
+        source={require("../../assets/branding/header-logo.png")}
         style={{ width: 46, height: 38 }}
         resizeMode="contain"
         accessible={false}

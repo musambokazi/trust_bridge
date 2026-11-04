@@ -4,13 +4,25 @@ import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Icon, Input, Muted, Page, Txt } from "../../src/components/ui";
 import { isSetting, settingDetails, settings } from "../../src/settings";
-import { legalDocuments } from "../../src/legal";
+import { legalDetails, legalDocuments } from "../../src/legal";
 import { useDemo } from "../../src/state/DemoState";
 import { color as c } from "../../src/theme";
 
 function goBack() {
   if (router.canGoBack()) router.back();
   else router.replace("/profile");
+}
+
+function TextLink({ title, onPress }: { title: string; onPress: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="link"
+      onPress={onPress}
+      style={({ pressed }) => [layout.textLink, pressed && { opacity: 0.7 }]}
+    >
+      <Txt style={layout.linkLabel}>{title}</Txt>
+    </Pressable>
+  );
 }
 
 export default function SettingScreen() {
@@ -31,15 +43,15 @@ export default function SettingScreen() {
         <Muted>{setting.description}</Muted>
         {id === "workspace" && (
           <>
-            <Button secondary title="Supplier directory" icon="arrow-forward" onPress={() => router.push("/suppliers")} />
-            <Button secondary title="Company or individual" icon="arrow-forward" onPress={() => router.push("/settings/workspace-type")} />
-            <Button secondary title="Team access" icon="arrow-forward" onPress={() => router.push("/settings/team-access")} />
+            <TextLink title="Supplier directory" onPress={() => router.push("/suppliers")} />
+            <TextLink title="Company or individual" onPress={() => router.push("/settings/workspace-type")} />
+            <TextLink title="Team access" onPress={() => router.push("/settings/team-access")} />
           </>
         )}
         {id === "privacy" && (
           <>
-            <Button secondary title="Privacy notice" icon="arrow-forward" onPress={() => router.push("/settings/privacy-notice")} />
-            <Button secondary title="Terms of service" icon="arrow-forward" onPress={() => router.push("/settings/terms")} />
+            <TextLink title="Privacy notice" onPress={() => router.push("/settings/privacy-notice")} />
+            <TextLink title="Terms of service" onPress={() => router.push("/settings/terms")} />
           </>
         )}
         {(id === "privacy-notice" || id === "terms") && (
@@ -48,7 +60,8 @@ export default function SettingScreen() {
             {legalDocuments[id].map(([title, body], index) => (
               <View key={title} style={layout.section}>
                 <Txt accessibilityRole="header" style={layout.sectionTitle}>{index + 1}. {title}</Txt>
-                <Muted>{body}</Muted>
+                <Txt>{body}</Txt>
+                <Muted>{legalDetails[id][index]}</Muted>
               </View>
             ))}
           </>
@@ -89,6 +102,8 @@ const layout = StyleSheet.create({
   back: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
   title: { flex: 1, fontSize: 21, lineHeight: 28, fontWeight: "600" },
   page: { paddingTop: 16, paddingBottom: 32 },
+  textLink: { minHeight: 44, justifyContent: "center" },
+  linkLabel: { color: c.orange, textDecorationLine: "underline" },
   section: { gap: 6, borderTopWidth: 1, borderColor: c.line, paddingTop: 16 },
   sectionTitle: { fontWeight: "600" },
   scale: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 },
