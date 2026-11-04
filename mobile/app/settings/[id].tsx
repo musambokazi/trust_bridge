@@ -4,6 +4,7 @@ import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Icon, Input, Muted, Page, Txt } from "../../src/components/ui";
 import { isSetting, settingDetails, settings } from "../../src/settings";
+import { legalDocuments } from "../../src/legal";
 import { useDemo } from "../../src/state/DemoState";
 import { color as c } from "../../src/theme";
 
@@ -14,10 +15,8 @@ function goBack() {
 
 export default function SettingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { name, setName, scale, setScale, reset } = useDemo();
+  const { name, setName, scale, setScale } = useDemo();
   if (!isSetting(id)) return <Redirect href="/profile" />;
-  if (id === "sign-in") return <Redirect href="/sign-in" />;
-  if (id === "welcome") return <Redirect href="/welcome" />;
   const setting = settings[id];
 
   return (
@@ -29,11 +28,37 @@ export default function SettingScreen() {
         <Txt accessibilityRole="header" style={layout.title}>{setting.title}</Txt>
       </View>
       <Page style={layout.page}>
-        {"body" in setting && <Muted>{setting.body}</Muted>}
+        <Muted>{setting.description}</Muted>
+        {id === "workspace" && (
+          <>
+            <Button secondary title="Supplier directory" icon="arrow-forward" onPress={() => router.push("/suppliers")} />
+            <Button secondary title="Company or individual" icon="arrow-forward" onPress={() => router.push("/settings/workspace-type")} />
+            <Button secondary title="Team access" icon="arrow-forward" onPress={() => router.push("/settings/team-access")} />
+          </>
+        )}
+        {id === "privacy" && (
+          <>
+            <Button secondary title="Privacy notice" icon="arrow-forward" onPress={() => router.push("/settings/privacy-notice")} />
+            <Button secondary title="Terms of service" icon="arrow-forward" onPress={() => router.push("/settings/terms")} />
+          </>
+        )}
+        {(id === "privacy-notice" || id === "terms") && (
+          <>
+            <Txt>Draft · applies to the current app build only</Txt>
+            {legalDocuments[id].map(([title, body], index) => (
+              <View key={title} style={layout.section}>
+                <Txt accessibilityRole="header" style={layout.sectionTitle}>{index + 1}. {title}</Txt>
+                <Muted>{body}</Muted>
+              </View>
+            ))}
+          </>
+        )}
         {id === "account" && (
           <>
             <Input dark label="Preview display name" value={name} onChangeText={setName} maxLength={40} autoComplete="off" />
-            <Muted>Changes apply to this session only.</Muted>
+            <Muted>Sample username: @demo-member</Muted>
+            <Muted>Sample email: member@example.com</Muted>
+            <Muted>Display-name changes apply to this session only.</Muted>
           </>
         )}
         {id === "display" && (
@@ -45,13 +70,6 @@ export default function SettingScreen() {
               <Button secondary title="A+" disabled={scale >= 1.3} onPress={() => setScale(Math.min(1.3, +(scale + 0.05).toFixed(2)))} />
             </View>
             <Txt>Text preview: Review invoice details before making a payment.</Txt>
-          </>
-        )}
-        {id === "reset" && (
-          <>
-            <Muted>Remove checks created in this demo session?</Muted>
-            <Button title="Confirm reset" onPress={() => { reset(); goBack(); }} />
-            <Button secondary title="Keep my checks" onPress={goBack} />
           </>
         )}
         {settingDetails[id]?.map(([title, body]) => (

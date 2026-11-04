@@ -27,7 +27,7 @@ export default function Welcome() {
           <Muted>{slide.body}</Muted>
         </View>
         <Button title={last ? "Continue to account" : "Next"} icon="arrow-forward" onPress={() => last ? router.push("/sign-in") : setStep(step + 1)} />
-        <Button secondary title={step ? "Previous" : "Back to settings"} onPress={() => step ? setStep(step - 1) : router.replace("/profile")} />
+        {step > 0 && <Button secondary title="Previous" onPress={() => setStep(step - 1)} />}
       </Page>
     </SafeAreaView>
   );

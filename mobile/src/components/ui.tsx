@@ -2,6 +2,7 @@ import React from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
+  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -143,15 +144,12 @@ export function Button({
 export function Brand() {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
-      <View
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-        style={styles.mark}
-      >
-        <View style={styles.bridgeLeft} />
-        <View style={styles.bridgeRight} />
-        <View style={styles.bridgeDeck} />
-      </View>
+      <Image
+        source={require("../../assets/branding/splash-icon.png")}
+        style={{ width: 46, height: 38 }}
+        resizeMode="contain"
+        accessible={false}
+      />
       <Txt style={{ fontSize: 20, fontWeight: "700", letterSpacing: -0.8 }}>
         trustbridge<Txt style={{ color: c.orange }}>.</Txt>
       </Txt>

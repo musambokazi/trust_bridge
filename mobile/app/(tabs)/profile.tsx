@@ -12,7 +12,7 @@ import {
 } from "../../src/components/ui";
 import { useDemo } from "../../src/state/DemoState";
 import { color as c } from "../../src/theme";
-import { settings, isSetting } from "../../src/settings";
+import { settings, profileSettings } from "../../src/settings";
 
 function SettingsRow({
   title, description, icon, onPress,
@@ -68,13 +68,13 @@ export default function Profile() {
             <Muted>ACME Traders · Preview profile</Muted>
           </View>
         </View>
-        {Object.keys(settings).filter(isSetting).map((id) => (
+        {profileSettings.map((id) => (
           <SettingsRow
             key={id}
             title={settings[id].title}
             description={id === "display" ? `Body text size · ${Math.round(scale * 100)}%` : settings[id].description}
             icon={settings[id].icon}
-            onPress={() => router.push(id === "sign-in" ? "/sign-in" : id === "welcome" ? "/welcome" : { pathname: "/settings/[id]", params: { id } })}
+            onPress={() => router.push({ pathname: "/settings/[id]", params: { id } })}
           />
         ))}
         <View style={layout.footer}><DemoNote /></View>

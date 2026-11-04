@@ -152,7 +152,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [preview, production]
+        variant: [production]
     environment: ${{ matrix.variant }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25

@@ -16,7 +16,9 @@ import {
   styles,
 } from "../src/components/ui";
 import { color as c } from "../src/theme";
+import { useDemo } from "../src/state/DemoState";
 export default function SignIn() {
+  const { enterWorkspace } = useDemo();
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
     [visible, setVisible] = useState(false),
@@ -24,7 +26,7 @@ export default function SignIn() {
   const pass = useRef<React.ComponentRef<typeof TextInput>>(null);
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1 }}>
-      <ScreenHeader back title="Account preview" />
+      <ScreenHeader back title="Your account" />
       <Page style={{ paddingBottom: 40 }}>
         <View style={{ gap: 14, paddingTop: 25 }}>
           <Eyebrow>WELCOME TO TRUSTBRIDGE</Eyebrow>
@@ -106,6 +108,7 @@ export default function SignIn() {
           icon="arrow-forward"
           onPress={() => {
             setPassword("");
+            enterWorkspace();
             router.replace("/");
           }}
         />

@@ -6,6 +6,8 @@ import {
   type InvoiceInput,
 } from "../domain/demo";
 type Demo = {
+  enteredWorkspace: boolean;
+  enterWorkspace: () => void;
   assessments: Assessment[];
   check: (input: InvoiceInput) => string;
   reset: () => void;
@@ -16,6 +18,7 @@ type Demo = {
 };
 const Context = createContext<Demo | null>(null);
 export function DemoProvider({ children }: { children: React.ReactNode }) {
+  const [enteredWorkspace, setEnteredWorkspace] = useState(false);
   const [assessments, setAssessments] = useState(initialAssessments);
   const [name, setName] = useState("Thulane");
   const [scale, setScale] = useState(1);
@@ -28,6 +31,8 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   return (
     <Context.Provider
       value={{
+        enteredWorkspace,
+        enterWorkspace: () => setEnteredWorkspace(true),
         assessments,
         check,
         reset: () => setAssessments(initialAssessments),
