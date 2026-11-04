@@ -4,7 +4,7 @@ import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Icon, Input, Muted, Page, Txt } from "../../src/components/ui";
 import { isSetting, settingDetails, settings } from "../../src/settings";
-import { legalDetails, legalDocuments } from "../../src/legal";
+import { legalDetails, legalDocuments, legalExamples } from "../../src/legal";
 import { useDemo } from "../../src/state/DemoState";
 import { color as c } from "../../src/theme";
 
@@ -13,14 +13,17 @@ function goBack() {
   else router.replace("/profile");
 }
 
-function TextLink({ title, onPress }: { title: string; onPress: () => void }) {
+function TextLink({ title, description, onPress }: { title: string; description: string; onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="link"
+      accessibilityLabel={title}
+      accessibilityHint={description}
       onPress={onPress}
       style={({ pressed }) => [layout.textLink, pressed && { opacity: 0.7 }]}
     >
       <Txt style={layout.linkLabel}>{title}</Txt>
+      <Muted>{description}</Muted>
     </Pressable>
   );
 }
@@ -43,20 +46,26 @@ export default function SettingScreen() {
         <Muted>{setting.description}</Muted>
         {id === "workspace" && (
           <>
-            <TextLink title="Supplier directory" onPress={() => router.push("/suppliers")} />
-            <TextLink title="Company or individual" onPress={() => router.push("/settings/workspace-type")} />
-            <TextLink title="Team access" onPress={() => router.push("/settings/team-access")} />
+            <TextLink title="Supplier directory" description="Browse the supplier references used for invoice checks." onPress={() => router.push("/suppliers")} />
+            <TextLink title="Company or individual" description="See what each workspace type is for." onPress={() => router.push("/settings/workspace-type")} />
+            <TextLink title="Team access" description="Learn how invitations and permissions work." onPress={() => router.push("/settings/team-access")} />
           </>
         )}
         {id === "privacy" && (
           <>
-            <TextLink title="Privacy notice" onPress={() => router.push("/settings/privacy-notice")} />
-            <TextLink title="Terms of service" onPress={() => router.push("/settings/terms")} />
+            <TextLink title="Privacy notice" description="See what information the app uses and what stays on your device." onPress={() => router.push("/settings/privacy-notice")} />
+            <TextLink title="Terms of service" description="Understand how to use TrustBridge and interpret check results." onPress={() => router.push("/settings/terms")} />
           </>
         )}
         {(id === "privacy-notice" || id === "terms") && (
           <>
             <Txt>Draft · applies to the current app build only</Txt>
+            {legalExamples[id].map(([title, body]) => (
+              <View key={title} style={layout.section}>
+                <Txt accessibilityRole="header" style={layout.sectionTitle}>{title}</Txt>
+                <Muted>{body}</Muted>
+              </View>
+            ))}
             {legalDocuments[id].map(([title, body], index) => (
               <View key={title} style={layout.section}>
                 <Txt accessibilityRole="header" style={layout.sectionTitle}>{index + 1}. {title}</Txt>
@@ -102,8 +111,8 @@ const layout = StyleSheet.create({
   back: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
   title: { flex: 1, fontSize: 21, lineHeight: 28, fontWeight: "600" },
   page: { paddingTop: 16, paddingBottom: 32 },
-  textLink: { minHeight: 44, justifyContent: "center" },
-  linkLabel: { color: c.orange, textDecorationLine: "underline" },
+  textLink: { minHeight: 48, justifyContent: "center", gap: 4 },
+  linkLabel: { fontWeight: "600" },
   section: { gap: 6, borderTopWidth: 1, borderColor: c.line, paddingTop: 16 },
   sectionTitle: { fontWeight: "600" },
   scale: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 },

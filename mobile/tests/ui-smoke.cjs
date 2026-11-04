@@ -53,8 +53,18 @@ const server = http.createServer((req, res) => {
     const origin = `http://127.0.0.1:${server.address().port}`;
     await p.goto(origin);
     await p.waitForURL("**/welcome");
-    for (let step = 0; step < 3; step++) {
-      await p.getByRole("button", { name: "Next", exact: true }).click();
+    const advanceWelcome = () => p.getByRole("button", { name: "Next", exact: true }).click();
+    await p.setViewportSize({ width: 320, height: 690 });
+    await p.getByRole("heading", { name: "Check before you pay." }).waitFor();
+    await advanceWelcome();
+    await p.getByRole("heading", { name: "Start with a supplier you know." }).waitFor();
+    await p.getByRole("button", { name: "Previous", exact: true }).click();
+    await p.getByRole("heading", { name: "Check before you pay." }).waitFor();
+    assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+    await p.setViewportSize({ width: 390, height: 844 });
+    for (const title of ["Start with a supplier you know.", "See exactly what changed.", "Keep a record of your checks."]) {
+      await advanceWelcome();
+      await p.getByRole("heading", { name: title, exact: true }).waitFor();
     }
     await p.getByRole("button", { name: "Continue to account" }).click();
     await p.getByRole("button", { name: "Preview account creation" }).click();

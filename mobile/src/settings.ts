@@ -41,6 +41,7 @@ export const settingDetails: Partial<Record<Setting, readonly [string, string][]
     ["Verify account access", "When team access is available, check who sent an invitation and which company it names before accepting. If you change roles or leave a company, ask its administrator to remove access you no longer need."],
     ["Separate review from approval", "Where possible, have a different person verify changes to supplier payment details before anyone updates the reference or approves a payment."],
     ["If something looks wrong", "Pause the payment. Keep the invoice and correspondence in your organisation’s approved system, and tell the person who handles supplier or payment incidents. Avoid forwarding bank details or credentials in an unsecured message."],
+    ["Handle urgent requests carefully", "If a request asks you to skip approval, change the account immediately or keep the transfer confidential, pause and use your normal verification process. Time pressure does not confirm a change."],
     ["Online and offline access", "Live sign-in and saved sessions are not connected. The current workspace can be explored using fictional records without signing in."],
   ],
   display: [["Text size", "The buttons adjust supported body text throughout the app. The sample shows the change before you leave this screen."]],
@@ -56,6 +57,9 @@ export const settingDetails: Partial<Record<Setting, readonly [string, string][]
     ["What this build connects to", "The current supplier directory and assessment history use fictional records. Live accounts, shared workspaces, profile uploads and external supplier verification are not yet connected."],
     ["Example: a familiar supplier with new bank details", "A regular supplier sends an invoice with its usual company name but a different account reference. Compare it against the reference, pause when the discrepancy appears, and call a contact already on file. Confirm the change through your normal process before anyone amends the reference."],
     ["What a useful review record contains", "When you investigate a discrepancy, record what changed, whom you contacted, and the decision you reached in your approved system. This keeps the reasoning available to the next person who reviews the payment."],
+    ["What to check first", "Confirm you chose the right supplier before comparing the details. If two suppliers have similar names, use another trusted identifier to distinguish them. A good comparison starts with the right record."],
+    ["When the directory has no record", "A missing supplier reference means there is no baseline for a meaningful comparison. Ask the person responsible for supplier records how to verify the supplier before you continue."],
+    ["How to hand off an invoice review", "Tell the next reviewer which reference you used, which field differed, and whether you reached the supplier through a known contact. Keep that explanation alongside your normal approval record."],
     ["Where to start", "Open Suppliers to look up a reference, Check to compare an invoice, or History to revisit a result. Profile contains account information, workspace guidance, and the privacy notice and terms."],
   ],
 };

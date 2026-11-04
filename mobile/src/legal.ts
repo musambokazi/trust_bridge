@@ -152,3 +152,17 @@ export const legalDetails = {
     "For an actual invoice, follow the controls required by your organisation and confirm any payment changes independently. Use this build to evaluate the workflow with sample information.",
   ],
 } as const;
+
+export const legalExamples = {
+  "privacy-notice": [
+    ["Before entering anything", "You can browse the fictional directory without typing your name, email or an invoice number. If you're showing the form to a colleague, use invented values that cannot be traced back to a real person or supplier. A real document can still identify a business even if its name is removed."],
+    ["What happens during an invoice check", "Suppose you enter a made-up invoice number and a sample bank reference. TrustBridge compares the fields on the device and displays a result. Going to another tab can leave that result available in History for the rest of the running session. The app does not send those inputs to a bank or to the service that delivers app updates."],
+    ["What happens when you close the app", "Returning to your phone's home screen may leave TrustBridge running. A full restart clears the session, but it cannot clear an image you saved, a screenshot another person received, or any notes you made outside the app."],
+    ["Before a live service collects data", "This draft is about the build you have installed. If live accounts or supplier syncing are introduced, the notice will need to explain who operates the service, which records leave the device, who can see them, how long they are kept and how to reach the operator about your information."],
+  ],
+  terms: [
+    ["A useful review starts with the right reference", "If an invoice arrives with a new account number, compare it with the supplier record you already trust. Use a contact you obtained independently of the invoice. A reply from the same address that sent the change is not an independent check."],
+    ["When the app finds no difference", "Agreement on the displayed fields cannot tell you whether the goods arrived, the purchase was approved or the invoice was already paid. Keep those checks in your normal approval process. If a reference is incomplete or out of date, stop and confirm the missing information."],
+    ["When you share a result", "A screenshot can help explain where a difference appeared. It is not a payment approval or a substitute for your organisation's record. For a demo or issue report, use sample data and check that the screenshot contains no real information."],
+  ],
+} as const;
