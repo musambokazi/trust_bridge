@@ -145,7 +145,27 @@ const server = http.createServer((req, res) => {
       else await p.getByRole("button", { name: "Go back", exact: true }).click();
       await p.waitForURL("**/profile");
     }
-    await p.getByRole("button", { name: "View sign-in design" }).click();
+    await p.getByRole("button", { name: "Welcome tour", exact: true }).click();
+    await p.waitForURL("**/welcome");
+    for (let step = 0; step < 3; step++) {
+      await p.getByRole("button", { name: "Next", exact: true }).click();
+    }
+    await p.getByRole("button", { name: "Continue to account" }).click();
+    await p.getByRole("button", { name: "Preview account creation" }).click();
+    await p.getByRole("button", { name: "Company", exact: true }).click();
+    const next = p.getByRole("button", { name: "Continue", exact: true });
+    await next.click();
+    for (const [label, value] of [
+      ["First name", "Sample"], ["Last name", "Member"],
+      ["Username", "sample_member"], ["Email address", "sample@example.com"],
+    ]) await p.getByRole("textbox", { name: label, exact: true }).fill(value);
+    await next.click();
+    for (const [label, value] of [
+      ["Country", "South Africa"], ["Legal business name", "Sample Company"], ["Your role", "Buyer"],
+    ]) await p.getByRole("textbox", { name: label, exact: true }).fill(value);
+    await next.click();
+    await p.getByText("Sample Company · Buyer · South Africa", { exact: true }).waitFor();
+    await p.getByRole("button", { name: "Return to sign in" }).click();
     await p
       .getByRole("textbox", { name: "Email address", exact: true })
       .fill("demo@example.com");

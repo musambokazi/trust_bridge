@@ -109,6 +109,7 @@ export default function SignIn() {
             router.replace("/");
           }}
         />
+        <Button secondary title="Preview account creation" onPress={() => router.push("/sign-up")} />
         <DemoNote />
       </Page>
     </SafeAreaView>

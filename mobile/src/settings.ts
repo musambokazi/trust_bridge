@@ -26,6 +26,7 @@ export const settings = {
   display: { title: "Reading & display", description: "Adjust body text size", icon: "text-outline" },
   "sign-in": { title: "View sign-in design", description: "Open the account preview", icon: "log-in-outline" },
   reset: { title: "Reset demo checks", description: "Clear checks created in this session", icon: "refresh-outline" },
+  welcome: { title: "Welcome tour", description: "See how TrustBridge fits into your payment checks", icon: "compass-outline" },
   about: { ...info.about, description: "What the app does and how to use the preview", icon: "information-circle-outline" },
 } as const;
 
@@ -34,3 +35,29 @@ export type Setting = keyof typeof settings;
 export function isSetting(value: unknown): value is Setting {
   return typeof value === "string" && Object.prototype.hasOwnProperty.call(settings, value);
 }
+
+export const settingDetails: Partial<Record<Setting, readonly [string, string][]>> = {
+  account: [
+    ["Your identity", "Your display name appears on Home and Profile. This preview uses a sample email and username, with no live account attached."],
+    ["Profile photo", "Photo uploads will be available when your TrustBridge account and private photo storage are connected."],
+  ],
+  workspace: [
+    ["Supplier directory", "Use Suppliers to look up the reference records your workspace checks invoices against."],
+    ["Company or individual", "Companies will provide their legal business name, registration number where applicable and your role. Individuals will set up a workspace under their own name."],
+    ["Team access", "A company registration does not by itself grant access to an existing organisation or its supplier records."],
+  ],
+  privacy: [
+    ["What stays on this device", "Preview checks and display preferences are held for the current app session. Restarting clears them."],
+    ["What to enter", "Use fictional invoice details in this preview. Never enter a real banking reference or reuse a real password."],
+  ],
+  security: [
+    ["Before paying", "If bank details changed, call the supplier using a number you already trust. Do not use contact details supplied only on the invoice."],
+    ["Online and offline access", "First sign-in and account verification will require internet. Offline access will depend on a previously established session and will not make live supplier verification available."],
+  ],
+  display: [["Text size", "The buttons adjust supported body text throughout the app. The sample below shows the change before you leave this screen."]],
+  reset: [["What gets cleared", "Only invoice checks created during this session are removed. The original sample checks remain available."]],
+  about: [
+    ["How it works", "Choose a supplier, enter invoice details, then review the comparison with the workspace reference. History lets you revisit the result."],
+    ["What a match means", "A match means the compared fields agree with the reference. It is not proof that an invoice is genuine or permission to pay."],
+  ],
+};
