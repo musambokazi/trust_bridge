@@ -190,8 +190,8 @@ export function ScreenHeader({
 }
 export const Input = React.forwardRef<
   React.ComponentRef<typeof TextInput>,
-  TextInputProps & { label: string; error?: string; suffix?: React.ReactNode; dark?: boolean }
->(function Input({ label, error, suffix, dark = false, style, ...props }, ref) {
+  TextInputProps & { label: string; error?: string; prefix?: React.ReactNode; suffix?: React.ReactNode; dark?: boolean }
+>(function Input({ label, error, prefix, suffix, dark = false, style, ...props }, ref) {
   return (
     <View style={{ gap: 8 }}>
       <Txt style={[styles.label, dark && { color: c.white }]}>{label}</Txt>
@@ -205,6 +205,7 @@ export const Input = React.forwardRef<
           backgroundColor: dark ? c.surface : "#FFFFFF",
         }}
       >
+        {prefix}
         <TextInput
           {...props}
           ref={ref}

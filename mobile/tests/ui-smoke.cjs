@@ -94,13 +94,23 @@ const server = http.createServer((req, res) => {
     await p.getByRole("button", { name: "Done", exact: true }).click();
     await create();
     await next.click();
-    await fill([["First name", "Sample"], ["Surname", "Member"]]);
+    const first = p.getByLabel("First name", { exact: true });
+    await first.fill("Sample");
+    await first.press("Enter");
+    assert.equal(await p.getByLabel("Surname", { exact: true }).evaluate((input) => document.activeElement === input), true);
+    await fill([["Surname", "Member"]]);
     await next.click();
-    await fill([["Email address", "sample@example.com"], ["Cell phone number", "+27820000000"]]);
+    await fill([["Email address", "sample@example.com"]]);
+    await p.getByRole("button", { name: "Country code for Cell phone number" }).click();
+    await p.getByLabel("Search countries or codes", { exact: true }).fill("44");
+    await p.getByRole("button", { name: "United Kingdom +44", exact: true }).click();
+    await p.getByText("Country: United Kingdom", { exact: true }).waitFor();
+    await fill([["Cell phone number", "07700900123"]]);
     await next.click();
     await fill([["Password", "FictionalOnly8!"], ["Confirm password", "FictionalOnly8!"]]);
     await next.click();
     await p.getByText("Individual account", { exact: true }).waitFor();
+    await p.getByText("+447700900123", { exact: true }).waitFor();
     await p.getByRole("button", { name: "Done", exact: true }).click();
     await p.getByRole("button", { name: "Continue offline" }).click();
 
