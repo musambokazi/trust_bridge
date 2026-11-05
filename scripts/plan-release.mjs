@@ -6,7 +6,7 @@ const app = read('app.json').expo, pkg = read('package.json'), lock = read('pack
 if (app.runtimeVersion !== '1.0.1') throw Error('The OTA runtime must remain 1.0.1.');
 if (app.version !== pkg.version || !/^\d+\.\d+\.\d+$/.test(app.version)) throw Error('Use matching semantic app versions in app.json and package.json.');
 // Conservative: any production dependency/config change gets an isolated channel.
-const native = { dependencies: Object.entries(lock.packages).filter(([k, p]) => k && !p.dev).map(([path, p]) => ({ path, version: p.version, integrity: p.integrity })), plugins: app.plugins, androidPackage: app.android.package, orientation: app.orientation, userInterfaceStyle: app.userInterfaceStyle, config: readFileSync('app.config.js', 'utf8') };
+const native = { dependencies: Object.entries(lock.packages).filter(([k, p]) => k && !p.dev).map(([path, p]) => ({ path, version: p.version, integrity: p.integrity })), plugins: app.plugins, androidPackage: app.android.package, androidAllowBackup: app.android.allowBackup, orientation: app.orientation, userInterfaceStyle: app.userInterfaceStyle, config: readFileSync('app.config.js', 'utf8') };
 // Asset bytes are native build inputs too, including future replacements at the same path.
 const imagePaths = new Set();
 function collectImages(value) {

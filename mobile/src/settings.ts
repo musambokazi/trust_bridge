@@ -20,10 +20,10 @@ export function isSetting(value: unknown): value is Setting {
 
 export const settingDetails: Partial<Record<Setting, readonly [string, string][]>> = {
   account: [
-    ["Your identity", "Your display name appears on Home and Profile. The current account card contains sample details until live accounts are connected."],
-    ["Username and email", "Your username identifies your profile. Your verified email will be used to sign in and recover access when account services are connected."],
-    ["Profile photo", "Photo uploads require a connected account and private storage. The profile icon is shown until those are available."],
-    ["Account changes", "The display name can be edited for this session. Changing an email, password or account type is not available in this build."],
+    ["Your identity", "Your display name appears on Home and Profile. Your name, username and verified email identify your signed-in account."],
+    ["Username and email", "Your username identifies your profile. Your verified email will be used to sign in and recover access through Supabase Auth."],
+    ["Profile photo", "Choose a photo from your library. The image is resized to a JPEG and stored in a private account folder. Temporary signed links display it to you."],
+    ["Account changes", "Names and username are saved to your private profile while connected. Password recovery starts from Sign in. Email and account-type changes are not available here."],
   ],
   "workspace-type": [
     ["Individual workspace", "Use an individual workspace if you handle your own supplier checks. Your profile represents you personally."],
@@ -32,8 +32,8 @@ export const settingDetails: Partial<Record<Setting, readonly [string, string][]
   ],
   "team-access": [
     ["Membership", "Access to a company workspace must come from an authorised invitation. Company names and email domains alone are not evidence of permission."],
-    ["Roles and responsibilities", "Teams should designate who may maintain supplier references and who may review invoice discrepancies. These roles are not enforced by the current build."],
-    ["Availability", "Team invitations and member management are not connected. This workspace contains fictional records."],
+    ["Roles and responsibilities", "Teams should designate who may maintain supplier references and who may review invoice discrepancies. This build allows only the account owner to access their workspace. Shared roles are not available."],
+    ["Availability", "Team invitations and member management are not connected. Only your own saved supplier records are shown."],
   ],
   security: [
     ["Before paying", "If bank details changed, call the supplier using a number you already trust. Do not use contact details supplied only on the invoice."],
@@ -42,7 +42,7 @@ export const settingDetails: Partial<Record<Setting, readonly [string, string][]
     ["Separate review from approval", "Where possible, have a different person verify changes to supplier payment details before anyone updates the reference or approves a payment."],
     ["If something looks wrong", "Pause the payment. Keep the invoice and correspondence in your organisation’s approved system, and tell the person who handles supplier or payment incidents. Avoid forwarding bank details or credentials in an unsecured message."],
     ["Handle urgent requests carefully", "If a request asks you to skip approval, change the account immediately or keep the transfer confidential, pause and use your normal verification process. Time pressure does not confirm a change."],
-    ["Online and offline access", "Live sign-in and saved sessions are not connected. The current workspace can be explored using fictional records without signing in."],
+    ["Online and offline access", "First sign-in requires a connection and a confirmed email. Your cached workspace remains available offline. Pending checks are encrypted on this device until the server can compare them."],
   ],
   display: [["Text size", "The buttons adjust supported body text throughout the app. The sample shows the change before you leave this screen."]],
   about: [
@@ -52,9 +52,9 @@ export const settingDetails: Partial<Record<Setting, readonly [string, string][]
     ["Run an invoice check", "Open Check, select the supplier and enter the fields requested by the form. TrustBridge compares them with the selected reference and explains the discrepancies it finds."],
     ["Read the result", "A match means the fields checked agreed with the reference. It does not establish that an invoice is authentic. A mismatch tells you what to investigate; a missing reference means there is insufficient information to compare."],
     ["Act on a change", "Pause and contact the supplier using a trusted number or channel already on file. Confirm whether the change is legitimate before updating records or sending money."],
-    ["Review previous checks", "History collects the checks made during this session so you can revisit what was compared and what needs follow-up. This build does not provide a permanent audit record."],
+    ["Review previous checks", "History collects the checks made during this session so you can revisit what was compared and what needs follow-up. Synced checks are kept in your account; the device caches the most recent 250 results."],
     ["Keep payment approval separate", "TrustBridge does not transfer funds, authorise a payment or replace your organisation’s approval process. Use the result as one input alongside purchasing records and independently verified instructions."],
-    ["What this build connects to", "The current supplier directory and assessment history use fictional records. Live accounts, shared workspaces, profile uploads and external supplier verification are not yet connected."],
+    ["What this build connects to", "Supabase provides sign-in, private account data, supplier records, saved comparisons and profile photos. Shared workspaces and independent bank or supplier verification are not offered by this build."],
     ["Example: a familiar supplier with new bank details", "A regular supplier sends an invoice with its usual company name but a different account reference. Compare it against the reference, pause when the discrepancy appears, and call a contact already on file. Confirm the change through your normal process before anyone amends the reference."],
     ["What a useful review record contains", "When you investigate a discrepancy, record what changed, whom you contacted, and the decision you reached in your approved system. This keeps the reasoning available to the next person who reviews the payment."],
     ["What to check first", "Confirm you chose the right supplier before comparing the details. If two suppliers have similar names, use another trusted identifier to distinguish them. A good comparison starts with the right record."],

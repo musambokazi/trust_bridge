@@ -1,49 +1,25 @@
 # TrustBridge
 
-Frontend for the NEMISA hackathon invoice assessment app. React Native + Expo Router + TypeScript, with Android, iOS and web preview support.
+Expo React Native invoice-reference review app. The connected 1.0.3 release uses Supabase Auth, private profiles/workspaces, supplier records, server-calculated comparisons and private avatar storage.
 
-## Run the UI
+## Development
 
+Node 24:
 ```sh
-cd mobile
-npm ci
-npm start
-# Or: npm run web
-```
-
-Use Expo Go compatible with SDK 58, a matching development build, or the web preview. From the repository root, `npm run typecheck`, `npm run lint`, `npm test` and `npm run export:web` delegate to the mobile project.
-
-## Included
-
-- Dashboard with working recent assessment and review links.
-- Searchable supplier directory and supplier detail screens.
-- Invoice form with supplier selection, validation and keyboard Next navigation.
-- Clearly labelled, explainable demonstration results and session-only history.
-- History search/filtering, profile, display controls and information sections.
-- Sign-in design with password visibility toggle (no live authentication).
-- Compact five-tab floating navigation, rounded animated selection and reduced-motion support.
-
-The design uses a 60/30/10 charcoal, white and orange hierarchy. Navigation references were reviewed in VIMBA, Exegomai (`bible_fun_facts`) and Bible Diaries; the components here are newly implemented.
-
-## Demo boundary
-
-**Frontend only. No Supabase connection, real authentication, live banking verification, production risk scoring or cloud persistence is implemented.** Records are fictional. New checks exist only in memory until reload. Never enter real banking details or credentials in this preview.
-
-The local comparison exists solely to demonstrate navigation and result states. Production assessments MUST come from an authenticated, organisation-authorised backend, as specified in the team blueprint. See [UI handoff](docs/UI_HANDOFF.md) for integration points and acceptance checks.
-
-## UI smoke checks
-
-```sh
-cd mobile
+npm --prefix mobile ci
+npm run typecheck
+npm run lint
+npm test
 npm run export:web
-npx playwright install chromium
-npm run test:ui
+npm --prefix mobile run test:ui
 ```
 
-The browser checks cover supplier search, invoice validation, result navigation, history filters, password visibility, session reset and all five tabs at 320, 390, 768 and 1280 pixels. Physical-device keyboard and safe-area acceptance remain part of the team’s device testing.
+The mobile configuration contains only a public Supabase client key. Database grants/RLS enforce access. Never place a service-role key, database password or signing credential in app source.
 
-## Android APKs and OTA updates
+Supabase migrations are in `supabase/migrations`. The SQL isolation suite in `supabase/tests/account_isolation.sql` creates temporary fixture records and rolls the entire transaction back. Use only against the intended project; do not copy credentials into test files.
 
-Source changes are made on **main**. Runtime version stays fixed at **1.0.1**; app versions change only when a new compiled release is required. The [delivery workflow](.github/workflows/delivery.yml) builds preview and production APKs on Expo EAS, publishes them under GitHub **Releases**, and publishes compatible OTA updates to both environments. Existing app releases are reused for UI-only updates.
+## Delivery and release status
 
-See [delivery, token setup and signing notes](docs/ANDROID_PREVIEW_BUILD.md).
+Source is main. Expo runtime is fixed at 1.0.1; app versions change for native dependencies. GitHub builds preview and production APKs when required, preserves prior releases and publishes compatible Production OTA updates. Install the new APK for native features; old runtimes stay on their isolated channels.
+
+Read [production readiness](docs/PRODUCTION_READINESS.md) before a public launch. Email callback/SMTP configuration, real-device acceptance tests, release signing and privacy operations are outstanding; the connected validation release is not yet certified production-ready.

@@ -4,20 +4,28 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Eyebrow, Heading, Icon, Input, Muted, Page, ScreenHeader, Txt } from "../src/components/ui";
 import { defaultPhoneRegion, normalizePhone, phoneRegions } from "../src/domain/phone";
+import * as Linking from "expo-linking";
+import { supabase, secureStorage } from "../src/backend/client";
+import { useAuth } from "../src/backend/AuthState";
+import type { AccountDraft } from "../src/backend/types";
 import { color as c } from "../src/theme";
 
 type Field = { key: string; label: string; type?: "email" | "phone"; optional?: boolean };
 const individual: Field[][] = [
-  [{ key: "first", label: "First name" }, { key: "last", label: "Surname" }],
+  [{ key: "first", label: "First name" }, { key: "last", label: "Surname" }, { key: "username", label: "Username" }],
   [{ key: "email", label: "Email address", type: "email" }, { key: "phone", label: "Cell phone number", type: "phone" }],
 ];
 const company: Field[][] = [
   [{ key: "company", label: "Legal company name" }, { key: "registration", label: "Company registration number" }, { key: "tax", label: "Company tax number" }, { key: "address", label: "Registered company address" }, { key: "country", label: "Country" }],
-  [{ key: "contact", label: "Authorised contact name" }, { key: "role", label: "Your role" }, { key: "email", label: "Company email address", type: "email" }, { key: "phone", label: "Company phone number", type: "phone" }, { key: "backupEmail", label: "Alternative email address", type: "email", optional: true }, { key: "backupPhone", label: "Alternative phone number", type: "phone", optional: true }],
+  [{ key: "contact", label: "Authorised contact name" }, { key: "role", label: "Your role" }, { key: "username", label: "Username" }, { key: "email", label: "Company email address", type: "email" }, { key: "phone", label: "Company phone number", type: "phone" }, { key: "backupEmail", label: "Alternative email address", type: "email", optional: true }, { key: "backupPhone", label: "Alternative phone number", type: "phone", optional: true }],
   [{ key: "industry", label: "Industry" }, { key: "offering", label: "Products or services provided" }],
 ];
 
 export default function SignUp() {
+  const { session, completeAccount } = useAuth();
+  const [accepted, setAccepted] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [step, setStep] = useState(0);
   const [kind, setKind] = useState<"individual" | "company">("individual");
   const [data, setData] = useState<Record<string, string>>({});
@@ -51,7 +59,7 @@ export default function SignUp() {
     for (const field of fields) {
       const value = data[field.key]?.trim() ?? "";
       if (!value && field.optional) continue;
-      if (!value || (field.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) || (field.type === "phone" && !normalizePhone(value, regionFor(field.key)))) {
+      if (!value || (field.key === "username" && !/^[a-zA-Z0-9_]{3,30}$/.test(value)) || (field.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) || (field.type === "phone" && !normalizePhone(value, regionFor(field.key)))) {
         setError(`Enter a valid ${field.label.toLowerCase()}.`);
         return;
       }
@@ -60,10 +68,50 @@ export default function SignUp() {
       setError(score !== rules.length ? "Meet all four password requirements." : "The passwords do not match.");
       return;
     }
-    if (step === passwordStep) { setPassword(""); setConfirmation(""); setVisible(false); }
+    if (step === passwordStep) setVisible(false);
     setError("");
     Keyboard.dismiss();
     setStep(step + 1);
+  }
+  async function submitAccount() {
+    if (busy || submitted) return;
+    if (!accepted) { setError("Read and accept the privacy notice and terms before creating your account."); return; }
+    setBusy(true); setError("");
+    try {
+      const phone = normalizePhone(data.phone ?? "", regionFor("phone"));
+      const username = (data.username ?? "").trim().toLowerCase();
+      if (!phone || !/^[a-z0-9_]{3,30}$/.test(username)) throw Error("Enter a valid phone and a username with 3–30 letters, numbers or underscores.");
+      const first = kind === "company" ? (data.contact ?? "").trim().split(/\s+/)[0] ?? "" : (data.first ?? "").trim();
+      const last = kind === "company" ? (data.contact ?? "").trim().split(/\s+/).slice(1).join(" ") || "Contact" : (data.last ?? "").trim();
+      const email = session?.user.email ?? (data.email ?? "").trim().toLowerCase();
+      const draft: AccountDraft = {
+        email,
+        profile: { first_name: first, last_name: last, username, phone, phone_country: regionFor("phone")[0], text_scale: 1 },
+        workspace: {
+          kind, name: kind === "company" ? (data.company ?? "").trim() : first + " " + last,
+          registration: data.registration?.trim() ?? "", tax_number: data.tax?.trim() ?? "", address: data.address?.trim() ?? "",
+          country: kind === "company" ? (data.country ?? "").trim() : regionFor("phone")[1],
+          contact_name: kind === "company" ? data.contact?.trim() ?? "" : first + " " + last, contact_role: data.role?.trim() ?? "",
+          email, alternate_email: data.backupEmail?.trim() ?? "", phone,
+          alternate_phone: data.backupPhone ? normalizePhone(data.backupPhone, regionFor("backupPhone")) ?? "" : "",
+          industry: data.industry?.trim() ?? "", offering: data.offering?.trim() ?? "",
+        },
+      };
+      if (session) {
+        await completeAccount(draft);
+        setPassword(""); setConfirmation(""); router.replace("/");
+      } else {
+        await secureStorage.setItem("registration-draft", JSON.stringify(draft));
+        const result = await supabase.auth.signUp({
+          email, password, options: { emailRedirectTo: Linking.createURL("auth-callback") },
+        });
+        setPassword(""); setConfirmation("");
+        if (result.error) throw Error("Registration could not be completed. Try again later or sign in if you already have an account.");
+        if (result.data.session) { await completeAccount(draft); router.replace("/"); }
+        else setSubmitted(true);
+      }
+    } catch (error) { setError(error instanceof Error ? error.message : "Unable to create account."); }
+    finally { setBusy(false); }
   }
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -72,7 +120,7 @@ export default function SignUp() {
         <View style={{ gap: 12 }}>
           <Eyebrow>STEP {step + 1} OF {reviewStep + 1}</Eyebrow>
           <Heading>{step === 0 ? "Choose your account type" : step === passwordStep ? "Set a password" : step === reviewStep ? "Review your details" : titles[step - 1]}</Heading>
-          <Muted>Online registration is not available yet. Use example details and a password you do not use elsewhere. Nothing is submitted or saved.</Muted>
+          <Muted>Your details are saved to your private account after email verification. Company registration does not grant access to another company’s workspace.</Muted>
         </View>
         {step === 0 && <View style={{ gap: 10 }}>
           {(["individual", "company"] as const).map((value) => <Button key={value} title={value === "company" ? "Company" : "Individual"} secondary={kind !== value} icon={kind === value ? "checkmark" : undefined} onPress={() => { if (kind !== value) { setData({}); setPhoneCountries({}); } setKind(value); }} />)}
@@ -130,12 +178,19 @@ export default function SignUp() {
         {step === reviewStep && <View style={{ gap: 10 }}>
           <Txt>{kind === "company" ? "Company account" : "Individual account"}</Txt>
           {groups.flat().filter(({ key }) => !!data[key]?.trim()).map(({ key, label, type }) => <View key={key}><Muted>{label}</Muted><Txt>{type === "phone" ? normalizePhone(data[key] ?? "", regionFor(key)) : data[key]?.trim()}</Txt>{type === "phone" && <Muted>Country: {regionFor(key)[1]}</Muted>}</View>)}
-          <Muted>No account was created. Online registration will be available when the account service is connected.</Muted>
+          <Muted>Review your details before creating your account. Your phone is stored in international format.</Muted>
+          <Button secondary title="Read Privacy notice" onPress={() => router.push("/settings/privacy-notice")} />
+          <Button secondary title="Read Terms of service" onPress={() => router.push("/settings/terms")} />
+          <Button secondary title={accepted ? "Accepted privacy notice and terms" : "Accept privacy notice and terms"} onPress={() => setAccepted(!accepted)} />
+        </View>}
+        {submitted && <View style={{ gap: 10 }}>
+          <Txt accessibilityRole="alert">Check your email to confirm your account. Then sign in to finish saving your details.</Txt>
+          <Button secondary title="Go to sign in" onPress={() => router.replace("/sign-in")} />
         </View>}
         {!!error && <Txt accessibilityRole="alert">{error}</Txt>}
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
           {step > 0 ? <Button secondary title="Previous" onPress={() => { setError(""); setStep(step - 1); }} /> : <View />}
-          {step < reviewStep ? <Button title="Next" onPress={next} /> : <Button title="Done" onPress={() => { setData({}); if (router.canGoBack()) router.back(); else router.replace("/sign-in"); }} />}
+          {step < reviewStep ? <Button title="Next" onPress={next} /> : <Button title={session ? "Save account" : "Create account"} loading={busy} onPress={submitAccount} />}
         </View>
       </Page>
       <Modal visible={picker !== null} animationType="none" onRequestClose={() => setPicker(null)}>

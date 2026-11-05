@@ -14,9 +14,11 @@ import {
   Txt,
   styles,
 } from "../../src/components/ui";
-import { maskReference, suppliers } from "../../src/domain/demo";
+import { maskReference } from "../../src/domain/demo";
+import { useDemo } from "../../src/state/DemoState";
 import { color as c } from "../../src/theme";
 export default function SupplierDetail() {
+  const { suppliers } = useDemo();
   const { id } = useLocalSearchParams<{ id: string }>();
   const s = suppliers.find((v) => v.id === id);
   return (
@@ -26,7 +28,7 @@ export default function SupplierDetail() {
         {s ? (
           <>
             <View style={{ gap: 14 }}>
-              <Eyebrow>FICTIONAL REFERENCE RECORD</Eyebrow>
+              <Eyebrow>YOUR SUPPLIER REFERENCE</Eyebrow>
               <View
                 style={{
                   width: 62,
@@ -51,7 +53,7 @@ export default function SupplierDetail() {
                 ["Bank reference", maskReference(s.bankReference)],
                 [
                   "Record status",
-                  s.verified ? "Reviewed sample" : "Needs verification",
+                  s.verified ? "Marked reviewed by you" : "Needs verification",
                 ],
                 ["Last reviewed", s.verifiedOn || "Not reviewed"],
                 ["Contact on record", s.contact],
@@ -90,7 +92,7 @@ export default function SupplierDetail() {
         ) : (
           <>
             <Heading>Supplier not found.</Heading>
-            <Muted>This supplier is not available in the sample directory.</Muted>
+            <Muted>This supplier is not available in the your directory.</Muted>
             <Button
               title="Back to suppliers"
               onPress={() => router.replace("/suppliers")}

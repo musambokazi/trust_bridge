@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Image, Pressable, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import {
   DemoNote,
@@ -10,6 +10,7 @@ import {
   ScreenHeader,
   Txt,
 } from "../../src/components/ui";
+import { useAuth } from "../../src/backend/AuthState";
 import { useDemo } from "../../src/state/DemoState";
 import { color as c } from "../../src/theme";
 import { settings, profileSettings } from "../../src/settings";
@@ -47,6 +48,7 @@ function SettingsRow({
 
 export default function Profile() {
   const { name, scale } = useDemo();
+  const { session, profile, workspace, avatarUrl } = useAuth();
   return (
     <>
       <ScreenHeader />
@@ -58,14 +60,14 @@ export default function Profile() {
             onPress={() => router.push({ pathname: "/settings/[id]", params: { id: "account" } })}
             style={layout.avatar}
           >
-            <Icon name="person-outline" color={c.orange} size={28} />
+            {avatarUrl ? <Image source={{ uri: avatarUrl }} style={{ width: 58, height: 58, borderRadius: 29 }} /> : <Icon name="person-outline" color={c.orange} size={28} />}
             <View style={layout.camera}><Icon name="camera-outline" color={c.ink} size={14} /></View>
           </Pressable>
           <View style={layout.copy}>
-            <Txt accessibilityRole="header" style={layout.title}>{name.trim() || "Workspace user"}</Txt>
-            <Txt style={{ color: c.orange }}>@workspace-member</Txt>
-            <Muted>member@example.com</Muted>
-            <Muted>ACME Traders · Local profile</Muted>
+            <Txt accessibilityRole="header" style={layout.title}>{profile ? profile.first_name + " " + profile.last_name : name}</Txt>
+            <Txt style={{ color: c.orange }}>@{profile?.username}</Txt>
+            <Muted>{session?.user.email}</Muted>
+            <Muted>{workspace?.name} · {workspace?.kind === "company" ? "Company" : "Individual"}</Muted>
           </View>
         </View>
         {profileSettings.map((id) => (

@@ -301,8 +301,7 @@ export function DemoNote() {
     <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 7 }}>
       <Icon name="flask-outline" size={14} color={c.muted} />
       <Txt style={{ color: c.muted, fontSize: 11, lineHeight: 17, flex: 1 }}>
-        Offline workspace · Fictional records. Nothing is uploaded or
-        verified by a live service.
+        Your saved supplier reference is a comparison baseline, not payment approval. Verify changes independently.
       </Txt>
     </View>
   );

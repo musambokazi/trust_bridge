@@ -3,6 +3,7 @@ import { Pressable, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import {
   DemoNote,
+  Button,
   Eyebrow,
   Heading,
   Icon,
@@ -11,9 +12,10 @@ import {
   ScreenHeader,
   Txt,
 } from "../../src/components/ui";
-import { suppliers } from "../../src/domain/demo";
+import { useDemo } from "../../src/state/DemoState";
 import { color as c } from "../../src/theme";
 export default function Suppliers() {
+  const { suppliers } = useDemo();
   const [query, setQuery] = useState("");
   const results = suppliers.filter((s) =>
     `${s.name} ${s.category}`.toLowerCase().includes(query.toLowerCase()),
@@ -50,6 +52,7 @@ export default function Suppliers() {
             style={{ flex: 1, minHeight: 51, color: c.white, fontSize: 14 }}
           />
         </View>
+        <Button secondary title="Add supplier" onPress={() => router.push("/new-supplier")} />
         <Txt style={{ color: c.muted, fontSize: 11 }}>
           {results.length} SUPPLIER RECORDS
         </Txt>
@@ -97,7 +100,7 @@ export default function Suppliers() {
                   }}
                 >
                   {s.verified
-                    ? "Reviewed sample reference"
+                    ? "Marked reviewed by you"
                     : "Reference needs verification"}
                 </Txt>
               </View>

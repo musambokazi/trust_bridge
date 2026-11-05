@@ -142,7 +142,7 @@ jobs:
           Expo project: ${EXPO_PROJECT_ID}
           Source: ${GITHUB_SHA}
 
-          Fictional supplier data; live sign-in and backend verification are not connected. Both APKs use the Expo template development signing key for this internal demonstration. The production channel name is an update destination, not a claim of production readiness or store signing.
+          Connected Supabase validation release: email/password accounts, private profiles/workspaces, private avatars, saved suppliers and server-calculated invoice comparisons. Install this APK for the new secure-storage and photo modules. Email delivery/callback configuration and real-device acceptance testing remain required. Both APKs still use the historical Expo template development key and are for internal validation, not a public/store launch. See docs/PRODUCTION_READINESS.md.
           EOF_NOTES
           gh release create "v${APP_VERSION}" apks/*.apk --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "TrustBridge ${APP_VERSION}" --notes-file release-notes.md --prerelease
   update:

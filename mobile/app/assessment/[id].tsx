@@ -28,7 +28,7 @@ export default function AssessmentResult() {
         <Page>
           <Heading>This result is no longer available.</Heading>
           <Muted>
-            Local checks are kept only in this app session. Start another check
+            Only saved checks for your signed-in account are available here. Start another check
             to see a result.
           </Muted>
           <Button
@@ -44,7 +44,7 @@ export default function AssessmentResult() {
       <ScreenHeader back title="Assessment" />
       <Page style={{ paddingBottom: 45 }}>
         <View style={{ gap: 14 }}>
-          <Eyebrow>LOCAL RESULT / {item.invoiceNumber}</Eyebrow>
+          <Eyebrow>ACCOUNT RESULT / {item.invoiceNumber}</Eyebrow>
           <View
             style={{
               width: 54,

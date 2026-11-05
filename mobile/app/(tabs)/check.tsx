@@ -16,7 +16,6 @@ import {
   styles,
 } from "../../src/components/ui";
 import {
-  suppliers,
   validateInvoice,
   type InvoiceInput,
 } from "../../src/domain/demo";
@@ -30,6 +29,7 @@ const blank: InvoiceInput = {
   bankReference: "",
 };
 export default function CheckInvoice() {
+  const { suppliers, check } = useDemo();
   const { supplier: supplierParam } = useLocalSearchParams<{
     supplier?: string;
   }>();
@@ -46,21 +46,24 @@ export default function CheckInvoice() {
     amountRef = useRef<React.ComponentRef<typeof TextInput>>(null),
     nameRef = useRef<React.ComponentRef<typeof TextInput>>(null),
     bankRef = useRef<React.ComponentRef<typeof TextInput>>(null);
-  const { check } = useDemo();
   const supplier = suppliers.find((s) => s.id === input.supplierId);
   const set = (key: keyof InvoiceInput, value: string) => {
     setInput((v) => ({ ...v, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
   };
-  const submit = () => {
+  const [submitError, setSubmitError] = useState("");
+  const submit = async () => {
     const e = validateInvoice(input);
     setErrors(e);
     if (Object.keys(e).length) return;
     setBusy(true);
-    const id = check(input);
-    setInput(blank);
-    setBusy(false);
-    router.push(`/assessment/${id}`);
+    setSubmitError("");
+    try {
+      const id = await check(input);
+      setInput(blank);
+      router.push(`/assessment/${id}`);
+    } catch (error) { setSubmitError(error instanceof Error ? error.message : "Unable to save check."); }
+    finally { setBusy(false); }
   };
   return (
     <>
@@ -71,7 +74,7 @@ export default function CheckInvoice() {
           <Heading>Small details.{"\n"}Big difference.</Heading>
           <Muted>
             Enter what’s on the invoice. We’ll show how it compares with your
-            selected sample record.
+            saved supplier record.
           </Muted>
         </View>
         <View style={[styles.paper, { backgroundColor: c.bg, borderWidth: 1, borderColor: c.line }]}>
@@ -88,7 +91,7 @@ export default function CheckInvoice() {
             <View style={{ gap: 3 }}>
               <Txt style={[styles.paperTitle, { color: c.white }]}>Invoice details</Txt>
               <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
-                Manual entry · Local comparison
+                Manual entry · Server comparison
               </Txt>
             </View>
           </View>
@@ -183,8 +186,7 @@ export default function CheckInvoice() {
             onSubmitEditing={submit}
           />
           <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
-            Use fictional information in this workspace. The live service and
-            secure storage are not connected.
+            Checks are saved on this device before syncing. Offline checks remain unverified until the server returns a result.
           </Txt>
         </View>
         <Button
@@ -193,28 +195,7 @@ export default function CheckInvoice() {
           loading={busy}
           onPress={submit}
         />
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => {
-            setInput({
-              supplierId: "ubuntu",
-              invoiceNumber: "INV-1043",
-              supplierName: "Ubuntu Supplies",
-              amount: "12450.00",
-              bankReference: "DEMO7821",
-            });
-            setErrors({});
-          }}
-          style={{
-            minHeight: 44,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Txt style={{ color: c.orange, fontSize: 13 }}>
-            Try an example with changed bank details ↗
-          </Txt>
-        </Pressable>
+        {!!submitError && <Txt accessibilityRole="alert">{submitError}</Txt>}
         <DemoNote />
       </Page>
       <Modal
@@ -265,10 +246,7 @@ export default function CheckInvoice() {
                 <Icon name="close" />
               </Pressable>
             </View>
-            {[
-              ...suppliers.map((s) => ({ id: s.id, name: s.name })),
-              { id: "unknown", name: "Supplier not listed" },
-            ].map((s) => (
+            {suppliers.map((s) => (
               <Pressable
                 key={s.id}
                 accessibilityRole="button"

@@ -15,9 +15,11 @@ import {
   styles,
 } from "../../src/components/ui";
 import { useDemo } from "../../src/state/DemoState";
+import { useAuth } from "../../src/backend/AuthState";
 import { color as c } from "../../src/theme";
 export default function Home() {
-  const { assessments, name } = useDemo();
+  const { assessments, name, syncMessage, refresh, pendingCount } = useDemo();
+  const { workspace } = useAuth();
   const review = assessments.filter((a) => a.level !== "clear").length;
   return (
     <>
@@ -41,7 +43,7 @@ export default function Home() {
       />
       <Page>
         <View style={{ gap: 12, marginTop: 12 }}>
-          <Eyebrow>ACME TRADERS / OFFLINE WORKSPACE</Eyebrow>
+          <Eyebrow>{workspace?.name.toUpperCase() || "YOUR WORKSPACE"}</Eyebrow>
           <Txt style={{ color: c.muted }}>Good to see you, {name}.</Txt>
           <Txt accessibilityRole="header" style={s.heroTitle}>
             A second look.{"\n"}A smarter move<Txt style={s.orangeDot}>.</Txt>
@@ -81,7 +83,7 @@ export default function Home() {
               {String(assessments.length).padStart(2, "0")}
             </Txt>
             <Txt style={{ color: c.muted, fontSize: 12 }}>
-              Checks in this session
+              Recent saved checks
             </Txt>
           </View>
           <View style={{ width: 1, backgroundColor: c.line }} />
@@ -125,6 +127,8 @@ export default function Home() {
             </Muted>
           </View>
         </View>
+        <Muted>{syncMessage} {pendingCount ? `${pendingCount} checks waiting to sync.` : ""}</Muted>
+        <Button secondary title="Sync now" onPress={() => { void refresh(); }} />
         <DemoNote />
       </Page>
     </>

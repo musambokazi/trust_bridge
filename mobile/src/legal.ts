@@ -1,168 +1,286 @@
 export const legalDocuments = {
   "privacy-notice": [
-    ["Scope", "This draft describes the current TrustBridge build and its fictional workspace. It does not describe a future live account service."],
-    ["Purpose", "TrustBridge demonstrates how invoice details can be compared with supplier reference records before payment."],
-    ["Account availability", "The current app does not create a live account or authenticate a user."],
-    ["Signup fields", "The signup walkthrough uses sample identity and workspace details to demonstrate the flow. It does not submit them."],
-    ["Sign-in fields", "Online sign-in is unavailable. Use a made-up password in the registration form."],
-    ["Display name", "Changing the display name updates what appears on Home and Profile during the current session."],
-    ["Sample email and username", "The account card shows fictional identifiers. They are not associated with a verified email address."],
-    ["Profile photos", "This build does not upload profile photos or store them on a server."],
-    ["Supplier records", "The supplier directory is bundled with the app and uses fictional examples."],
-    ["Invoice inputs", "The check form uses the entered values to produce a comparison locally. Enter only invented details."],
-    ["Payment references", "Bank references shown on result screens are masked. Masking is not permission to enter real bank information."],
-    ["Check results", "New assessments appear in History during the session. They are not sent to a verification service."],
-    ["Searches and filters", "Directory and history filters narrow the records shown in the app."],
-    ["Reading preferences", "Text-size adjustments apply to supported text during the current session."],
-    ["Information in memory", "Sample form entries and newly created checks are kept in app memory while needed."],
-    ["Session end", "Restarting the app clears session changes and restores bundled sample records."],
-    ["Offline use", "The installed workspace can operate on sample records without a connection. Offline access is not a verified account session."],
-    ["App updates", "The app can contact Expo to check for and download updates when connected."],
-    ["Update requests", "Update delivery uses the app's channel, runtime and platform information to select a compatible package."],
-    ["Invoice verification", "The app does not contact banks, suppliers or credit bureaus to validate invoice inputs."],
-    ["Payment processing", "The app does not process payments or receive payment credentials."],
-    ["Company information", "Use invented business names, roles and registration numbers in the walkthrough."],
-    ["Team access", "The sample workspace has no member invitations or shared account records."],
-    ["Information about other people", "Do not enter real supplier contacts or information about colleagues and customers."],
-    ["Sensitive information", "Do not submit identity documents, tax records, full account numbers or personal financial information."],
-    ["Screenshots", "Screenshots and screen recordings are controlled by your device and can expose whatever is visible on screen."],
-    ["Shared devices", "Avoid leaving completed forms visible on an unlocked or shared device."],
-    ["Exports", "This build does not provide a personal-data export or a permanent audit file."],
-    ["Changes and corrections", "You can correct sample values on the form before running a new check."],
-    ["Local clearing", "Close and restart the app to discard changes made during the current session."],
-    ["Live data requests", "A live service would need a published contact and a process for requests about personal data. Those are not provided by this build."],
-    ["Unexpected disclosure", "If real information was accidentally entered, close the app and remove any copies or screenshots you created. Contact your organisation if its records were involved."],
-    ["External links", "If you leave TrustBridge, the destination service handles your activity under its own notice."],
-    ["Changes to this notice", "App updates may revise this text as features or data handling change."],
-    ["Before live accounts", "A final notice must identify the operator, explain actual data uses and retention, and provide a contact before live account collection is enabled."],
+    [
+      "Scope",
+      "This notice covers the connected TrustBridge app: registration, email sign-in, private profiles, an owner-controlled workspace, supplier references, invoice comparisons and optional profile photographs. It distinguishes device caching from data saved to Supabase."
+    ],
+    [
+      "Operator details",
+      "The project team must publish its legal operator name and a monitored privacy/support contact before a public launch. This document remains a draft until those details, retention schedules and operational procedures are approved."
+    ],
+    [
+      "Account details",
+      "Registration asks for names, a username, email and phone number. Company accounts also ask for business identity, address, tax and registration references, an authorised contact and business activity. Alternate contacts are optional."
+    ],
+    [
+      "Purpose",
+      "These fields identify your account and workspace and support invoice review. A company name or tax number is not independent evidence that a business or its payment instructions have been verified."
+    ],
+    [
+      "Authentication",
+      "Supabase Auth handles email and password registration, email confirmation, sign-in and password recovery. Passwords are sent to Auth over HTTPS and are not written to the profile or workspace tables."
+    ],
+    [
+      "Email confirmation",
+      "Confirm the email sent during registration before completing account setup. Email delivery, redirect configuration and recovery must be tested against the real mail provider before release to the public."
+    ],
+    [
+      "Phone formatting",
+      "The selected country and dialing code are stored with an international-format phone number. Country selection is user-provided; it is not proof of residence or citizenship."
+    ],
+    [
+      "Company information",
+      "Business fields are saved in the account owner's private workspace. Do not enter another organisation's confidential tax, address or contact details unless you are authorised to use them."
+    ],
+    [
+      "Alternate contacts",
+      "Alternative email and phone are optional contact fields. Tell the relevant person before entering their information. The app does not independently verify their consent or their relationship to the business."
+    ],
+    [
+      "Username",
+      "Your username identifies your profile within the app. It must be unique and use supported characters. This version does not expose a public profile directory."
+    ],
+    [
+      "Profile photos",
+      "You may choose a photograph from your device library. The app resizes it to a JPEG and uploads it to your private avatar folder. It does not request microphone or camera access for that action."
+    ],
+    [
+      "Photo display",
+      "The app obtains a temporary signed link to display your photograph. Someone who obtains that link may be able to view the image while the link remains valid, so avoid sharing it."
+    ],
+    [
+      "Workspace ownership",
+      "This release supports a workspace owned by one account. The owner can view and maintain its supplier references. Team invitations and shared company memberships are not implemented."
+    ],
+    [
+      "Supplier records",
+      "You enter a supplier name, category, registration reference, bank reference and trusted contact. These records are saved to Supabase under your workspace, subject to account access rules."
+    ],
+    [
+      "Invoice inputs",
+      "Submitting a check queues the selected supplier and entered invoice fields. Full bank references are retained locally only while the check is pending; the server result stores the final four characters."
+    ],
+    [
+      "Server comparison",
+      "The server reads the supplier record available to the account owner and calculates the result. It does not contact a bank or establish ownership of an account number."
+    ],
+    [
+      "Saved results",
+      "Synced comparisons are stored in your account with an invoice number, name, amount, time, findings and masked references. History displays the most recent results."
+    ],
+    [
+      "Device cache",
+      "On native devices the app keeps account details, supplier summaries and recent results in OS-backed secure storage. The cache is limited and is separate from the server record."
+    ],
+    [
+      "Offline checks",
+      "While offline, new checks remain in an encrypted queue. They are explicitly pending and have no server comparison result. The app retries when active and connected."
+    ],
+    [
+      "Sync retries",
+      "Each queued check has a unique request identifier. The server uses that identifier to avoid duplicate results when a network response is lost and the device retries."
+    ],
+    [
+      "Session credentials",
+      "Native session tokens are stored in OS-backed secure storage. Saved credentials let the app restore the session; server requests still depend on a valid session and access rules."
+    ],
+    [
+      "Offline session limits",
+      "An offline device cannot immediately learn that access was revoked remotely. Protect the device and reconnect periodically. Cached information is not a fresh verification of account status."
+    ],
+    [
+      "Browser storage",
+      "The web build uses browser session storage for session and cached account data. Browser scripts running in that origin can access it. The native device storage protections do not apply to the browser."
+    ],
+    [
+      "Updates",
+      "Expo delivers compatible app updates using platform, runtime and channel information. Update delivery is separate from invoice comparison and is not intended to receive invoice form contents."
+    ],
+    [
+      "Access controls",
+      "Row-level security restricts profile, workspace, supplier and result queries to the owning account. These controls complement, rather than replace, the need for correct authentication and secure devices."
+    ],
+    [
+      "Other providers",
+      "Supabase hosts Auth, database and avatar storage; Expo provides application update delivery. The project team must review the providers' actual regions, contracts and operational settings for the deployment."
+    ],
+    [
+      "No payments",
+      "TrustBridge does not initiate transfers, collect card credentials or authorise payments. Enter references only for comparison and do not upload statements or unrelated identity documents."
+    ],
+    [
+      "Screenshots",
+      "Screen captures can reveal names, amounts, contacts and invoice numbers, even when bank references are masked. Review a capture before sharing it outside the app."
+    ],
+    [
+      "Shared devices",
+      "Sign out before handing a device to another person. The app warns about pending checks before signing out because unsynced work would otherwise be removed from that device."
+    ],
+    [
+      "Local sign-out",
+      "Signing out removes the session and local account/workspace cache on this device. It does not delete your server profile, supplier records or saved results."
+    ],
+    [
+      "Corrections",
+      "Profile names and username can be corrected while connected. Supplier references should be independently checked before they are saved. Email and account-type changes are not currently supported in Settings."
+    ],
+    [
+      "Retention",
+      "Server records remain until an approved deletion process removes them. The team has not yet established a final retention schedule. Uninstalling the app does not delete Supabase records."
+    ],
+    [
+      "Access and deletion requests",
+      "A self-service export or account-deletion flow is not yet available. A monitored contact and a verified request-handling process must be published before a public launch."
+    ],
+    [
+      "Incidents",
+      "If a device or session may be compromised, use your organisation's reporting procedure and stop entering sensitive data. The team must establish support, notification and incident-response procedures."
+    ],
+    [
+      "Changes",
+      "Review this notice when features or data handling change. This draft describes the implemented storage and sync model but is not a claim that the app has completed a legal or production security review."
+    ]
   ],
-  terms: [
-    ["Scope", "These draft terms cover the current TrustBridge build and its sample workflow."],
-    ["Purpose of the app", "Use TrustBridge to understand how an invoice comparison can support a pre-payment review."],
-    ["Fictional data only", "Use invented supplier, invoice and account details in this build."],
-    ["No live account", "Registration and sign-in are unavailable until the account service is connected."],
-    ["Individual workspace", "An individual workspace illustrates checks made on your own behalf."],
-    ["Company workspace", "A company workspace illustrates how a business may organise its checks and references."],
-    ["No company verification", "Entering a company name or registration number does not verify that company."],
-    ["Authority to act", "Do not represent an organisation or claim access to its records without permission."],
-    ["Team membership", "Membership, permissions and invitations are not active in this build."],
-    ["Supplier references", "A reference is the baseline for comparison. In real use it should be obtained through an independently trusted process."],
-    ["Reference maintenance", "Review and validate changes to supplier details before relying on a new reference."],
-    ["Invoice accuracy", "Enter the intended fields carefully. Missing or mistyped values can affect a comparison."],
-    ["Match result", "A match means the fields compared agree. It does not prove the invoice is authentic."],
-    ["Discrepancy result", "A discrepancy identifies a difference to investigate. It does not establish misconduct."],
-    ["Missing references", "If no suitable reference exists, use your normal verification process before proceeding."],
-    ["Changed payment instructions", "Check changes through an independently trusted supplier contact."],
-    ["Payment approvals", "Follow your own approval process. TrustBridge does not approve, initiate or execute payments."],
-    ["No guarantee against fraud", "An invoice can contain risks that the comparison does not detect."],
-    ["Human review", "Review results and supporting documents before making a decision that affects a supplier or a payment."],
-    ["History", "Session history is a convenience. Do not use it as the only record of an operational or audit decision."],
-    ["Session changes", "Checks and preferences created in the sample workspace are cleared when the app restarts."],
-    ["Offline access", "Some sample features work offline. Live verification and account recovery are not part of offline access."],
-    ["Compatibility", "Features can vary by installed app version and device."],
-    ["Updates", "An app update can change screens, sample records or how comparisons are displayed."],
-    ["Acceptable use", "Use the app for legitimate evaluation or invoice review. Do not use it to impersonate a supplier or solicit payment."],
-    ["Prohibited access", "Do not attempt to access another person's workspace, credentials or private records."],
-    ["Content permissions", "Only enter information that you are authorised to use, subject to this build's fictional-data restriction."],
-    ["Secure device use", "Keep your device locked and avoid sharing screens that contain sensitive information."],
-    ["Third-party destinations", "Review the relevant service's terms before using an external website or tool."],
-    ["Feedback", "Remove real account, supplier and invoice details from any issue report or screenshot."],
-    ["Privacy notice", "Read the separate Privacy notice for the app's current information handling."],
-    ["Availability", "A feature may be unavailable during updates or when a required connection is unavailable."],
-    ["Stop using the app", "You can stop using the app at any time. Uninstalling removes the app from your device."],
-    ["Future service terms", "A live service needs final terms identifying its operator, support contact and any applicable account conditions."],
-    ["Review before reliance", "These draft terms describe the current build. Review your organisation's procedures before using any workflow in a real payment process."],
-  ],
-} as const;
-
-// Supplemental explanations are paired with the numbered clauses above.
-export const legalDetails = {
-  "privacy-notice": [
-    "This notice covers the app screens you can use today, including onboarding, the sample supplier directory, the invoice form and the Profile area. Features described as future work do not collect information in this build.",
-    "The comparison is designed to show how a reviewer can identify differences between the two sets of details. It is not designed to collect information for advertising, create a supplier credit profile or prove that a payment request is genuine.",
-    "Opening the sample workspace does not require a verified email or password. You cannot use it to sign into a company account, recover an account or obtain a record of who has accessed an organisation.",
-    "The walkthrough lets you see the difference between registering as an individual and entering company details. Completing its final review screen does not create a record that another user or a workspace administrator can retrieve.",
-    "If you want to test the registration password controls, type a made-up value. The control only changes how text is displayed on the screen. It does not authenticate you or change a password on another service.",
-    "The name is a local display preference, not proof of identity. It is not registered to an email address or synced to another installation. Use a sample name if you plan to share a screenshot.",
-    "Do not try to contact the sample address or use the displayed username as a login credential. The values illustrate where identifiers would appear on a connected profile.",
-    "The camera badge opens profile information; it does not capture or upload a photograph in this build. No public profile or photo-sharing link is created.",
-    "The directory illustrates the kinds of fields a supplier reference may contain. A sample record is not a recommendation, endorsement or statement about a real business.",
-    "Review your sample inputs before starting a comparison. If you receive a real invoice for work, handle it in the document and payment systems your organisation has approved.",
-    "The app shows only a portion of certain references so you can distinguish sample results without repeating a full reference on screen. A screenshot may still contain other visible details.",
-    "History helps you reopen a comparison while the app session is active. It should not be used as the sole record of a payment review, a dispute or an approval.",
-    "For example, searching for a supplier changes which bundled records you see. A search is not a request for TrustBridge to look up a person or business on an external service.",
-    "This setting changes supported text in the interface. It does not affect the invoice calculation, the supplier baseline or the information in a comparison result.",
-    "Moving between screens can retain state while the app process is running. Switching to another app or turning the screen off does not necessarily end the session.",
-    "A full app restart differs from returning to Home. If the current form or result is still visible when you come back, the device may have resumed the same running session.",
-    "Without an internet connection, an installed copy can still display bundled information. A connection may be needed to check for updates; going offline does not turn a sample reference into live information.",
-    "Downloading an update is separate from entering a sample check. A download may be followed by an in-app request to restart and apply the new version.",
-    "Version and channel information tells the update service which bundle to return. There is no reason to put an invoice number, bank detail or personal identifier into a message about which update you received.",
-    "The comparison reads the reference already selected in the app. A result is not an inquiry sent to a supplier, a bank-account ownership check or a credit decision.",
-    "There is no payment checkout, card entry or transfer approval screen. Complete any real payment outside the app using your usual controls.",
-    "A sample company name and role are enough to evaluate the signup layout. Keep business registration documents, employee details and company banking evidence out of the walkthrough.",
-    "A company selected during signup does not create a shared directory. There is no workspace owner who can see the sample form entries or add you to that sample organisation.",
-    "If you are demonstrating the app to others, invent names and addresses rather than adapting a real record. The same applies to examples shared in issue reports or presentations.",
-    "Some fields may look like places to enter financial information. They are provided to demonstrate the check only. Do not paste an invoice, bank statement or identity document into a sample field.",
-    "Before sharing a capture, review the image itself. Screen captures can include notifications, names and values outside the app's own content.",
-    "A colleague who can see your screen may be able to read an open form. Lock the device when stepping away and close the app after a demonstration on shared equipment.",
-    "You can revisit sample results in History, but no durable download or support export is generated. Keep any required business evidence in an approved system outside this build.",
-    "Changing a field and running the check again produces a new session result. It does not correct an existing supplier record, report a dispute or notify another party.",
-    "Clearing the running session does not delete screenshots, recordings or notes you saved separately. Review and remove those copies through the tools that created them.",
-    "The published notice for any future live service must explain where to request access, correction or deletion and how the operator handles those requests. This screen does not provide a live request form.",
-    "If information was copied into an email, support ticket or group chat, restarting TrustBridge does not recall it. Follow the reporting and containment process for the system where it was shared.",
-    "Before signing in, uploading information or accepting a request on a destination site, confirm that it is the one you expected. TrustBridge's in-app notice does not describe another service's processing.",
-    "Read the notice again when you install an update that adds accounts, syncing or new inputs. The information needed for a future live service can differ substantially from this build.",
-    "This draft should be reviewed against the actual account, storage, support and deletion processes before live collection is enabled. It does not identify an operator or promise a retention period that has yet to be established.",
-  ],
-  terms: [
-    "Read these terms together with the Privacy notice. They describe what the current build can do and what you should expect from a sample supplier and invoice review.",
-    "You can use the workflow to learn where to find a supplier reference, how to compare the fields and where to review the result. Keep the decision about a real payment with the people authorised to make it.",
-    "Use examples you invent yourself or the records bundled with the app. Removing a company name from a real invoice is not enough if bank details, contact details or unique identifiers remain.",
-    "Completing signup does not create a contract for a paid plan, a live profile or a company membership. You cannot use a walkthrough password to recover access later.",
-    "The individual path shows what it might look like to check an invoice as a sole user. It does not verify your personal identity, tax status or business registration.",
-    "The company path asks for sample business details and a role. It does not create an approved supplier list for the named company or establish who can act on its behalf.",
-    "A typed registration number may be incorrect, outdated or unrelated to the person submitting it. Do not treat the presence of a number as proof of ownership or control.",
-    "If you are evaluating the workflow for an employer or client, use information and equipment you are allowed to use. Do not imply that the organisation has adopted the app without its consent.",
-    "The current interface cannot invite staff, change a team member's permissions or remove access to a live workspace. Any such actions must be managed through an existing authorised process.",
-    "If a reference was created from the same invoice being checked, agreement tells you little about the invoice. Use a source that was established independently and reviewed by an authorised person.",
-    "Keep a record of who confirmed a change and when it was approved in the system your team already uses. Never update a reference simply to make a discrepancy disappear.",
-    "For example, selecting the wrong supplier can make valid instructions appear inconsistent or produce a misleading comparison. Check the supplier and the fields you entered before acting on a result.",
-    "Only the fields present in the comparison are covered. A result does not confirm that a purchase was authorised, goods were delivered or the sender controlled the address used to send the invoice.",
-    "Differences can come from data-entry mistakes, outdated records or legitimate changes. Check the source documents and verify through an independent contact before drawing a conclusion.",
-    "Without a baseline, the app cannot establish that the details agree with a trusted record. Do not treat the absence of a warning as a positive verification.",
-    "Use a phone number or channel your organisation obtained separately from the invoice. A contact listed only on a payment-change request is not independent confirmation.",
-    "A comparison result does not override purchase-order checks, segregation of duties or any threshold requiring a second approver. Use the payment system your organisation has authorised.",
-    "TrustBridge compares selected details. It cannot determine all forms of impersonation, duplicate billing or invoice tampering from those fields alone.",
-    "Investigate any inconsistency in the context of the supplier relationship and supporting records. Do not accuse a supplier or employee solely because the app flags a difference.",
-    "Use your approved finance, ticketing or document system to record decisions that need to be retained. A sample history screen is not a complete audit trail.",
-    "Do not assume a result will still be available when the device restarts or the app reloads. A future connected service would need a defined storage and retention policy.",
-    "A previously downloaded app can run the sample comparison locally. That does not mean the device has checked the latest supplier instructions or that a user is currently authenticated.",
-    "Test on the device and version you intend to use for a demonstration. A different app build may have a different update channel or screen flow.",
-    "Read any visible release notes before applying an update during a review. Complete or record important work elsewhere before restarting, because the sample session may clear.",
-    "Do not use TrustBridge's name, screenshots or sample results to trick someone into releasing funds or disclosing credentials. A comparison result is not a payment authorisation document.",
-    "Do not try to bypass access restrictions, probe another person's records or misuse identifiers shown in a sample. Report unexpected access through your organisation's approved channel.",
-    "Authorisation to use information in your work does not mean it should be copied into this sample build. Use representative fictional values instead.",
-    "Lock the device when away and check whether notifications or other apps are visible before sharing your screen. If a device is lost, follow your organisation's normal incident process.",
-    "Another service may require a separate account, handle data differently or charge fees. Confirm which service you are using before accepting its conditions.",
-    "A useful report can describe the screen, app version, steps and expected result using fictional inputs. Do not attach supplier banking evidence or an actual password.",
-    "The Privacy notice explains local form handling, session clearing and how the current app checks for updates. Read it before trying the account screens or sharing a capture.",
-    "Do not rely on uninterrupted access, especially when an update is pending or the device is offline. Keep an alternative method to perform required payment checks.",
-    "Closing or uninstalling the app does not remove screenshots or documents copied elsewhere. Delete or retain those separately in line with the process applicable to them.",
-    "Terms for a live service must be written around the real account and payment-review features, with the operator and support contact clearly identified. This draft does not establish a paid or supported service.",
-    "For an actual invoice, follow the controls required by your organisation and confirm any payment changes independently. Use this build to evaluate the workflow with sample information.",
-  ],
-} as const;
-
-export const legalExamples = {
-  "privacy-notice": [
-    ["Before entering anything", "You can browse the fictional directory without typing your name, email or an invoice number. If you're showing the form to a colleague, use invented values that cannot be traced back to a real person or supplier. A real document can still identify a business even if its name is removed."],
-    ["What happens during an invoice check", "Suppose you enter a made-up invoice number and a sample bank reference. TrustBridge compares the fields on the device and displays a result. Going to another tab can leave that result available in History for the rest of the running session. The app does not send those inputs to a bank or to the service that delivers app updates."],
-    ["What happens when you close the app", "Returning to your phone's home screen may leave TrustBridge running. A full restart clears the session, but it cannot clear an image you saved, a screenshot another person received, or any notes you made outside the app."],
-    ["Before a live service collects data", "This draft is about the build you have installed. If live accounts or supplier syncing are introduced, the notice will need to explain who operates the service, which records leave the device, who can see them, how long they are kept and how to reach the operator about your information."],
-  ],
-  terms: [
-    ["A useful review starts with the right reference", "If an invoice arrives with a new account number, compare it with the supplier record you already trust. Use a contact you obtained independently of the invoice. A reply from the same address that sent the change is not an independent check."],
-    ["When the app finds no difference", "Agreement on the displayed fields cannot tell you whether the goods arrived, the purchase was approved or the invoice was already paid. Keep those checks in your normal approval process. If a reference is incomplete or out of date, stop and confirm the missing information."],
-    ["When you share a result", "A screenshot can help explain where a difference appeared. It is not a payment approval or a substitute for your organisation's record. For an example or issue report, use sample data and check that the screenshot contains no real information."],
-  ],
+  "terms": [
+    [
+      "Scope",
+      "These draft terms describe the connected TrustBridge release and its limits. A public service needs an identified legal operator, final support contact and approved terms before launch."
+    ],
+    [
+      "Purpose",
+      "Use the app to compare invoice details with a supplier reference you maintain. The comparison supports a pre-payment review; it is not a payment instruction or a fraud verdict."
+    ],
+    [
+      "Account eligibility",
+      "Use an email and contact information you are authorised to use. Do not impersonate another person or register a company identity without permission."
+    ],
+    [
+      "Email verification",
+      "Complete email confirmation before finishing account setup. Keep access to that email because recovery depends on it. Contact verification does not verify a company or supplier."
+    ],
+    [
+      "Password handling",
+      "Choose a unique password meeting the displayed requirements. Do not share it with colleagues. The app does not store your password in the workspace or offline queue."
+    ],
+    [
+      "Account recovery",
+      "Use the recovery link requested from Sign in. Links expire and require connectivity. Do not forward a recovery email or accept a reset you did not request."
+    ],
+    [
+      "Individual accounts",
+      "An individual workspace belongs to the signed-in owner. It is intended for that person's supplier reference and invoice review activities."
+    ],
+    [
+      "Company accounts",
+      "A company registration records business details and a contact. It creates an owner-controlled workspace, not a verified legal entity or a shared company membership."
+    ],
+    [
+      "Authority",
+      "You are responsible for having permission to enter business information and supplier payment references. Registering a name or domain does not establish that permission."
+    ],
+    [
+      "Team features",
+      "This release has no member invitation or role delegation flow. Do not share a single account as a substitute for separate team permissions."
+    ],
+    [
+      "Private workspace",
+      "Database access is restricted to the owning account. Do not try to use another person's identifiers or requests to access their records."
+    ],
+    [
+      "Supplier baseline",
+      "Use a reference obtained through a process you trust independently of the invoice. Copying the invoice into the reference defeats the comparison."
+    ],
+    [
+      "Supplier accuracy",
+      "Keep reference details current and review changes through your normal supplier process. Saving a reference does not independently verify its contact or payment details."
+    ],
+    [
+      "Reference status",
+      "New references start as needing verification. TrustBridge does not certify them or claim that a bank has confirmed an account owner."
+    ],
+    [
+      "Input accuracy",
+      "Check the supplier, invoice number, amount and reference before submission. A mistyped or incomplete field can affect the comparison."
+    ],
+    [
+      "Match result",
+      "A match means the compared fields agree with the stored reference. It does not prove the invoice was authorised, goods were delivered or the sender is genuine."
+    ],
+    [
+      "Mismatch result",
+      "A difference is a reason to investigate. It can arise from a legitimate change, an old reference or a mistake, and is not by itself evidence of wrongdoing."
+    ],
+    [
+      "Missing information",
+      "If the supplier is unavailable or a baseline is missing, stop and use an independent review process. An unavailable result is not approval to pay."
+    ],
+    [
+      "Independent confirmation",
+      "Confirm a payment change through a number or channel already trusted. Do not rely only on contact details supplied in the request for the change."
+    ],
+    [
+      "Payment approval",
+      "Follow your organisation's approval and purchasing rules. The app does not execute transfers or replace a second approver where one is required."
+    ],
+    [
+      "No fraud guarantee",
+      "The comparison covers selected fields and cannot detect every form of invoice fraud, duplicate billing or impersonation. Continue checks outside the app."
+    ],
+    [
+      "Server results",
+      "Only the server issues a synced comparison result. An offline pending screen is a stored request awaiting comparison, not a completed assessment."
+    ],
+    [
+      "Offline use",
+      "Cached records may be older than the server. Connect before relying on an up-to-date reference, and wait for pending checks to receive a server result."
+    ],
+    [
+      "Sync behaviour",
+      "The app retries queued requests while active. Errors can leave work pending. A unique identifier protects against duplicate results when a request is retried."
+    ],
+    [
+      "History limits",
+      "The app caches the most recent 250 results. Server history is not a complete approval audit trail or a substitute for your organisation's evidence."
+    ],
+    [
+      "Sign-out",
+      "Sync pending work before signing out. Local sign-out clears device account information but leaves server records in place."
+    ],
+    [
+      "Profile photos",
+      "Upload only images you are allowed to use. Profile photos remain in private storage and are displayed through temporary signed links."
+    ],
+    [
+      "Acceptable use",
+      "Use TrustBridge for legitimate supplier and invoice review. Do not use the app, its name or its results to mislead others into paying or revealing credentials."
+    ],
+    [
+      "Security testing",
+      "Do not attempt unauthorised access to other accounts or disrupt the service. Report unexpected access with minimal necessary information."
+    ],
+    [
+      "Personal information",
+      "Read the Privacy notice before registration or uploading contacts. Do not enter information unrelated to the invoice-review workflow."
+    ],
+    [
+      "Device safety",
+      "Keep your device locked and install app builds only from the team's verified release source. Protect screenshots and any records you copy outside the app."
+    ],
+    [
+      "Availability",
+      "Connectivity, provider failures and device limitations can interrupt sign-in, uploads or comparison. Keep another approved way to review urgent invoices."
+    ],
+    [
+      "Updates",
+      "Updates can change screens and features. Let pending work sync before restarting or installing a new build, and review release information where provided."
+    ],
+    [
+      "Support and deletion",
+      "Self-service exports, account deletion and operational support procedures are not yet complete. The operator must establish them before a public launch."
+    ],
+    [
+      "Review before launch",
+      "These terms are a draft for the current release. Completing technical checks does not replace testing real email delivery, device installation, recovery, privacy operations and the organisation's payment controls."
+    ]
+  ]
 } as const;

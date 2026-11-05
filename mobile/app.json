@@ -3,7 +3,7 @@
     "name": "TrustBridge",
     "slug": "trustbridge",
     "scheme": "trustbridge",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#101112",
@@ -21,21 +21,31 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose a profile photo for your TrustBridge account.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
       ]
     ],
     "web": {
       "bundler": "metro",
       "output": "single",
-      "name": "TrustBridge UI Preview",
+      "name": "TrustBridge",
       "favicon": "./assets/branding/favicon.png"
     },
     "android": {
       "package": "za.co.devpeeps.trustbridge",
-      "versionCode": 3,
+      "versionCode": 4,
       "adaptiveIcon": {
         "foregroundImage": "./assets/branding/adaptive-icon.png",
         "backgroundColor": "#000000"
-      }
+      },
+      "allowBackup": false
     },
     "runtimeVersion": "1.0.1",
     "owner": "musambokazi",

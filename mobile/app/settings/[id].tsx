@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Icon, Input, Muted, Page, Txt } from "../../src/components/ui";
 import { isSetting, settingDetails, settings } from "../../src/settings";
-import { legalDetails, legalDocuments, legalExamples } from "../../src/legal";
+import { legalDocuments } from "../../src/legal";
+import { useAuth } from "../../src/backend/AuthState";
+import { chooseAvatar } from "../../src/backend/avatar";
 import { useDemo } from "../../src/state/DemoState";
 import { color as c } from "../../src/theme";
 
@@ -30,7 +32,18 @@ function TextLink({ title, description, onPress }: { title: string; description:
 
 export default function SettingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { name, setName, scale, setScale } = useDemo();
+  const { scale, pendingCount } = useDemo();
+  const { profile, session, workspace, saveProfile, signOut } = useAuth();
+  const [first, setFirst] = useState(""), [last, setLast] = useState(""), [username, setUsername] = useState("");
+  const [notice, setNotice] = useState(""), [busy, setBusy] = useState(false);
+  useEffect(() => { setFirst(profile?.first_name ?? ""); setLast(profile?.last_name ?? ""); setUsername(profile?.username ?? ""); }, [profile?.id]);
+  async function act(task: () => Promise<void>) {
+    if (busy) return;
+    setBusy(true); setNotice("");
+    try { await task(); setNotice("Saved to your account."); }
+    catch (error) { setNotice(error instanceof Error ? error.message : "Unable to save."); }
+    finally { setBusy(false); }
+  }
   if (!isSetting(id)) return <Redirect href="/profile" />;
   const setting = settings[id];
 
@@ -60,40 +73,49 @@ export default function SettingScreen() {
         {(id === "privacy-notice" || id === "terms") && (
           <>
             <Txt>Draft · applies to the current app build only</Txt>
-            {legalExamples[id].map(([title, body]) => (
-              <View key={title} style={layout.section}>
-                <Txt accessibilityRole="header" style={layout.sectionTitle}>{title}</Txt>
-                <Muted>{body}</Muted>
-              </View>
-            ))}
             {legalDocuments[id].map(([title, body], index) => (
               <View key={title} style={layout.section}>
                 <Txt accessibilityRole="header" style={layout.sectionTitle}>{index + 1}. {title}</Txt>
                 <Txt>{body}</Txt>
-                <Muted>{legalDetails[id][index]}</Muted>
               </View>
             ))}
           </>
         )}
         {id === "account" && (
           <>
-            <Input dark label="Display name" value={name} onChangeText={setName} maxLength={40} autoComplete="off" />
-            <Muted>Sample username: @workspace-member</Muted>
-            <Muted>Sample email: member@example.com</Muted>
-            <Muted>Display-name changes apply to this session only.</Muted>
+            <Input dark label="First name" value={first} onChangeText={setFirst} maxLength={100} />
+            <Input dark label="Surname" value={last} onChangeText={setLast} maxLength={100} />
+            <Input dark label="Username" value={username} onChangeText={setUsername} maxLength={30} autoCapitalize="none" />
+            <Muted>{session?.user.email}</Muted>
+            <Muted>{profile?.phone}</Muted>
+            <Button title="Save profile" loading={busy} onPress={() => { void act(async () => {
+              if (!first.trim() || !last.trim() || !/^[a-z0-9_]{3,30}$/.test(username)) throw Error("Enter your names and a valid lowercase username.");
+              await saveProfile({ first_name: first.trim(), last_name: last.trim(), username });
+            }); }} />
+            <Button secondary title="Upload profile photo" disabled={busy || !session} onPress={() => { void act(async () => {
+              if (!session) throw Error("Sign in first.");
+              const path = await chooseAvatar(session.user.id);
+              if (path) await saveProfile({ avatar_path: path });
+            }); }} />
+            <Muted>{workspace?.name} · {workspace?.kind}</Muted>
+            <Button secondary title="Sign out on this device" disabled={busy} onPress={() => { void act(async () => {
+              if (pendingCount) throw Error("Sync your pending checks before signing out so they are not lost.");
+              await signOut(); router.replace("/sign-in");
+            }); }} />
           </>
         )}
         {id === "display" && (
           <>
             <Muted>Adjust the body text to suit you.</Muted>
             <View style={layout.scale}>
-              <Button secondary title="A−" disabled={scale <= 0.85} onPress={() => setScale(Math.max(0.85, +(scale - 0.05).toFixed(2)))} />
+              <Button secondary title="A−" disabled={busy || scale <= 0.85} onPress={() => { void act(() => saveProfile({ text_scale: Math.max(0.85, +(scale - 0.05).toFixed(2)) })); }} />
               <Txt accessibilityLiveRegion="polite">{Math.round(scale * 100)}%</Txt>
-              <Button secondary title="A+" disabled={scale >= 1.3} onPress={() => setScale(Math.min(1.3, +(scale + 0.05).toFixed(2)))} />
+              <Button secondary title="A+" disabled={busy || scale >= 1.3} onPress={() => { void act(() => saveProfile({ text_scale: Math.min(1.3, +(scale + 0.05).toFixed(2)) })); }} />
             </View>
             <Txt>Sample text: Review invoice details before making a payment.</Txt>
           </>
         )}
+        {!!notice && <Txt accessibilityRole="alert">{notice}</Txt>}
         {settingDetails[id]?.map(([title, body]) => (
           <View key={title} style={layout.section}>
             <Txt accessibilityRole="header" style={layout.sectionTitle}>{title}</Txt>
