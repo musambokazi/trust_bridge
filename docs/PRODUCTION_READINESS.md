@@ -1,6 +1,6 @@
-# TrustBridge connected release 1.0.3
+# TrustBridge connected release 1.0.4
 
-This is a connected validation release, not a declaration that the product is ready for unrestricted public use. Source stays on main. Runtime remains 1.0.1. SecureStore, photo picking and JPEG resizing require the new 1.0.3 binary and isolated native compatibility channel. Older releases remain available and do not receive incompatible bundles.
+This is a connected validation release, not a declaration that the product is ready for unrestricted public use. Source stays on main. Runtime remains 1.0.1. SecureStore, photo picking and JPEG resizing require the new 1.0.4 binary and isolated native compatibility channel. Older releases remain available and do not receive incompatible bundles.
 
 ## Implemented
 
@@ -23,6 +23,8 @@ This is a connected validation release, not a declaration that the product is re
 - Type checking, lint, unit tests, web export.
 - Browser tests use intercepted Supabase responses: signup, confirmation-required message, login, profile and workspace persistence, supplier creation, server comparison, keyboard focus, offline session restoration, offline pending checks and resync without duplicates, narrow-screen navigation. They do NOT verify real email delivery.
 - Server public Auth settings read: signup enabled, email confirmation required, anonymous sign-in disabled.
+
+- Dependency audit after SDK 58 patches and tested glob/minimatch overrides: no reported production-dependency advisories at the time of the scan. This is not a guarantee against unknown vulnerabilities.
 
 ## Must complete before public launch
 

@@ -1,6 +1,6 @@
 # TrustBridge
 
-Expo React Native invoice-reference review app. The connected 1.0.3 release uses Supabase Auth, private profiles/workspaces, supplier records, server-calculated comparisons and private avatar storage.
+Expo React Native invoice-reference review app. The connected 1.0.4 release uses Supabase Auth, private profiles/workspaces, supplier records, server-calculated comparisons and private avatar storage.
 
 ## Development
 

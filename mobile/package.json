@@ -1,6 +1,6 @@
 {
   "name": "trustbridge-mobile",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
@@ -19,7 +19,7 @@
     "@expo/metro-runtime": "~58.0.15",
     "@expo/vector-icons": "^15.0.2",
     "@supabase/supabase-js": "2.119.0",
-    "expo": "~58.0.19",
+    "expo": "58.0.23",
     "expo-constants": "~58.0.13",
     "expo-crypto": "58.0.7",
     "expo-file-system": "58.0.11",
@@ -32,7 +32,7 @@
     "expo-splash-screen": "~58.0.11",
     "expo-status-bar": "~58.0.4",
     "expo-system-ui": "~58.0.6",
-    "expo-updates": "~58.0.18",
+    "expo-updates": "58.0.21",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-native": "0.88.0",
@@ -47,5 +47,9 @@
     "@typescript-eslint/parser": "^8.72.0",
     "eslint": "^10.13.0",
     "typescript": "~6.0.3"
+  },
+  "overrides": {
+    "glob": "14.0.3",
+    "minimatch": "11.0.4"
   }
 }
