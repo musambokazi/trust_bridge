@@ -67,38 +67,42 @@ const server = http.createServer((req, res) => {
       await p.getByRole("heading", { name: title, exact: true }).waitFor();
     }
     await p.getByRole("button", { name: "Continue to account" }).click();
-    await p.getByRole("button", { name: "Preview account creation" }).click();
+    const create = () => p.getByRole("button", { name: "Create an account", exact: true }).click();
+    const next = p.getByRole("button", { name: "Next", exact: true });
+    const fill = async (entries) => {
+      for (const [label, value] of entries) await p.getByLabel(label, { exact: true }).fill(value);
+    };
+    await create();
     await p.getByRole("button", { name: "Company", exact: true }).click();
-    const next = p.getByRole("button", { name: "Continue", exact: true });
     await next.click();
-    for (const [label, value] of [
-      ["First name", "Sample"], ["Last name", "Member"],
-      ["Username", "sample_member"], ["Email address", "sample@example.com"],
-    ]) await p.getByRole("textbox", { name: label, exact: true }).fill(value);
+    await fill([["Legal company name", "Sample Company"], ["Company registration number", "12345"], ["Company tax number", "98765"], ["Registered company address", "1 Example Road"], ["Country", "South Africa"]]);
     await next.click();
-    for (const [label, value] of [
-      ["Country", "South Africa"], ["Legal business name", "Sample Company"], ["Your role", "Buyer"],
-    ]) await p.getByRole("textbox", { name: label, exact: true }).fill(value);
+    await fill([["Authorised contact name", "Sample Member"], ["Your role", "Buyer"], ["Company email address", "sample@example.com"], ["Company phone number", "+27110000000"]]);
     await next.click();
-    await p.getByText("Sample Company · Buyer · South Africa", { exact: true }).waitFor();
-    await p.getByRole("button", { name: "Return to sign in" }).click();
-    await p
-      .getByRole("textbox", { name: "Email address", exact: true })
-      .fill("demo@example.com");
-    const pass = p.getByLabel("Password", { exact: true });
-    await pass.fill("FictionalOnly8!");
-    assert.equal(await pass.evaluate((el) => el.type), "password");
-    await p.getByRole("button", { name: "Show password", exact: true }).click();
-    assert.equal(await pass.evaluate((el) => el.type), "text");
-    await p.getByRole("button", { name: "Hide password", exact: true }).click();
-    assert.equal(await pass.evaluate((el) => el.type), "password");
-    await p.getByRole("button", { name: /Sign in \(preview\)/ }).click();
-    await p
-      .getByText("Live sign-in is not connected.", { exact: false })
-      .waitFor();
-    assert.equal(await pass.inputValue(), "");
-    await p.getByRole("button", { name: "Explore demo workspace" }).click();
-
+    await fill([["Industry", "Retail"], ["Products or services provided", "Office supplies"]]);
+    await next.click();
+    await fill([["Password", "short"], ["Confirm password", "short"]]);
+    await next.click();
+    await p.getByRole("alert").filter({ hasText: "Meet all four" }).waitFor();
+    await fill([["Password", "FictionalOnly8!"], ["Confirm password", "FictionalOnly9!"]]);
+    await p.getByText("Password strength: Strong", { exact: true }).waitFor();
+    await next.click();
+    await p.getByRole("alert").filter({ hasText: "The passwords do not match" }).waitFor();
+    await fill([["Confirm password", "FictionalOnly8!"]]);
+    await next.click();
+    await p.getByText("Sample Company", { exact: true }).waitFor();
+    await p.getByRole("button", { name: "Done", exact: true }).click();
+    await create();
+    await next.click();
+    await fill([["First name", "Sample"], ["Surname", "Member"]]);
+    await next.click();
+    await fill([["Email address", "sample@example.com"], ["Cell phone number", "+27820000000"]]);
+    await next.click();
+    await fill([["Password", "FictionalOnly8!"], ["Confirm password", "FictionalOnly8!"]]);
+    await next.click();
+    await p.getByText("Individual account", { exact: true }).waitFor();
+    await p.getByRole("button", { name: "Done", exact: true }).click();
+    await p.getByRole("button", { name: "Continue offline" }).click();
 
     await p.getByText("A second look.", { exact: false }).waitFor();
     await p.evaluate(() => document.fonts.ready);
@@ -126,7 +130,7 @@ const server = http.createServer((req, res) => {
     await p
       .getByRole("button", { name: "Check an invoice for this supplier" })
       .click();
-    await p.getByRole("button", { name: "Compare demo details" }).click();
+    await p.getByRole("button", { name: "Compare invoice details" }).click();
     await p
       .getByText("Enter an invoice number (up to 80 characters).", {
         exact: true,
@@ -144,7 +148,7 @@ const server = http.createServer((req, res) => {
         path: path.join(process.env.UI_SCREENSHOT_DIR, "check.png"),
       });
     }
-    await p.getByRole("button", { name: "Compare demo details" }).click();
+    await p.getByRole("button", { name: "Compare invoice details" }).click();
     await p.getByText("Pause.", { exact: false }).waitFor();
     await p.getByText("Bank reference changed", { exact: true }).waitFor();
     await p.getByText("•••• 7821", { exact: true }).waitFor();
@@ -162,7 +166,7 @@ const server = http.createServer((req, res) => {
     await tabs().getByRole("tab", { name: "Profile", exact: true }).click();
     await p.getByRole("button", { name: "Account", exact: true }).click();
     await p
-      .getByRole("textbox", { name: "Preview display name" })
+      .getByRole("textbox", { name: "Display name" })
       .fill("Team member");
     await p.waitForURL("**/settings/account");
     await p.getByRole("button", { name: "Go back", exact: true }).click();

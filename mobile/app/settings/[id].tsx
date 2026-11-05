@@ -77,8 +77,8 @@ export default function SettingScreen() {
         )}
         {id === "account" && (
           <>
-            <Input dark label="Preview display name" value={name} onChangeText={setName} maxLength={40} autoComplete="off" />
-            <Muted>Sample username: @demo-member</Muted>
+            <Input dark label="Display name" value={name} onChangeText={setName} maxLength={40} autoComplete="off" />
+            <Muted>Sample username: @workspace-member</Muted>
             <Muted>Sample email: member@example.com</Muted>
             <Muted>Display-name changes apply to this session only.</Muted>
           </>
@@ -91,7 +91,7 @@ export default function SettingScreen() {
               <Txt accessibilityLiveRegion="polite">{Math.round(scale * 100)}%</Txt>
               <Button secondary title="A+" disabled={scale >= 1.3} onPress={() => setScale(Math.min(1.3, +(scale + 0.05).toFixed(2)))} />
             </View>
-            <Txt>Text preview: Review invoice details before making a payment.</Txt>
+            <Txt>Sample text: Review invoice details before making a payment.</Txt>
           </>
         )}
         {settingDetails[id]?.map(([title, body]) => (

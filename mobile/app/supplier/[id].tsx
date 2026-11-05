@@ -51,7 +51,7 @@ export default function SupplierDetail() {
                 ["Bank reference", maskReference(s.bankReference)],
                 [
                   "Record status",
-                  s.verified ? "Reviewed (demo)" : "Needs verification",
+                  s.verified ? "Reviewed sample" : "Needs verification",
                 ],
                 ["Last reviewed", s.verifiedOn || "Not reviewed"],
                 ["Contact on record", s.contact],
@@ -90,7 +90,7 @@ export default function SupplierDetail() {
         ) : (
           <>
             <Heading>Supplier not found.</Heading>
-            <Muted>This supplier is not available in the demo directory.</Muted>
+            <Muted>This supplier is not available in the sample directory.</Muted>
             <Button
               title="Back to suppliers"
               onPress={() => router.replace("/suppliers")}

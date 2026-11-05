@@ -14,7 +14,7 @@ export default function NotFound() {
       <ScreenHeader back title="TrustBridge" />
       <Page>
         <Heading>Let’s get you back.</Heading>
-        <Muted>This screen is not available in the UI preview.</Muted>
+        <Muted>This screen is not available in this build.</Muted>
         <Button title="Go to dashboard" onPress={() => router.replace("/")} />
       </Page>
     </SafeAreaView>

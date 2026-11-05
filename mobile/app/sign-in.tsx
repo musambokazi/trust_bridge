@@ -1,119 +1,20 @@
-import React, { useRef, useState } from "react";
-import { Pressable, TextInput, View } from "react-native";
+import React from "react";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  Button,
-  DemoNote,
-  Eyebrow,
-  Heading,
-  Icon,
-  Input,
-  Muted,
-  Page,
-  ScreenHeader,
-  Txt,
-  styles,
-} from "../src/components/ui";
-import { color as c } from "../src/theme";
+import { Button, Heading, Muted, Page, ScreenHeader, Txt } from "../src/components/ui";
 import { useDemo } from "../src/state/DemoState";
+
 export default function SignIn() {
   const { enterWorkspace } = useDemo();
-  const [email, setEmail] = useState(""),
-    [password, setPassword] = useState(""),
-    [visible, setVisible] = useState(false),
-    [message, setMessage] = useState("");
-  const pass = useRef<React.ComponentRef<typeof TextInput>>(null);
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <ScreenHeader back title="Your account" />
-      <Page style={{ paddingBottom: 40 }}>
-        <View style={{ gap: 14, paddingTop: 25 }}>
-          <Eyebrow>WELCOME TO TRUSTBRIDGE</Eyebrow>
-          <Heading>Good decisions{"\n"}start here.</Heading>
-          <Muted>
-            Your workspace. Your suppliers. A clearer view before you pay.
-          </Muted>
-        </View>
-        <View style={[styles.paper, { backgroundColor: c.bg, borderWidth: 1, borderColor: c.line }]}>
-          <Txt style={[styles.paperTitle, { color: c.white }]}>Sign in</Txt>
-          <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
-            Design preview only. Do not enter real credentials.
-          </Txt>
-          <Input
-            dark
-            label="Email address"
-            placeholder="you@company.example"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-            returnKeyType="next"
-            submitBehavior="submit"
-            onSubmitEditing={() => pass.current?.focus()}
-            autoComplete="off"
-          />
-          <Input
-            dark
-            label="Password"
-            placeholder="Enter a demo password"
-            ref={pass}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!visible}
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="done"
-            autoComplete="off"
-            suffix={
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={visible ? "Hide password" : "Show password"}
-                onPress={() => setVisible((v) => !v)}
-                style={{
-                  minHeight: 46,
-                  minWidth: 46,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Icon
-                  name={visible ? "eye-off-outline" : "eye-outline"}
-                  color={c.muted}
-                  size={20}
-                />
-              </Pressable>
-            }
-          />
-          <Button
-            title="Sign in (preview)"
-            icon="arrow-forward"
-            onPress={() => {
-              setPassword("");
-              setMessage(
-                "Live sign-in is not connected. Use Explore demo below to view the frontend.",
-              );
-            }}
-          />
-          {message && (
-            <Txt accessibilityRole="alert" style={[styles.mutedOnPaper, { color: c.muted }]}>
-              {message}
-            </Txt>
-          )}
-        </View>
-        <Button
-          secondary
-          title="Explore demo workspace"
-          icon="arrow-forward"
-          onPress={() => {
-            setPassword("");
-            enterWorkspace();
-            router.replace("/");
-          }}
-        />
-        <Button secondary title="Preview account creation" onPress={() => router.push("/sign-up")} />
-        <DemoNote />
+      <Page>
+        <Heading>Welcome to TrustBridge</Heading>
+        <Txt accessibilityRole="header">Sign in</Txt>
+        <Muted>Online sign-in is not available yet. You can review the registration form or continue to the offline workspace without an account.</Muted>
+        <Button title="Create an account" onPress={() => router.push("/sign-up")} />
+        <Button secondary title="Continue offline" onPress={() => { enterWorkspace(); router.replace("/"); }} />
       </Page>
     </SafeAreaView>
   );

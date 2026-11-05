@@ -41,7 +41,7 @@ export default function Home() {
       />
       <Page>
         <View style={{ gap: 12, marginTop: 12 }}>
-          <Eyebrow>ACME TRADERS / DEMO WORKSPACE</Eyebrow>
+          <Eyebrow>ACME TRADERS / OFFLINE WORKSPACE</Eyebrow>
           <Txt style={{ color: c.muted }}>Good to see you, {name}.</Txt>
           <Txt accessibilityRole="header" style={s.heroTitle}>
             A second look.{"\n"}A smarter move<Txt style={s.orangeDot}>.</Txt>
@@ -81,7 +81,7 @@ export default function Home() {
               {String(assessments.length).padStart(2, "0")}
             </Txt>
             <Txt style={{ color: c.muted, fontSize: 12 }}>
-              Checks in this preview
+              Checks in this session
             </Txt>
           </View>
           <View style={{ width: 1, backgroundColor: c.line }} />

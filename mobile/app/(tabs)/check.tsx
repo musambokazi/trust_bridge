@@ -71,7 +71,7 @@ export default function CheckInvoice() {
           <Heading>Small details.{"\n"}Big difference.</Heading>
           <Muted>
             Enter what’s on the invoice. We’ll show how it compares with your
-            selected demo record.
+            selected sample record.
           </Muted>
         </View>
         <View style={[styles.paper, { backgroundColor: c.bg, borderWidth: 1, borderColor: c.line }]}>
@@ -88,7 +88,7 @@ export default function CheckInvoice() {
             <View style={{ gap: 3 }}>
               <Txt style={[styles.paperTitle, { color: c.white }]}>Invoice details</Txt>
               <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
-                Manual entry · UI demonstration
+                Manual entry · Local comparison
               </Txt>
             </View>
           </View>
@@ -183,12 +183,12 @@ export default function CheckInvoice() {
             onSubmitEditing={submit}
           />
           <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
-            Use fictional information in this preview. The live service and
+            Use fictional information in this workspace. The live service and
             secure storage are not connected.
           </Txt>
         </View>
         <Button
-          title="Compare demo details"
+          title="Compare invoice details"
           icon="arrow-forward"
           loading={busy}
           onPress={submit}

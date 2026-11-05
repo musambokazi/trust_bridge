@@ -300,7 +300,7 @@ export function DemoNote() {
     <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 7 }}>
       <Icon name="flask-outline" size={14} color={c.muted} />
       <Txt style={{ color: c.muted, fontSize: 11, lineHeight: 17, flex: 1 }}>
-        Interactive UI preview · Fictional records. Nothing is uploaded or
+        Offline workspace · Fictional records. Nothing is uploaded or
         verified by a live service.
       </Txt>
     </View>

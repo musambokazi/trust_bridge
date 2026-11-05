@@ -26,9 +26,9 @@ export default function AssessmentResult() {
       <SafeAreaView style={{ flex: 1 }}>
         <ScreenHeader back title="Assessment" />
         <Page>
-          <Heading>This preview has expired.</Heading>
+          <Heading>This result is no longer available.</Heading>
           <Muted>
-            Demo checks are kept only in this app session. Start another check
+            Local checks are kept only in this app session. Start another check
             to see a result.
           </Muted>
           <Button
@@ -44,7 +44,7 @@ export default function AssessmentResult() {
       <ScreenHeader back title="Assessment" />
       <Page style={{ paddingBottom: 45 }}>
         <View style={{ gap: 14 }}>
-          <Eyebrow>DEMO RESULT / {item.invoiceNumber}</Eyebrow>
+          <Eyebrow>LOCAL RESULT / {item.invoiceNumber}</Eyebrow>
           <View
             style={{
               width: 54,
@@ -71,7 +71,7 @@ export default function AssessmentResult() {
               ? item.level === "unknown"
                 ? "Supplier identity needs verification"
                 : "Discrepancies need your attention"
-              : "No discrepancies detected by these demo checks"}
+              : "No discrepancies detected by this comparison"}
           </Txt>
           <Muted>
             {item.supplierName} · {money(item.amount)}
@@ -190,7 +190,7 @@ export default function AssessmentResult() {
           onPress={() => router.replace("/history")}
         />
         <Txt style={{ color: c.muted, fontSize: 11 }}>
-          Demo reference: {item.id}
+          Reference: {item.id.replace(/^preview-/, "local-")}
           {"\n"}
           {new Date(item.date).toLocaleString("en-ZA", {
             timeZone: "Africa/Johannesburg",

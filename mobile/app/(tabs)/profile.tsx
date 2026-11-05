@@ -62,10 +62,10 @@ export default function Profile() {
             <View style={layout.camera}><Icon name="camera-outline" color={c.ink} size={14} /></View>
           </Pressable>
           <View style={layout.copy}>
-            <Txt accessibilityRole="header" style={layout.title}>{name.trim() || "Demo user"}</Txt>
-            <Txt style={{ color: c.orange }}>@demo-member</Txt>
+            <Txt accessibilityRole="header" style={layout.title}>{name.trim() || "Workspace user"}</Txt>
+            <Txt style={{ color: c.orange }}>@workspace-member</Txt>
             <Muted>member@example.com</Muted>
-            <Muted>ACME Traders · Preview profile</Muted>
+            <Muted>ACME Traders · Local profile</Muted>
           </View>
         </View>
         {profileSettings.map((id) => (

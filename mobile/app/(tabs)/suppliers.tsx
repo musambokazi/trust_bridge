@@ -97,7 +97,7 @@ export default function Suppliers() {
                   }}
                 >
                   {s.verified
-                    ? "Reviewed reference · Demo"
+                    ? "Reviewed sample reference"
                     : "Reference needs verification"}
                 </Txt>
               </View>
