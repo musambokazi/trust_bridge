@@ -8,7 +8,7 @@ permissions:
   contents: read
 concurrency:
   group: trustbridge-delivery-main
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   validate:
     uses: ./.github/workflows/checks.yml

@@ -34,5 +34,7 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run export:web
-      - run: npx --no-install playwright install --with-deps chromium
-      - run: npm run test:ui
+      - name: Install pinned CI browser
+        run: npm install --no-save --ignore-scripts --package-lock=false @sparticuz/chromium@153.0.0
+      - name: Run browser workflow checks
+        run: node tests/run-ci-browser.cjs
