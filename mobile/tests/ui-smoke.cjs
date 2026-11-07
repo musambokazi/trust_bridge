@@ -63,6 +63,13 @@ const server = http.createServer((req, res) => {
     await next();
     await fill([["Email address", "qa@example.com"], ["Cell phone number", "0820000000"]]);
     await next();
+    await p.getByLabel("Password", { exact: true }).filter({ visible: true }).focus();
+    await p.getByRole("button", { name: "Show passwords", exact: true }).click();
+    await p.waitForFunction(() => Array.from(document.querySelectorAll('input[aria-label="Password"]')).some(el => el.offsetParent !== null && el.type === "text"));
+    assert.equal(await p.getByLabel("Confirm password", { exact: true }).evaluate(el => el.type), "password");
+    await p.getByLabel("Confirm password", { exact: true }).focus();
+    await p.waitForFunction(() => Array.from(document.querySelectorAll('input[aria-label="Password"]')).filter(el => el.offsetParent !== null).every(el => el.type === "password"));
+    await p.getByRole("button", { name: "Hide passwords", exact: true }).click();
     await fill([["Password", "short"], ["Confirm password", "short"]]);
     await next(); await p.getByRole("alert").filter({ hasText: "Meet all four" }).waitFor();
     await fill([["Password", "StrongPass123!"], ["Confirm password", "StrongPass123!"]]);
@@ -75,6 +82,12 @@ const server = http.createServer((req, res) => {
     await fill([["Email address", "qa@example.com"], ["Password", "StrongPass123!"]]);
     await p.getByRole("button", { name: "Show password", exact: true }).click();
     assert.equal(await p.getByLabel("Password", { exact: true }).filter({ visible: true }).evaluate((el) => el.type), "text");
+    await p.getByRole("button", { name: "Hide password", exact: true }).click();
+    await p.waitForFunction(() => Array.from(document.querySelectorAll('input[aria-label="Password"]')).filter(el => el.offsetParent !== null).every(el => el.type === "password"));
+    await p.getByRole("button", { name: "Show password", exact: true }).click();
+    await p.getByLabel("Email address", { exact: true }).filter({ visible: true }).focus();
+    await p.waitForFunction(() => Array.from(document.querySelectorAll('input[aria-label="Password"]')).filter(el => el.offsetParent !== null).every(el => el.type === "password"));
+    assert.equal(await p.getByLabel("Email address", { exact: true }).filter({ visible: true }).evaluate(el => el.type), "email");
     await p.getByRole("button", { name: "Sign in", exact: true }).click();
     await p.getByText("Good to see you, Test.", { exact: true }).waitFor();
     assert.equal(profile.phone, "+27820000000");

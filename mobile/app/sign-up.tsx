@@ -41,6 +41,7 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [visible, setVisible] = useState(false);
+  const activePassword = useRef<"password" | "confirmation">("password");
   const [error, setError] = useState("");
   const groups = kind === "company" ? company : individual;
   const titles = kind === "company" ? ["Company details", "Business contacts", "Business activity"] : ["Personal details", "Contact details"];
@@ -163,9 +164,9 @@ export default function SignUp() {
           </View>;
         })}
         {step === passwordStep && <>
-          <Input returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => inputRefs.current.confirmation?.focus()} dark label="Password" captureSensitive secureTextEntry={!visible} value={password} onChangeText={(value) => { setPassword(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
-          <Input ref={(input) => { inputRefs.current.confirmation = input; }} returnKeyType="next" submitBehavior="submit" onSubmitEditing={next} dark label="Confirm password" captureSensitive secureTextEntry={!visible} value={confirmation} onChangeText={(value) => { setConfirmation(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
-          <Button secondary title={visible ? "Hide passwords" : "Show passwords"} onPress={() => setVisible(!visible)} />
+          <Input ref={(input) => { inputRefs.current.password = input; }} onFocus={() => { activePassword.current = "password"; }} returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => inputRefs.current.confirmation?.focus()} dark label="Password" captureSensitive secureTextEntry={!visible} value={password} onChangeText={(value) => { setPassword(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
+          <Input ref={(input) => { inputRefs.current.confirmation = input; }} onFocus={() => { activePassword.current = "confirmation"; }} returnKeyType="next" submitBehavior="submit" onSubmitEditing={next} dark label="Confirm password" captureSensitive secureTextEntry={!visible} value={confirmation} onChangeText={(value) => { setConfirmation(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
+          <Button secondary title={visible ? "Hide passwords" : "Show passwords"} onPress={() => { inputRefs.current[activePassword.current]?.focus(); setVisible(!visible); }} />
           <View style={{ gap: 6 }}>
             <Txt accessibilityLiveRegion="polite">Password strength: {strength}</Txt>
             <View style={{ flexDirection: "row", gap: 4 }} aria-hidden>

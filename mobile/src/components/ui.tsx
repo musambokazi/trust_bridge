@@ -195,7 +195,7 @@ export const Input = React.forwardRef<
 >(function Input({ label, error, prefix, suffix, dark = false, captureSensitive = false, style, onFocus, onBlur, ...props }, ref) {
   const localRef = React.useRef<React.ComponentRef<typeof TextInput>>(null);
   React.useImperativeHandle(ref, () => localRef.current!, []);
-  const { protect, release, captureError } = usePasswordCapture(captureSensitive, localRef);
+  const { protect, release, captureError, protectedFocus } = usePasswordCapture(captureSensitive, localRef);
   return (
     <View style={{ gap: 8 }}>
       <Txt style={[styles.label, dark && { color: c.white }]}>{label}</Txt>
@@ -213,6 +213,7 @@ export const Input = React.forwardRef<
         <TextInput
           {...props}
           ref={localRef}
+          secureTextEntry={captureSensitive ? props.secureTextEntry !== false || !protectedFocus : props.secureTextEntry}
           onFocus={(event) => { protect(); onFocus?.(event); }}
           onBlur={(event) => { release(); onBlur?.(event); }}
           accessibilityLabel={label}

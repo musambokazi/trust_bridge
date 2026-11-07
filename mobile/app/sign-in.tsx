@@ -65,7 +65,7 @@ export default function SignIn() {
         </> : <>
           <Input dark label="Email address" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => pass.current?.focus()} />
           <Input ref={pass} dark label="Password" value={password} onChangeText={setPassword} autoCapitalize="none" autoComplete="current-password" captureSensitive secureTextEntry={!visible} returnKeyType="go" onSubmitEditing={login}
-            suffix={<Pressable accessibilityRole="button" accessibilityLabel={visible ? "Hide password" : "Show password"} onPress={() => setVisible(!visible)} style={{ padding: 12 }}><Icon name={visible ? "eye-off-outline" : "eye-outline"} /></Pressable>}
+            suffix={<Pressable accessibilityRole="button" accessibilityLabel={visible ? "Hide password" : "Show password"} onPress={() => { pass.current?.focus(); setVisible(!visible); }} style={{ padding: 12 }}><Icon name={visible ? "eye-off-outline" : "eye-outline"} /></Pressable>}
           />
           <Button title="Sign in" loading={busy} onPress={login} />
           <Button secondary title="Create an account" onPress={() => router.push("/sign-up")} />
