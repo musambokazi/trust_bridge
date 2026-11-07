@@ -3,7 +3,7 @@
     "name": "TrustBridge",
     "slug": "trustbridge",
     "scheme": "trustbridge",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#101112",
@@ -30,6 +30,12 @@
           "cameraPermission": false,
           "microphonePermission": false
         }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Use Face ID to unlock your saved TrustBridge account on this device."
+        }
       ]
     ],
     "web": {
@@ -40,7 +46,7 @@
     },
     "android": {
       "package": "za.co.devpeeps.trustbridge",
-      "versionCode": 5,
+      "versionCode": 6,
       "adaptiveIcon": {
         "foregroundImage": "./assets/branding/adaptive-icon.png",
         "backgroundColor": "#000000"

@@ -163,8 +163,8 @@ export default function SignUp() {
           </View>;
         })}
         {step === passwordStep && <>
-          <Input returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => inputRefs.current.confirmation?.focus()} dark label="Password" secureTextEntry={!visible} value={password} onChangeText={(value) => { setPassword(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
-          <Input ref={(input) => { inputRefs.current.confirmation = input; }} returnKeyType="next" submitBehavior="submit" onSubmitEditing={next} dark label="Confirm password" secureTextEntry={!visible} value={confirmation} onChangeText={(value) => { setConfirmation(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
+          <Input returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => inputRefs.current.confirmation?.focus()} dark label="Password" captureSensitive secureTextEntry={!visible} value={password} onChangeText={(value) => { setPassword(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
+          <Input ref={(input) => { inputRefs.current.confirmation = input; }} returnKeyType="next" submitBehavior="submit" onSubmitEditing={next} dark label="Confirm password" captureSensitive secureTextEntry={!visible} value={confirmation} onChangeText={(value) => { setConfirmation(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
           <Button secondary title={visible ? "Hide passwords" : "Show passwords"} onPress={() => setVisible(!visible)} />
           <View style={{ gap: 6 }}>
             <Txt accessibilityLiveRegion="polite">Password strength: {strength}</Txt>

@@ -31,8 +31,8 @@ export default function Callback() {
       <Heading>{recovery ? "Choose a new password" : "Email confirmation"}</Heading>
       {!!notice && <Txt accessibilityRole="alert">{notice}</Txt>}
       {recovery && <>
-        <Input dark label="New password" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" />
-        <Input dark label="Confirm new password" value={confirm} onChangeText={setConfirm} secureTextEntry autoCapitalize="none" />
+        <Input dark label="New password" value={password} onChangeText={setPassword} captureSensitive secureTextEntry autoCapitalize="none" />
+        <Input dark label="Confirm new password" value={confirm} onChangeText={setConfirm} captureSensitive secureTextEntry autoCapitalize="none" />
         <Muted>At least 8 characters, uppercase and lowercase letters, a number and a special character.</Muted>
         <Button title="Save password" loading={busy} onPress={async () => {
           if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password) || !/[^\p{L}\p{N}\s]/u.test(password) || password !== confirm) { setNotice("Meet all password requirements and make both fields match."); return; }

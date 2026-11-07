@@ -1,8 +1,12 @@
-# TrustBridge connected release 1.0.4
+# TrustBridge connected release 1.0.5
 
-This is a connected validation release, not a declaration that the product is ready for unrestricted public use. Source stays on main. Runtime remains 1.0.1. SecureStore, photo picking and JPEG resizing require the new 1.0.4 binary and isolated native compatibility channel. Older releases remain available and do not receive incompatible bundles.
+This is a connected validation release, not a declaration that the product is ready for unrestricted public use. Source stays on main. Runtime remains 1.0.1. Password capture protection and biometric unlock require the new 1.0.5 binary and isolated native compatibility channel. Older releases remain available and do not receive incompatible bundles.
 
 ## Implemented
+
+- Capture prevention is scoped to focused password/confirmation fields (sign-in, registration, recovery and device-unlock fallback), and biometric system confirmation. Blur, keyboard dismissal, navigation and unmount release input scopes. Password visibility toggles do not disable protection. The OS protects the entire app window during these short intervals; other screens do not enable prevention. Web is unsupported. This cannot prevent an external camera or guarantee behaviour on compromised devices.
+- Optional per-account, per-device biometric lock is enabled/disabled only after successful strong biometric confirmation. Background/relaunch locks the saved account; the opaque lock screen remains recordable. Prompt capture protection releases in finally, including cancellation/errors. Online account-password fallback preserves pending checks. Templates stay with the OS. This local barrier is not server MFA or a hardware-bound encryption key for cached data.
+- The biometric preference is stored in encrypted device storage. Changing the device's enrolled fingerprints may allow a newly enrolled owner to unlock. Use a trusted device lock and restrict who can change enrollment.
 
 - Supabase email/password signup and sign-in. Confirmation is enabled on the project. No anonymous sign-in or offline authentication bypass.
 - Separate individual and company registration. Password values are sent only to Supabase Auth, never profile/workspace tables or the encrypted pending registration draft.
@@ -33,7 +37,7 @@ This is a connected validation release, not a declaration that the product is re
 3. **Server password policy and abuse limits.** Confirm that Supabase Auth enforces the displayed minimum length and complexity; the app's strength meter alone is not a server control. Review compromised-password checks, CAPTCHA and email/sign-in rate limits. No credentials may be put into the mobile bundle.
 4. **Signing.** The current GitHub workflow still uses the historical Expo development keystore for internal APK compatibility. Replace it with an organisation-controlled release signing identity, store credentials in the CI secret store, and document backup/recovery. A store/public release cannot rely on that template development key.
 5. **Privacy and operations.** Publish legal operator/contact information, approved retention/deletion policies, export and verified deletion handling, incident response and support procedures. The 35-point notices remain drafts until reviewed against actual operations.
-6. **Device tests.** Verify actual Android SecureStore restoration, first-launch gating, keyboard avoidance, image permissions, upload replacement, sign-out, connectivity changes, stale/revoked sessions and update/restart behaviour. Automated browser tests do not substitute for these.
+6. **Device tests.** Test built-in and third-party recording on every password field, show/hide, email focus, keyboard dismissal, back, tab changes, biometric success/cancellation, background/resume and password fallback. Confirm other screens remain recordable. Test biometric opt-in, restart, enrollment changes and unsupported hardware. Web tests cannot prove these native behaviours. Verify actual Android SecureStore restoration, first-launch gating, keyboard avoidance, image permissions, upload replacement, sign-out, connectivity changes, stale/revoked sessions and update/restart behaviour. Automated browser tests do not substitute for these.
 7. **Backup and monitoring.** Confirm database backup availability and restoration procedure for the selected Supabase plan, monitor auth errors and sync failures, define an incident owner and a response process.
 
 ## Intentional limits
@@ -46,3 +50,7 @@ This is a connected validation release, not a declaration that the product is re
 - Native offline data cannot receive immediate remote access revocation. Server requests are validated when online.
 - Account creation is not fully transactional across profile/workspace tables: retries upsert the same account records and finish an interrupted setup.
 - A successful migration or green CI run is not a penetration test or legal certification.
+
+## Dashboard access on 2026-11-07
+
+The dashboard required sign-in. The secure browser sign-in request was declined; no Auth settings were changed. Callback allowlists, server password policy, custom SMTP and mail delivery verification remain pending.

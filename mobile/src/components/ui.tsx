@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { usePasswordCapture } from "../security/usePasswordCapture";
 import { color as c, money } from "../theme";
 import { useDemo } from "../state/DemoState";
 import type { Assessment } from "../domain/demo";
@@ -190,8 +191,11 @@ export function ScreenHeader({
 }
 export const Input = React.forwardRef<
   React.ComponentRef<typeof TextInput>,
-  TextInputProps & { label: string; error?: string; prefix?: React.ReactNode; suffix?: React.ReactNode; dark?: boolean }
->(function Input({ label, error, prefix, suffix, dark = false, style, ...props }, ref) {
+  TextInputProps & { label: string; error?: string; prefix?: React.ReactNode; suffix?: React.ReactNode; dark?: boolean; captureSensitive?: boolean }
+>(function Input({ label, error, prefix, suffix, dark = false, captureSensitive = false, style, onFocus, onBlur, ...props }, ref) {
+  const localRef = React.useRef<React.ComponentRef<typeof TextInput>>(null);
+  React.useImperativeHandle(ref, () => localRef.current!, []);
+  const { protect, release, captureError } = usePasswordCapture(captureSensitive, localRef);
   return (
     <View style={{ gap: 8 }}>
       <Txt style={[styles.label, dark && { color: c.white }]}>{label}</Txt>
@@ -208,19 +212,21 @@ export const Input = React.forwardRef<
         {prefix}
         <TextInput
           {...props}
-          ref={ref}
+          ref={localRef}
+          onFocus={(event) => { protect(); onFocus?.(event); }}
+          onBlur={(event) => { release(); onBlur?.(event); }}
           accessibilityLabel={label}
           placeholderTextColor={dark ? c.muted : "#757B80"}
           style={[styles.input, dark && { color: c.white }, style]}
         />
         {suffix}
       </View>
-      {error && (
+      {(error || captureError) && (
         <Txt
           accessibilityRole="alert"
           style={{ color: dark ? c.orange : c.warning, fontSize: 12 }}
         >
-          {error}
+          {error || captureError}
         </Txt>
       )}
     </View>

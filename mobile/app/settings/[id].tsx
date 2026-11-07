@@ -8,6 +8,7 @@ import { legalDocuments } from "../../src/legal";
 import { useAuth } from "../../src/backend/AuthState";
 import { chooseAvatar } from "../../src/backend/avatar";
 import { useDemo } from "../../src/state/DemoState";
+import { useDeviceSecurity } from "../../src/security/DeviceSecurity";
 import { color as c } from "../../src/theme";
 
 function goBack() {
@@ -32,6 +33,7 @@ function TextLink({ title, description, onPress }: { title: string; description:
 
 export default function SettingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const security = useDeviceSecurity();
   const { scale, pendingCount } = useDemo();
   const { profile, session, workspace, saveProfile, signOut } = useAuth();
   const [first, setFirst] = useState(""), [last, setLast] = useState(""), [username, setUsername] = useState("");
@@ -104,6 +106,14 @@ export default function SettingScreen() {
             }); }} />
           </>
         )}
+        {id === "security" && <>
+          <Txt style={layout.sectionTitle}>Biometric unlock on this device</Txt>
+          <Muted>{security.enabled ? "Enabled. Your saved account locks when the app goes into the background." : "Off. Enable fingerprint or Face ID to protect your saved account when reopening the app."}</Muted>
+          <Button secondary title={security.enabled ? "Disable biometric unlock" : "Enable biometric unlock"} loading={security.busy} onPress={() => { void security.setEnabled(!security.enabled); }} />
+          {!!security.message && <Txt accessibilityRole="alert">{security.message}</Txt>}
+          <Muted>Only the system confirmation uses capture protection. Recording works normally again when confirmation closes. Biometrics stay with your device and are never sent to TrustBridge or Supabase.</Muted>
+          <Muted>Password and confirm-password fields also block capture only while focused. Tap another field or dismiss the keyboard to restore recording. Web browsers do not offer this protection.</Muted>
+        </>}
         {id === "display" && (
           <>
             <Muted>Adjust the body text to suit you.</Muted>

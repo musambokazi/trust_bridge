@@ -126,6 +126,12 @@ const server = http.createServer((req, res) => {
         assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth), name + " overflow");
       }
     }
+    await p.goto("http://127.0.0.1:" + server.address().port + "/settings/security");
+    await p.getByRole("button", { name: "Enable biometric unlock", exact: true }).click();
+    await p.getByText("Biometric unlock is available in the installed mobile app.", { exact: true }).waitFor();
+    await p.getByRole("button", { name: "Go back", exact: true }).click();
+    await tabs().getByRole("tab", { name: "Check", exact: true }).click();
+    await tabs().getByRole("tab", { name: "Profile", exact: true }).click();
     if (process.env.UI_SCREENSHOT_DIR) { fs.mkdirSync(process.env.UI_SCREENSHOT_DIR, { recursive: true }); await p.screenshot({ path: path.join(process.env.UI_SCREENSHOT_DIR, "connected-profile.png") }); }
     assert.deepEqual(errors, []);
     console.log("PASS: mocked live signup/email confirmation/login, profile and workspace persistence, supplier creation, server comparison, session restoration offline, keyboard focus and responsive navigation. Real RLS is verified separately against Supabase.");

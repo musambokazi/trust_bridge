@@ -110,7 +110,7 @@ export const legalDocuments = {
     ],
     [
       "Screenshots",
-      "Screen captures can reveal names, amounts, contacts and invoice numbers, even when bank references are masked. Review a capture before sharing it outside the app."
+      "Screen captures can reveal names, amounts, contacts and invoice numbers, even when bank references are masked. In the installed mobile app, password-field focus and biometric confirmation temporarily block app-window capture; other screens remain recordable. Browsers do not provide this protection. Optional biometric unlock is a local device check, not server multi-factor authentication. Templates remain with your operating system; the app stores only your device preference. Review a capture before sharing it outside the app."
     ],
     [
       "Shared devices",
