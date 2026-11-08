@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, readFileSync, chmodSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, chmodSync, rmSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, delimiter } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -25,3 +25,5 @@ test('a mismatched native hash cannot overwrite an existing app version', () => 
 test('runtime number cannot drift and incomplete releases cannot be silently overwritten', () => { const f = fixture(); try { const app = JSON.parse(readFileSync(join(f.dir, 'app.json'), 'utf8')); app.expo.runtimeVersion = '1.0.2'; f.write('app.json', app); assert.match(f.run().stderr, /runtime must remain 1.0.1/); app.expo.runtimeVersion = '1.0.1'; f.write('app.json', app); const hash = JSON.parse(readFileSync(join(f.dir, 'runtime-baseline.json'), 'utf8')).nativeHash; f.write('remote-release.json', { body: 'Native compatibility: `' + hash + '`', assets: [] }); assert.match(f.run().stderr, /Release exists but is incomplete/); } finally { f.clean(); } });
 
 test('replacing a native icon at the same path changes its compatibility channel', () => { const f = fixture(); try { const app = JSON.parse(readFileSync(join(f.dir, 'app.json'), 'utf8')); app.expo.icon = './icon.png'; f.write('app.json', app); writeFileSync(join(f.dir, 'icon.png'), 'first-image-fixture'); const first = f.run(); assert.equal(first.status, 0, first.stderr); writeFileSync(join(f.dir, 'icon.png'), 'replacement-image-fixture'); const second = f.run(); assert.equal(second.status, 0, second.stderr); assert.notEqual(JSON.parse(first.stdout).nativeHash, JSON.parse(second.stdout).nativeHash); assert.notEqual(JSON.parse(first.stdout).channels.preview, JSON.parse(second.stdout).channels.preview); } finally { f.clean(); } });
+
+ test('local native source changes require an isolated channel even without dependency changes', () => { const f = fixture(); try { mkdirSync(join(f.dir, 'modules/documents/android'), { recursive: true }); const source = join(f.dir, 'modules/documents/android/Reader.kt'); writeFileSync(source, 'first implementation'); const first = f.run(); assert.equal(first.status, 0, first.stderr); writeFileSync(source, 'changed implementation'); const second = f.run(); assert.equal(second.status, 0, second.stderr); assert.notEqual(JSON.parse(first.stdout).nativeHash, JSON.parse(second.stdout).nativeHash); } finally { f.clean(); } });

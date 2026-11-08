@@ -5,6 +5,10 @@ export const legalDocuments = {
       "This notice covers the connected TrustBridge app: registration, email sign-in, private profiles, an owner-controlled workspace, supplier references, invoice comparisons and optional profile photographs. It distinguishes device caching from data saved to Supabase."
     ],
     [
+      "Optional invoice import",
+      "Android photo and PDF imports use on-device text recognition. Browser and iOS users can paste copied text or enter details manually. Raw files and extracted text are not uploaded by the import feature. Working copies are deleted from app cache after processing, including errors and cancellation; an interrupted process may leave temporary cache files until the operating system clears them. Only reviewed form values enter the existing encrypted check queue when you submit a comparison. Recognition is fallible and does not authenticate an invoice or verify its bank details."
+    ],
+    [
       "Operator details",
       "The project team must publish its legal operator name and a monitored privacy/support contact before a public launch. This document remains a draft until those details, retention schedules and operational procedures are approved."
     ],

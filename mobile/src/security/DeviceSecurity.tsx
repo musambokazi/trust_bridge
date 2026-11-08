@@ -7,8 +7,8 @@ import { secureStorage, supabase } from "../backend/client";
 import { captureScopes } from "./capture";
 import { color as c } from "../theme";
 
-type Security = { enabled: boolean; busy: boolean; message: string; setEnabled: (enabled: boolean) => Promise<void>; unlockWithPassword: (password: string) => Promise<void> };
-const Context = createContext<Security>({ enabled: false, busy: false, message: "", setEnabled: async () => {}, unlockWithPassword: async () => {} });
+type Security = { locked: boolean; enabled: boolean; busy: boolean; message: string; setEnabled: (enabled: boolean) => Promise<void>; unlockWithPassword: (password: string) => Promise<void> };
+const Context = createContext<Security>({ locked: false, enabled: false, busy: false, message: "", setEnabled: async () => {}, unlockWithPassword: async () => {} });
 export const useDeviceSecurity = () => useContext(Context);
 
 export function DeviceSecurity({ children }: { children: React.ReactNode }) {
@@ -98,7 +98,7 @@ export function DeviceSecurity({ children }: { children: React.ReactNode }) {
     if (result.error || result.data.user?.id !== account || currentUid.current !== account) throw Error("Could not confirm your password. Check your connection and try again.");
     setState((old) => ({ ...old, locked: AppState.currentState === "background" }));
   }
-  return <Context.Provider value={{ enabled: state.uid === uid && state.enabled, busy, message, setEnabled: run, unlockWithPassword }}>
+  return <Context.Provider value={{ locked: waiting || (!!uid && state.uid === uid && state.locked), enabled: state.uid === uid && state.enabled, busy, message, setEnabled: run, unlockWithPassword }}>
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1 }} accessibilityElementsHidden={waiting || locked} importantForAccessibility={waiting || locked ? "no-hide-descendants" : "auto"} pointerEvents={waiting || locked ? "none" : "auto"}>
         {children}

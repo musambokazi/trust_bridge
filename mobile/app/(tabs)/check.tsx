@@ -20,6 +20,7 @@ import {
   type InvoiceInput,
 } from "../../src/domain/demo";
 import { useDemo } from "../../src/state/DemoState";
+import { InvoiceImportDialog } from "../../src/invoices/InvoiceImportDialog";
 import { color as c } from "../../src/theme";
 const blank: InvoiceInput = {
   supplierId: "",
@@ -51,6 +52,8 @@ export default function CheckInvoice() {
     setInput((v) => ({ ...v, [key]: value }));
     setErrors((e) => ({ ...e, [key]: undefined }));
   };
+  const [importOpen, setImportOpen] = useState(false);
+  const [importNotice, setImportNotice] = useState("");
   const [submitError, setSubmitError] = useState("");
   const submit = async () => {
     const e = validateInvoice(input);
@@ -77,6 +80,8 @@ export default function CheckInvoice() {
             saved supplier record.
           </Muted>
         </View>
+        <Button secondary title="Import invoice photo, PDF or text" icon="document-attach-outline" disabled={busy} onPress={() => setImportOpen(true)} />
+        {!!importNotice && <Txt accessibilityLiveRegion="polite">{importNotice}</Txt>}
         <View style={[styles.paper, { backgroundColor: c.bg, borderWidth: 1, borderColor: c.line }]}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <View
@@ -91,7 +96,7 @@ export default function CheckInvoice() {
             <View style={{ gap: 3 }}>
               <Txt style={[styles.paperTitle, { color: c.white }]}>Invoice details</Txt>
               <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
-                Manual entry · Server comparison
+                Review details · Server comparison
               </Txt>
             </View>
           </View>
@@ -198,6 +203,10 @@ export default function CheckInvoice() {
         {!!submitError && <Txt accessibilityRole="alert">{submitError}</Txt>}
         <DemoNote />
       </Page>
+      <InvoiceImportDialog visible={importOpen} onClose={() => setImportOpen(false)} onApply={draft => {
+        setInput(current => ({ ...current, ...draft })); setErrors({});
+        setImportNotice("Reviewed fields added. Confirm the supplier record and compare when ready.");
+      }} />
       <Modal
         visible={picker}
         animationType="slide"

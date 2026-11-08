@@ -3,7 +3,7 @@
     "name": "TrustBridge",
     "slug": "trustbridge",
     "scheme": "trustbridge",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#101112",
@@ -26,8 +26,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Choose a profile photo for your TrustBridge account.",
-          "cameraPermission": false,
+          "photosPermission": "Choose a profile photo or an invoice image.",
+          "cameraPermission": "Photograph an invoice to extract its details on this device.",
           "microphonePermission": false
         }
       ],
@@ -46,7 +46,7 @@
     },
     "android": {
       "package": "za.co.devpeeps.trustbridge",
-      "versionCode": 6,
+      "versionCode": 7,
       "adaptiveIcon": {
         "foregroundImage": "./assets/branding/adaptive-icon.png",
         "backgroundColor": "#000000"

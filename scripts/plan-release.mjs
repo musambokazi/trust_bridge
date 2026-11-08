@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, appendFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, appendFileSync, readdirSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 const read = path => JSON.parse(readFileSync(path, 'utf8'));
@@ -15,6 +15,19 @@ function collectImages(value) {
 }
 collectImages({ icon: app.icon, android: app.android, splash: app.splash, plugins: app.plugins });
 if (imagePaths.size) native.assets = [...imagePaths].sort().map(path => ({ path, sha256: createHash('sha256').update(readFileSync(path)).digest('hex') }));
+// Local Expo module code is part of the binary, even when npm dependencies
+// do not change. Never send an OTA requiring a different native implementation.
+function moduleInputs(path) {
+  return readdirSync(path, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name)).flatMap(entry => {
+    if (['build', '.gradle', 'node_modules'].includes(entry.name)) return [];
+    const file = path + '/' + entry.name;
+    if (entry.isDirectory()) return moduleInputs(file);
+    if (!entry.isFile()) throw Error('Native module inputs must be regular files: ' + file);
+    if (/\.(kt|java|swift|m|mm|h|gradle|kts|xml|podspec|json)$/.test(file)) return [{ path: file, sha256: createHash('sha256').update(readFileSync(file)).digest('hex') }];
+    return [];
+  });
+}
+if (existsSync('modules')) native.localModules = moduleInputs('modules');
 const hash = createHash('sha256').update(JSON.stringify(native)).digest('hex');
 if (process.argv.includes('--write-baseline')) { writeFileSync('runtime-baseline.json', JSON.stringify({ nativeHash: hash }, null, 2) + '\n'); process.exit(0); }
 const first = read('runtime-baseline.json').nativeHash;
