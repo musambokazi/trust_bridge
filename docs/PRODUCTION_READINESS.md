@@ -32,9 +32,9 @@ This is a connected validation release, not a declaration that the product is re
 
 ## Must complete before public launch
 
-1. **Email and callback configuration.** In the project's Auth URL configuration allow both `trustbridge://auth-callback` and `trustbridge-preview://auth-callback`. Use a real HTTPS site URL under your control instead of a localhost default. The app requests these native redirects for confirmation and recovery. Test signup, confirmation, login, reset and expiry end to end on installed APKs with an address you control.
+1. **Email-flow acceptance.** On 2026-11-08 the default Site URL was set to `trustbridge://auth-callback` and both exact native callbacks (`trustbridge://auth-callback`, `trustbridge-preview://auth-callback`) were saved and verified after reload. Supabase supports native deep-link Site URLs. No web domain was invented. After SMTP is configured, test signup, confirmation, login, reset and expiry end to end on the installed production and preview APKs with an address you control.
 2. **Mail delivery.** Configure and verify a custom SMTP sender/domain, delivery limits, bounce handling and recovery templates. The implementation has not sent emails to a real user or verified inbox delivery. Do not disable email confirmation to work around mail problems.
-3. **Server password policy and abuse limits.** Confirm that Supabase Auth enforces the displayed minimum length and complexity; the app's strength meter alone is not a server control. Review compromised-password checks, CAPTCHA and email/sign-in rate limits. No credentials may be put into the mobile bundle.
+3. **Remaining abuse controls.** Server policy was saved and verified on 2026-11-08: minimum 8 characters, lowercase, uppercase, digit and symbol; secure password change enabled. Email confirmation and secure email change remain enabled; anonymous sign-in remains disabled. Existing rate limits were reviewed and left unchanged. CAPTCHA is not configured: provider keys and a compatible client challenge flow are still needed. Leaked-password protection is unavailable on the current Free plan (Pro and above); no plan upgrade was made. Current-password-on-update was left off to avoid breaking the recovery-only password-change flow.
 4. **Signing.** The current GitHub workflow still uses the historical Expo development keystore for internal APK compatibility. Replace it with an organisation-controlled release signing identity, store credentials in the CI secret store, and document backup/recovery. A store/public release cannot rely on that template development key.
 5. **Privacy and operations.** Publish legal operator/contact information, approved retention/deletion policies, export and verified deletion handling, incident response and support procedures. The 35-point notices remain drafts until reviewed against actual operations.
 6. **Device tests.** Test built-in and third-party recording on every password field, show/hide, email focus, keyboard dismissal, back, tab changes, biometric success/cancellation, background/resume and password fallback. Confirm other screens remain recordable. Test biometric opt-in, restart, enrollment changes and unsupported hardware. Web tests cannot prove these native behaviours. Verify actual Android SecureStore restoration, first-launch gating, keyboard avoidance, image permissions, upload replacement, sign-out, connectivity changes, stale/revoked sessions and update/restart behaviour. Automated browser tests do not substitute for these.
@@ -51,6 +51,23 @@ This is a connected validation release, not a declaration that the product is re
 - Account creation is not fully transactional across profile/workspace tables: retries upsert the same account records and finish an interrupted setup.
 - A successful migration or green CI run is not a penetration test or legal certification.
 
-## Dashboard access on 2026-11-07
+## Auth configuration verified on 2026-11-08
 
-The dashboard required sign-in. The secure browser sign-in request was declined; no Auth settings were changed. Callback allowlists, server password policy, custom SMTP and mail delivery verification remain pending.
+Dashboard sign-in completed after the user solved the CAPTCHA. The following were saved and verified in the project `pbyquxpeizkumucvpcdk`:
+
+- Site URL: `trustbridge://auth-callback`.
+- Exact redirect allowlist: `trustbridge://auth-callback` and `trustbridge-preview://auth-callback`. No wildcard redirects.
+- Minimum password length: 8 (confirmed visually after reopening the saved provider settings).
+- Complexity: lowercase, uppercase, digits and symbols.
+- Secure password change: enabled (recent sign-in or reauthentication required for older sessions).
+- Email provider, email confirmation and secure email change: enabled.
+- Anonymous sign-ins: disabled.
+- Email OTP lifetime: 3600 seconds; OTP length: 8 digits; unchanged.
+- Rate limits: unchanged, including 30 sign-in/signup requests per 5 minutes per IP, 30 token verifications per 5 minutes per IP and 150 token refreshes per 5 minutes per IP.
+- Supabase security advisor: no findings.
+
+Custom SMTP remains disabled. Sender/domain/provider credentials have not been provided, and real confirmation/reset delivery has not been tested. Default templates remain in place. No user account was created and no test email was sent during this dashboard configuration.
+
+CAPTCHA remains disabled until provider keys and client challenge handling are configured together. Leaked-password protection requires Pro or above; the project remains on Free. These saved Auth settings do not establish unrestricted production readiness.
+
+Reference: https://supabase.com/docs/guides/auth/redirect-urls (native deep-link Site URLs), https://supabase.com/docs/guides/auth/password-security and https://supabase.com/docs/guides/auth/auth-smtp.
