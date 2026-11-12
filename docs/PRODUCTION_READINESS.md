@@ -45,8 +45,8 @@ This is a connected validation release, not a declaration that the product is re
 - One owner-controlled workspace per account; no invitations or cross-company sharing.
 - No independent bank ownership, supplier identity, company tax or registration verification.
 - New references remain unverified. The UI does not expose an unsupported 'verified' badge.
-- Supplier creation and profile changes require connectivity. The offline outbox currently covers invoice checks, not arbitrary profile/registration edits.
-- Up to 250 supplier summaries and recent results are cached. At most 50 checks may be pending. An unavailable supplier can keep a request pending; resolve before signing out.
+- Supplier creation and profile changes require connectivity. The encrypted offline outbox covers invoice checks, supplier edits and review checklists with version conflict handling, but not arbitrary profile/registration edits.
+- Cache targets are 150 supplier summaries, 150 comparisons, 100 reviews and 100 recent changes, trimmed to fit the encrypted cache budget. At most 50 combined checks/edits may be pending. An unavailable supplier can keep a request pending; resolve before signing out.
 - Native offline data cannot receive immediate remote access revocation. Server requests are validated when online.
 - Account creation is not fully transactional across profile/workspace tables: retries upsert the same account records and finish an interrupted setup.
 - A successful migration or green CI run is not a penetration test or legal certification.
@@ -71,3 +71,7 @@ Custom SMTP remains disabled. Sender/domain/provider credentials have not been p
 CAPTCHA remains disabled until provider keys and client challenge handling are configured together. Leaked-password protection requires Pro or above; the project remains on Free. These saved Auth settings do not establish unrestricted production readiness.
 
 Reference: https://supabase.com/docs/guides/auth/redirect-urls (native deep-link Site URLs), https://supabase.com/docs/guides/auth/password-security and https://supabase.com/docs/guides/auth/auth-smtp.
+
+## Workflow phases 2–6 (2026-11-12)
+
+The v1.0.7 workflow adds immutable comparison snapshots, server-controlled supplier audit history, validated reviewer checklists, an account-scoped conflict-aware outbox and local masked PDF exports. Live rolled-back database integration tests pass; the Supabase security advisor reports no findings after these migrations. This does not remove the public-launch requirements above, including organisation-controlled signing, SMTP acceptance and installed-device testing. See FEATURE_PHASES.md for cache/export limits and validation scope.

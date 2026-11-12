@@ -1,5 +1,6 @@
 // Fictional UI fixtures. This module is NOT the trusted production assessment engine.
 export type Supplier = {
+  version?: number;
   id: string;
   name: string;
   initials: string;
@@ -24,6 +25,7 @@ export type Finding = {
   mismatch: boolean;
 };
 export type Assessment = {
+  comparison?: { supplierName: string; invoiceName: string; supplierVersion: number; supplierReviewedAt: string | null; capturedAt: string; rows: { field: string; label: string; reference: string; invoice: string; matches: boolean }[] };
   id: string;
   invoiceNumber: string;
   supplierName: string;

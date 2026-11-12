@@ -20,3 +20,6 @@ mobile/credentials.json
 mobile/app.config.js.bootstrap
 mobile/eas-build.json
 mobile/release-plan.json
+
+# Local Supabase CLI scratch state
+supabase/.temp/

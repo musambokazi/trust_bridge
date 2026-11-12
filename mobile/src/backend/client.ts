@@ -15,9 +15,10 @@ export const secureStorage = {
     if (!pointer) return null;
     const [generation, countText] = pointer.split(":");
     const count = Number(countText);
-    if (!generation || !Number.isInteger(count) || count < 1 || count > 500) return null;
+    if (!generation || !Number.isInteger(count) || count < 1 || count > 500) throw Error("Saved secure storage is unreadable; existing data has been preserved.");
     const chunks = await Promise.all(Array.from({ length: count }, (_, i) => SecureStore.getItemAsync(`${key}.${generation}.${i}`)));
-    return chunks.some((chunk) => chunk === null) ? null : chunks.join("");
+    if (chunks.some(chunk => chunk === null)) throw Error("Saved secure storage is incomplete; existing data has been preserved.");
+    return chunks.join("");
   },
   async setItem(key: string, value: string): Promise<void> {
     key = keyFor(key);

@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessment_reviews: {
+        Row: {
+          assessment_id: string
+          contact_checked: boolean
+          discrepancies_resolved: boolean
+          documents_checked: boolean
+          notes: string
+          status: string
+          updated_at: string
+          user_id: string
+          version: number
+        }
+        Insert: {
+          assessment_id: string
+          contact_checked: boolean
+          discrepancies_resolved: boolean
+          documents_checked: boolean
+          notes: string
+          status: string
+          updated_at?: string
+          user_id: string
+          version: number
+        }
+        Update: {
+          assessment_id?: string
+          contact_checked?: boolean
+          discrepancies_resolved?: boolean
+          documents_checked?: boolean
+          notes?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_reviews_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: true
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessments: {
         Row: {
           created_at: string
@@ -92,6 +136,57 @@ export type Database = {
         }
         Relationships: []
       }
+      supplier_changes: {
+        Row: {
+          actor_id: string | null
+          after_values: Json
+          before_values: Json | null
+          created_at: string
+          id: string
+          reason: string
+          supplier_id: string
+          version: number
+          workspace_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          after_values: Json
+          before_values?: Json | null
+          created_at?: string
+          id?: string
+          reason: string
+          supplier_id: string
+          version: number
+          workspace_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          after_values?: Json
+          before_values?: Json | null
+          created_at?: string
+          id?: string
+          reason?: string
+          supplier_id?: string
+          version?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supplier_changes_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "supplier_changes_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           bank_reference: string
@@ -99,9 +194,11 @@ export type Database = {
           contact: string
           created_at: string
           id: string
+          last_change_reason: string
           name: string
           registration: string
           reviewed_at: string | null
+          version: number
           workspace_id: string
         }
         Insert: {
@@ -110,9 +207,11 @@ export type Database = {
           contact?: string
           created_at?: string
           id?: string
+          last_change_reason?: string
           name: string
           registration?: string
           reviewed_at?: string | null
+          version?: number
           workspace_id: string
         }
         Update: {
@@ -121,9 +220,11 @@ export type Database = {
           contact?: string
           created_at?: string
           id?: string
+          last_change_reason?: string
           name?: string
           registration?: string
           reviewed_at?: string | null
+          version?: number
           workspace_id?: string
         }
         Relationships: [
@@ -201,6 +302,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_workflow_operation: {
+        Args: {
+          entity_id: string
+          expected_version: number
+          operation: string
+          payload: Json
+          request_id: string
+        }
+        Returns: Json
+      }
       compare_invoice: {
         Args: {
           invoice_amount: number

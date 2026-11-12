@@ -1,5 +1,9 @@
 export const legalDocuments = {
   "privacy-notice": [
+    ["Comparison snapshots", "New server comparisons retain the reference name, version, review date and masked bank digits used at that time. Later supplier edits do not rewrite past comparisons. Older records without a snapshot are labelled accordingly."],
+    ["Supplier change history", "Accepted supplier edits require a reason and create server-written before/after history with the account identifier, version and date. Bank fields in history are masked. Free-text reasons and review notes may contain personal information: do not include passwords or complete bank references there."],
+    ["Offline edits and conflicts", "Supplier edits and reviewer checklists are saved to the account-scoped encrypted native outbox before upload. On reconnect, request identifiers prevent duplicate changes. If the server version has changed, the app asks you to compare and resolve it rather than silently overwriting the newer record. Cached history and results are bounded; pending work is retained."],
+    ["Review reports", "Export is optional and initiated by you. PDF reports include masked comparison fields and the last synced checklist; notes are excluded unless selected. A shared report leaves the app's access controls. Temporary native PDFs remain in app-private cache for handoff and are pruned on a later export after one hour, or by the operating system. Reports saved or sent to another app must be managed there."],
     [
       "Scope",
       "This notice covers the connected TrustBridge app: registration, email sign-in, private profiles, an owner-controlled workspace, supplier references, invoice comparisons and optional profile photographs. It distinguishes device caching from data saved to Supabase."

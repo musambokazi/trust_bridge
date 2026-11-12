@@ -127,8 +127,9 @@ export default function Home() {
             </Muted>
           </View>
         </View>
-        <Muted>{syncMessage} {pendingCount ? `${pendingCount} checks waiting to sync.` : ""}</Muted>
+        <Muted>{syncMessage} {pendingCount ? `${pendingCount} items waiting to sync.` : ""}</Muted>
         <Button secondary title="Sync now" onPress={() => { void refresh(); }} />
+        <Button secondary title="Open sync centre" onPress={() => router.push("/sync")} />
         <DemoNote />
       </Page>
     </>

@@ -70,6 +70,7 @@ export default function Profile() {
             <Muted>{workspace?.name} · {workspace?.kind === "company" ? "Company" : "Individual"}</Muted>
           </View>
         </View>
+        <SettingsRow title="Sync centre" description="Pending work, conflicts and last successful sync" icon="sync-outline" onPress={() => router.push("/sync")} />
         {profileSettings.map((id) => (
           <SettingsRow
             key={id}

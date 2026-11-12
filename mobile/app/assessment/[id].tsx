@@ -1,3 +1,7 @@
+import { AccountGate } from "../../src/backend/AccountGate";
+import { Comparison } from "../../src/workflow/Comparison";
+import { ReviewEditor } from "../../src/workflow/ReviewEditor";
+import { ReportExport } from "../../src/workflow/ReportExport";
 import React from "react";
 import { View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -17,7 +21,7 @@ import {
 import { useDemo } from "../../src/state/DemoState";
 import { maskReference } from "../../src/domain/demo";
 import { color as c, money } from "../../src/theme";
-export default function AssessmentResult() {
+function AssessmentResultContent() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { assessments } = useDemo();
   const item = assessments.find((a) => a.id === id);
@@ -77,8 +81,11 @@ export default function AssessmentResult() {
             {item.supplierName} · {money(item.amount)}
           </Muted>
         </View>
-        <View style={styles.paper}>
-          <Txt style={styles.paperTitle}>What we found</Txt>
+        <Comparison item={item} />
+        <ReviewEditor id={item.id} />
+        <ReportExport item={item} />
+        <View style={[styles.paper, { backgroundColor: c.surface }]}>
+          <Txt style={[styles.paperTitle, { color: c.white }]}>What we found</Txt>
           {item.findings.map((f, i) => (
             <View
               key={f.field}
@@ -101,11 +108,11 @@ export default function AssessmentResult() {
                   color={f.mismatch ? c.warning : c.paperMuted}
                   size={18}
                 />
-                <Txt style={{ fontWeight: "600", color: c.ink, flex: 1 }}>
+                <Txt style={{ fontWeight: "600", color: c.white, flex: 1 }}>
                   {f.title}
                 </Txt>
               </View>
-              <Txt style={styles.mutedOnPaper}>{f.detail}</Txt>
+              <Txt style={{ color: c.muted }}>{f.detail}</Txt>
               {f.field === "bank" && (
                 <View
                   style={{
@@ -195,10 +202,12 @@ export default function AssessmentResult() {
           {new Date(item.date).toLocaleString("en-ZA", {
             timeZone: "Africa/Johannesburg",
           })}{" "}
-          SAST · This session only
+          SAST · Saved comparison record
         </Txt>
         <DemoNote />
       </Page>
     </SafeAreaView>
   );
 }
+
+export default function AssessmentResult() { return <AccountGate><AssessmentResultContent /></AccountGate>; }

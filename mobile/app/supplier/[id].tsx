@@ -1,3 +1,4 @@
+import { AccountGate } from "../../src/backend/AccountGate";
 import React from "react";
 import { View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
@@ -17,8 +18,8 @@ import {
 import { maskReference } from "../../src/domain/demo";
 import { useDemo } from "../../src/state/DemoState";
 import { color as c } from "../../src/theme";
-export default function SupplierDetail() {
-  const { suppliers } = useDemo();
+function SupplierDetailContent() {
+  const { suppliers, history, operations } = useDemo();
   const { id } = useLocalSearchParams<{ id: string }>();
   const s = suppliers.find((v) => v.id === id);
   return (
@@ -87,6 +88,16 @@ export default function SupplierDetail() {
                 router.push({ pathname: "/check", params: { supplier: s.id } })
               }
             />
+            <Button secondary title="Edit supplier reference" onPress={() => router.push({ pathname: "/edit-supplier", params: { id: s.id } })} />
+            {operations.some(o => o.kind === "supplier" && o.entityId === s.id) && <Button secondary title="Supplier edit waiting to sync" onPress={() => router.push("/sync")} />}
+            <Txt style={{ fontSize: 22, fontWeight: "600" }}>Supplier change history</Txt>
+            <Muted>Server-written records, with bank references masked. History begins when this feature was enabled; earlier changes may not be available.</Muted>
+            {history.filter(h => h.supplier_id === s.id).map(h => <View key={h.id} style={{ gap: 8, paddingTop: 16, borderTopWidth: 1, borderColor: c.line }}>
+              <Txt style={{ fontWeight: "600" }}>Version {h.version} · {new Date(h.created_at).toLocaleString()}</Txt>
+              <Muted>{h.actor_id ? "Changed by your signed-in account" : "Recorded by the service"}</Muted><Txt>{h.reason}</Txt>
+              {Object.keys(h.after_values).map(key => <View key={key} style={{ gap: 3 }}><Txt>{key}: {String(h.before_values?.[key] ?? "Not previously captured")} → {String(h.after_values[key] ?? "Not set")}</Txt></View>)}
+            </View>)}
+            {!history.some(h => h.supplier_id === s.id) && <Muted>No change history is cached for this supplier.</Muted>}
             <DemoNote />
           </>
         ) : (
@@ -103,3 +114,5 @@ export default function SupplierDetail() {
     </SafeAreaView>
   );
 }
+
+export default function SupplierDetail() { return <AccountGate><SupplierDetailContent /></AccountGate>; }
