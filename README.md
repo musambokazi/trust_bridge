@@ -23,3 +23,8 @@ Supabase migrations are in `supabase/migrations`. The SQL isolation suite in `su
 Source is main. Expo runtime is fixed at 1.0.1; app versions change for native dependencies. GitHub builds preview and production APKs when required, preserves prior releases and publishes compatible Production OTA updates. Install the new APK for native features; old runtimes stay on their isolated channels.
 
 Read [production readiness](docs/PRODUCTION_READINESS.md) before a public launch. Email callback/SMTP configuration, real-device acceptance tests, release signing and privacy operations are outstanding; the connected validation release is not yet certified production-ready.
+
+
+### Connected workflow and security
+
+See [requirements](docs/REQUIREMENTS.md), [architecture](docs/SYSTEM_ARCHITECTURE.md), [API contract](docs/API_SPECIFICATION.md), [database](docs/DATABASE_SCHEMA.md), [threat model and runbook](docs/SECURITY_PLAN.md), [test plan](docs/TEST_PLAN.md) and [business validation](docs/BUSINESS_VALIDATION.md). Connected features are not a declaration of unrestricted public-launch readiness. Prices remain proposed; merchant billing is disabled.

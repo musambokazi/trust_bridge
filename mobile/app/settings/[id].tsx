@@ -47,6 +47,7 @@ export default function SettingScreen() {
     finally { setBusy(false); }
   }
   if (!isSetting(id)) return <Redirect href="/profile" />;
+  if(id==="team-access")return <Redirect href="/team"/>;
   const setting = settings[id];
 
   return (
@@ -63,11 +64,13 @@ export default function SettingScreen() {
           <>
             <TextLink title="Supplier directory" description="Browse the supplier references used for invoice checks." onPress={() => router.push("/suppliers")} />
             <TextLink title="Company or individual" description="See what each workspace type is for." onPress={() => router.push("/settings/workspace-type")} />
-            <TextLink title="Team access" description="Learn how invitations and permissions work." onPress={() => router.push("/settings/team-access")} />
+            <TextLink title="Team access" description="Manage invitations, roles and shared workspaces." onPress={() => router.push("/team")} />
           </>
         )}
+        {id === "workspace" && <TextLink title="Plans and usage" description="Assessment allowances and proposed plans." onPress={()=>router.push("/plans")}/>}
         {id === "privacy" && (
           <>
+            <TextLink title="Your data" description="Export account data or request verified account deletion." onPress={()=>router.push("/data-controls")}/>
             <TextLink title="Privacy notice" description="See what information the app uses and what stays on your device." onPress={() => router.push("/settings/privacy-notice")} />
             <TextLink title="Terms of service" description="Understand how to use TrustBridge and interpret check results." onPress={() => router.push("/settings/terms")} />
           </>
@@ -107,6 +110,9 @@ export default function SettingScreen() {
           </>
         )}
         {id === "security" && <>
+          <TextLink title="Two-factor authentication" description="Set up an authenticator app and complete secure step-up sign-in." onPress={()=>router.push("/two-factor")}/>
+          <TextLink title="Security activity" description="Server-written workspace events for owners and admins." onPress={()=>router.push("/activity")}/>
+          <TextLink title="Verify signed report" description="Check an ML-DSA-65 report bundle without uploading its contents." onPress={()=>router.push("/verify-report")}/>
           <Txt style={layout.sectionTitle}>Biometric unlock on this device</Txt>
           <Muted>{security.enabled ? "Enabled. Your saved account locks when the app goes into the background." : "Off. Enable fingerprint or Face ID to protect your saved account when reopening the app."}</Muted>
           <Button secondary title={security.enabled ? "Disable biometric unlock" : "Enable biometric unlock"} loading={security.busy} onPress={() => { void security.setEnabled(!security.enabled); }} />

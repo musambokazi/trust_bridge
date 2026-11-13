@@ -1,0 +1,10 @@
+[functions.check-invoice]
+verify_jwt = true
+[functions.manage-suppliers]
+verify_jwt = true
+[functions.get-assessment]
+verify_jwt = true
+[functions.sign-report]
+verify_jwt = true
+[functions.account-controls]
+verify_jwt = true

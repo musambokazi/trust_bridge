@@ -1,6 +1,6 @@
 export type ReviewDraft = { contact_checked: boolean; documents_checked: boolean; discrepancies_resolved: boolean; status: "unresolved" | "reviewed"; notes: string };
 export type Review = ReviewDraft & { assessment_id: string; user_id: string; version: number; updated_at: string };
-export type SupplierEdit = { name: string; category: string; registration: string; contact: string; bank_reference?: string; reviewed: boolean; reason: string };
+export type SupplierEdit = { name: string; category: string; registration: string; contact: string; bank_reference?: string; tax_reference?: string; branch_code?: string; reviewed: boolean; reason: string };
 export type Operation = { id: string; kind: "supplier" | "review"; entityId: string; version: number; payload: SupplierEdit | ReviewDraft; at: string; status: "waiting" | "failed" | "blocked" | "conflict"; attempts: number; error?: string; serverVersion?: number; lastAttempt?: string };
 export type SupplierChange = { id: string; supplier_id: string; actor_id: string | null; version: number; reason: string; before_values: Record<string, string | number | null> | null; after_values: Record<string, string | number | null>; created_at: string };
 export type SyncReceipt = { id: string; kind: string; at: string };

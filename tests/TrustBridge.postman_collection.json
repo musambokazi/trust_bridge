@@ -1,0 +1,129 @@
+{
+  "info": {
+    "name": "TrustBridge authenticated acceptance",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Use a dedicated non-customer account. Keep tokens in a private local environment, never exported. Repeat with viewer, other-workspace and missing-token cases. This collection is supplied, not a claim it was run in Postman."
+  },
+  "item": [
+    {
+      "name": "Check invoice",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "apikey",
+            "value": "{{publishable_key}}"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{supabase_url}}/functions/v1/check-invoice",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"request_id\": \"{{request_id}}\",\n  \"wid\": \"{{workspace_id}}\",\n  \"supplier\": \"{{supplier_id}}\",\n  \"invoice_number\": \"API-TEST\",\n  \"invoice_name\": \"{{supplier_name}}\",\n  \"invoice_amount\": 100,\n  \"invoice_reference\": \"{{bank_reference}}\",\n  \"invoice_tax\": \"{{tax_reference}}\",\n  \"invoice_branch\": \"{{branch_code}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Returns a JSON response\", function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read assessment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "apikey",
+            "value": "{{publishable_key}}"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{supabase_url}}/functions/v1/get-assessment",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"{{assessment_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Returns a JSON response\", function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sign saved report",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "apikey",
+            "value": "{{publishable_key}}"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{supabase_url}}/functions/v1/sign-report",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"{{assessment_id}}\",\n  \"includeNotes\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Returns a JSON response\", function () { pm.response.to.be.json; });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

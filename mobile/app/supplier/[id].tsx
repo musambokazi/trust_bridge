@@ -51,6 +51,8 @@ function SupplierDetailContent() {
               <Txt style={styles.paperTitle}>Reference details</Txt>
               {[
                 ["Registration reference", s.registration],
+                ["Tax reference",maskReference(s.taxReference??"")],
+                ["Branch code",s.branchCode??"Not recorded"],
                 ["Bank reference", maskReference(s.bankReference)],
                 [
                   "Record status",

@@ -66,21 +66,22 @@ function AssessmentResultContent() {
             />
           </View>
           <Heading>
-            {review ? "Pause.\nTake a closer look." : "The details\nline up."}
+            {item.level==="elevated"?"Hold payment.\nEscalate for review.":review ? "Pause.\nTake a closer look." : "The details\nline up."}
           </Heading>
           <Txt
             style={{ color: review ? c.orange : c.white, fontWeight: "500" }}
           >
             {review
               ? item.level === "unknown"
-                ? "Supplier identity needs verification"
-                : "Discrepancies need your attention"
-              : "No discrepancies detected by this comparison"}
+                ? "Waiting for server comparison"
+                : item.level==="elevated"?"Elevated Concern":"Review Required"
+              : "Low Concern · No discrepancies detected"}
           </Txt>
           <Muted>
             {item.supplierName} · {money(item.amount)}
           </Muted>
         </View>
+        <Txt style={{fontWeight:"600"}}>{item.level==="unknown"?"Waiting for server comparison":item.level==="elevated"?"Elevated Concern":item.level==="clear"?"Low Concern":"Review Required"}</Txt>
         <Comparison item={item} />
         <ReviewEditor id={item.id} />
         <ReportExport item={item} />
@@ -167,9 +168,9 @@ function AssessmentResultContent() {
         >
           <Txt style={{ fontSize: 17, fontWeight: "600" }}>Your next move</Txt>
           <Muted>
-            {review
+            {item.recommendedAction??(review
               ? "Independently confirm the details using a supplier contact you already trust. Do not rely on contact details included in the suspicious invoice."
-              : "Continue your usual approval process. A match does not establish authenticity or authorise payment."}
+              : "Continue your usual approval process. A match does not establish authenticity or authorise payment.")}
           </Muted>
         </View>
         <Txt style={{ color: c.muted, fontSize: 12 }}>
@@ -178,14 +179,14 @@ function AssessmentResultContent() {
         </Txt>
         <Button
           title={
-            item.level === "unknown"
+            item.supplierId === "unknown"
               ? "View supplier records"
               : "View supplier record"
           }
           icon="arrow-forward"
           onPress={() =>
             router.push(
-              item.level === "unknown"
+              item.supplierId === "unknown"
                 ? "/suppliers"
                 : `/supplier/${item.supplierId}`,
             )

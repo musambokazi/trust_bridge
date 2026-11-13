@@ -14,16 +14,22 @@ const server = http.createServer((req, res) => {
 });
 (async () => {
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-  let browser;
+  let browser, p;
   try {
     browser = await chromium.launch({ headless: true, args: ["--no-sandbox"], ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}) });
-    const p = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    p = await browser.newPage({ viewport: { width: 390, height: 844 } });
     const errors = []; p.on("pageerror", (error) => errors.push(error.message));
     const uid = "11111111-1111-4111-8111-111111111111", wid = "22222222-2222-4222-8222-222222222222";
     let profile = null, workspace = null, suppliers = [], results = [], reviews = [], audit = [], offline = false, signups = 0;
     const receipts = new Map();
+    const {ml_dsa65}=await import('@noble/post-quantum/ml-dsa.js');
+    const {canonical,hash}=await import('../src/reports/integrity.ts');
+    const reportKey=ml_dsa65.keygen(new Uint8Array(32).fill(23));
+    const keyId=hash(reportKey.publicKey),registry=[{id:keyId,publicKey:Buffer.from(reportKey.publicKey).toString('base64'),revokedAt:null}];
+    let latestBundle;
+
     const user = { id: uid, email: "qa@example.com", aud: "authenticated", role: "authenticated", email_confirmed_at: new Date().toISOString(), app_metadata: { provider: "email", providers: ["email"] }, user_metadata: {}, created_at: new Date().toISOString() };
-    const token = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url") + "." + Buffer.from(JSON.stringify({ sub: uid, exp: Math.floor(Date.now() / 1000) + 3600, aud: "authenticated", role: "authenticated" })).toString("base64url") + ".signature";
+    const token = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url") + "." + Buffer.from(JSON.stringify({ sub: uid, exp: Math.floor(Date.now() / 1000) + 3600, aud: "authenticated", role: "authenticated",aal:"aal1",amr:[{method:"password",timestamp:Math.floor(Date.now()/1000)}] })).toString("base64url") + "."+Buffer.alloc(32).toString("base64url");
     await p.route("https://pbyquxpeizkumucvpcdk.supabase.co/**", async (route) => {
       if (offline) { await route.abort("internetdisconnected"); return; }
       const req = route.request(), url = new URL(req.url()), body = req.postDataJSON();
@@ -44,6 +50,17 @@ const server = http.createServer((req, res) => {
         json = suppliers;
       } else if (url.pathname === "/rest/v1/assessment_reviews") json = reviews;
       else if (url.pathname === "/rest/v1/supplier_changes") json = audit;
+      else if(url.pathname==='/functions/v1/manage-suppliers'&&body.operation==='create'){
+        const record={...body.payload,id:body.request_id,workspace_id:body.wid,version:1};suppliers.push(record);json={id:record.id};
+      }
+      else if(url.pathname==='/rest/v1/rpc/workspace_role') json='owner';
+      else if(url.pathname==='/rest/v1/rpc/report_public_keys')json=registry;
+      else if(url.pathname==='/functions/v1/sign-report'){
+        const assessment=results.find(x=>x.id===body.id),pdf=Buffer.from('%PDF-1.4\nMock export transport fixture\n%%EOF');
+        const context={id:crypto.randomUUID(),workspaceId:wid,actorId:uid,assessment,review:reviews.find(r=>r.assessment_id===body.id)??null,notesIncluded:body.includeNotes};
+        const manifest={schema:'trustbridge.report.v1',algorithm:'ML-DSA-65',id:context.id,keyId,workspaceId:wid,assessmentId:body.id,issuedAt:new Date().toISOString(),pdfSha256:hash(pdf),contextSha256:hash(new TextEncoder().encode(canonical(context)))};
+        json={manifest,context,signature:Buffer.from(ml_dsa65.sign(new TextEncoder().encode(canonical(manifest)),reportKey.secretKey)).toString('base64'),pdfBase64:pdf.toString('base64')};latestBundle=json;
+      }
       else if (url.pathname === "/rest/v1/rpc/apply_workflow_operation") {
         if (receipts.has(body.request_id)) json = receipts.get(body.request_id);
         else {
@@ -65,7 +82,7 @@ const server = http.createServer((req, res) => {
         }
       }
       else if (url.pathname === "/rest/v1/assessments") json = results.map((result) => ({ result }));
-      else if (url.pathname === "/rest/v1/rpc/compare_invoice") {
+      else if ((url.pathname === "/rest/v1/rpc/compare_invoice" || url.pathname === "/functions/v1/check-invoice")) {
         json = { id: body.request_id, supplierId: body.supplier, invoiceNumber: body.invoice_number, supplierName: body.invoice_name, amount: body.invoice_amount, date: new Date().toISOString(), level: "review", approvedReference: "1234", submittedReference: body.invoice_reference.slice(-4), findings: [{ field: "bank", title: "Bank reference changed", detail: "Compare with saved reference.", mismatch: true }] };
         const reference = suppliers.find(x => x.id === body.supplier);
         json.comparison = { supplierName: reference.name, invoiceName: body.invoice_name, supplierVersion: reference.version, supplierReviewedAt: null, capturedAt: json.date, rows: [{ field: "name", label: "Supplier name", reference: reference.name, invoice: body.invoice_name, matches: reference.name === body.invoice_name }, { field: "bank", label: "Bank reference (last four)", reference: "Masked: " + reference.bank_reference.slice(-4), invoice: "Masked: " + body.invoice_reference.slice(-4), matches: reference.bank_reference === body.invoice_reference }] };
@@ -181,7 +198,7 @@ const server = http.createServer((req, res) => {
     await p.goto("http://127.0.0.1:" + server.address().port + "/assessment/" + comparisonId);
     await p.getByText("Side-by-side comparison", { exact: true }).waitFor();
     const popupReady = p.waitForEvent("popup");
-    await p.getByRole("button", { name: "Print or save review report as PDF", exact: true }).click();
+    await p.getByRole("button", { name: "Print or save unsigned draft PDF", exact: true }).click();
     const report = await popupReady;
     await report.waitForLoadState("domcontentloaded");
     const reportText = await report.locator("body").innerText();
@@ -189,6 +206,19 @@ const server = http.createServer((req, res) => {
     assert.ok(!reportText.includes("Private notes")); assert.ok(!reportText.includes("REF9999"));
     if (process.env.UI_SCREENSHOT_DIR) { fs.mkdirSync(process.env.UI_SCREENSHOT_DIR, { recursive: true }); await report.pdf({ path: path.join(process.env.UI_SCREENSHOT_DIR,"review-report.pdf"), format: "A4", printBackground: true }); }
     await report.close();
+    const downloaded=p.waitForEvent('download');
+    await p.getByRole('button',{name:'Export ML-DSA signed PDF bundle',exact:true}).click();
+    const zip=await downloaded;assert.match(zip.suggestedFilename(),/^TrustBridge-.*\.zip$/);
+    const zipBytes=fs.readFileSync(await zip.path());const {unzipSync,strFromU8}=require('fflate');
+    const files=unzipSync(zipBytes);assert.ok(files['report.pdf']);assert.ok(files['proof.json']);
+    await p.getByRole('button',{name:'Verify a report bundle',exact:true}).click();
+    const chooser=p.waitForEvent('filechooser');
+    await p.getByRole('button',{name:'Select signed report bundle',exact:true}).click();
+    await (await chooser).setFiles({name:'qa-report.zip',mimeType:'application/zip',buffer:zipBytes});
+    await p.getByText(/Signature valid. PDF and assessment snapshot are unchanged/).waitFor();
+    assert.equal(JSON.parse(strFromU8(files['proof.json'])).manifest.id,latestBundle.manifest.id);
+    await p.getByRole('button',{name:'Go back',exact:true}).click();
+
 
     await p.getByRole("button", { name: "Back to assessment history" }).click();
     await tabs().getByRole("tab", { name: "Profile", exact: true }).click();
@@ -209,7 +239,7 @@ const server = http.createServer((req, res) => {
     await p.getByRole("button", { name: "QA Supplies Revised", exact: true }).click();
     await fill([["Invoice number", "INV-OFFLINE"], ["Amount (ZAR)", "200"], ["Supplier name on invoice", "QA Supplies"], ["Bank reference on invoice", "REF7777"]]);
     await p.getByRole("button", { name: "Compare invoice details" }).click();
-    await p.getByText("Waiting for server comparison", { exact: true }).waitFor();
+    await p.getByText("Waiting for server comparison", { exact: true }).first().waitFor();
     assert.equal(results.length, 1);
     await p.getByRole("button", { name: "Back to assessment history" }).click();
     await tabs().getByRole("tab", { name: "Home", exact: true }).click();
@@ -235,5 +265,5 @@ const server = http.createServer((req, res) => {
     if (process.env.UI_SCREENSHOT_DIR) { fs.mkdirSync(process.env.UI_SCREENSHOT_DIR, { recursive: true }); await p.screenshot({ path: path.join(process.env.UI_SCREENSHOT_DIR, "connected-profile.png") }); }
     assert.deepEqual(errors, []);
     console.log("PASS: phases 2-6 comparison snapshot, offline review restoration/sync, supplier conflict resolution/audit and masked PDF print; mocked live signup/email confirmation/login, profile and workspace persistence, supplier creation, server comparison, session restoration offline, keyboard focus and responsive navigation. Real RLS is verified separately against Supabase.");
-  } finally { if (browser) await browser.close(); await new Promise((resolve) => server.close(resolve)); }
+  } catch(error){ if(p){console.error((await p.locator("body").innerText()).slice(0,2500));if(process.env.UI_SCREENSHOT_DIR){fs.mkdirSync(process.env.UI_SCREENSHOT_DIR,{recursive:true});await p.screenshot({path:path.join(process.env.UI_SCREENSHOT_DIR,"failure.png")});}}throw error; } finally { if (browser) await browser.close(); await new Promise((resolve) => server.close(resolve)); }
 })().catch((error) => { console.error(error); process.exitCode = 1; });

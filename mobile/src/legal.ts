@@ -1,5 +1,9 @@
 export const legalDocuments = {
   "privacy-notice": [
+    ["Signed report bundles", "Online signed exports use ML-DSA-65 and include a server-rendered PDF plus detached proof in a ZIP. Signing material stays server-side in encrypted Vault storage. Verify both the signature and the PDF hash against the trusted key registry. A valid signature does not establish supplier legitimacy, bank ownership or payment approval. Offline verification uses cached keys and may not know about a recent revocation."],
+    ["Team access and security events", "An invitation is bound to a confirmed email and expires after 48 hours. Workspace members can see the team's display names and roles. Owners can see pending invitation emails. Server-written events record successful supplier, assessment, review, membership and report operations. Security activity is visible to owners and admins; it is not a complete copy of platform authentication logs."],
+    ["Two-factor authentication", "Optional authenticator setup uses Supabase MFA. If enabled, a verified second factor is required for live workspace access and sensitive actions. Device biometrics are a separate local control. Protect authenticator backups and use the operator's identity-verified recovery process if access is lost."],
+    ["Access and deletion", "Your data screen provides an authorised masked workspace export with explicit collection limits. Password-confirmed account deletion removes your profile, avatar and owner-controlled data after membership checks. If you contributed records to another organisation, the operator must review retention obligations before deletion can proceed. Exported files and backups are governed by their own retention processes."],
     ["Comparison snapshots", "New server comparisons retain the reference name, version, review date and masked bank digits used at that time. Later supplier edits do not rewrite past comparisons. Older records without a snapshot are labelled accordingly."],
     ["Supplier change history", "Accepted supplier edits require a reason and create server-written before/after history with the account identifier, version and date. Bank fields in history are masked. Free-text reasons and review notes may contain personal information: do not include passwords or complete bank references there."],
     ["Offline edits and conflicts", "Supplier edits and reviewer checklists are saved to the account-scoped encrypted native outbox before upload. On reconnect, request identifiers prevent duplicate changes. If the server version has changed, the app asks you to compare and resolve it rather than silently overwriting the newer record. Cached history and results are bounded; pending work is retained."],
@@ -58,7 +62,7 @@ export const legalDocuments = {
     ],
     [
       "Workspace ownership",
-      "This release supports a workspace owned by one account. The owner can view and maintain its supplier references. Team invitations and shared company memberships are not implemented."
+      "Every workspace has an owner and can have invited admins, reviewers and viewers. The owner controls membership. Access is checked against live membership on every server request; offline caches cannot immediately learn of removal."
     ],
     [
       "Supplier records",
@@ -180,7 +184,7 @@ export const legalDocuments = {
     ],
     [
       "Company accounts",
-      "A company registration records business details and a contact. It creates an owner-controlled workspace, not a verified legal entity or a shared company membership."
+      "A company registration records business details and a contact. It creates an owner-controlled workspace. Shared access requires accepting an invitation for a confirmed email. It does not establish a verified legal entity."
     ],
     [
       "Authority",
@@ -248,7 +252,7 @@ export const legalDocuments = {
     ],
     [
       "History limits",
-      "The app caches the most recent 250 results. Server history is not a complete approval audit trail or a substitute for your organisation's evidence."
+      "The app caches up to 150 recent results, subject to encrypted cache limits. Server history is not a complete approval audit trail or a substitute for your organisation's evidence."
     ],
     [
       "Sign-out",

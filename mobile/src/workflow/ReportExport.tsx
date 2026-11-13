@@ -1,3 +1,4 @@
+import {SignedExport} from "../reports/SignedExport";
 import React, { useState } from "react";
 import { Platform, Pressable, View } from "react-native";
 import * as Print from "expo-print";
@@ -48,7 +49,8 @@ export function ReportExport({ item }: { item: Assessment }) {
   <Muted>Export comparison findings and the last synced checklist. Bank fields are masked. Pending work is clearly labelled; export does not sync it.</Muted>
   <Pressable accessibilityRole="checkbox" accessibilityLabel="Include synced reviewer notes in the report" accessibilityState={{ checked: notes }} onPress={() => setNotes(!notes)} style={{ paddingVertical: 12 }}><Txt>{notes ? "✓" : "○"} Include synced reviewer notes</Txt></Pressable>
   <Muted>Temporary native exports stay in app-private cache and are pruned on a later export after an hour, or by the operating system. Notes are omitted by default. If included, they may contain personal information you typed; check them before sharing.</Muted>
-  <Button secondary title={Platform.OS === "web" ? "Print or save review report as PDF" : "Export PDF review report"} loading={busy} onPress={() => { void exportPDF(); }} />
+  <Button secondary title={Platform.OS === "web" ? "Print or save unsigned draft PDF" : "Export unsigned draft PDF"} loading={busy} onPress={() => { void exportPDF(); }} />
+  <SignedExport id={item.id} includeNotes={notes}/>
   {!!notice && <Txt accessibilityRole="alert">{notice}</Txt>}
  </View>;
 }

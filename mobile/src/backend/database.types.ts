@@ -25,6 +25,7 @@ export type Database = {
           updated_at: string
           user_id: string
           version: number
+          workspace_id: string
         }
         Insert: {
           assessment_id: string
@@ -36,6 +37,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           version: number
+          workspace_id: string
         }
         Update: {
           assessment_id?: string
@@ -47,6 +49,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           version?: number
+          workspace_id?: string
         }
         Relationships: [
           {
@@ -54,6 +57,13 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: true
             referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_reviews_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]
@@ -100,6 +110,38 @@ export type Database = {
           },
         ]
       }
+      plan_requests: {
+        Row: {
+          created_at: string
+          id: string
+          plan: string
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          plan: string
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          plan?: string
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_path: string | null
@@ -135,6 +177,92 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      security_events: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          entity_id: string | null
+          id: string
+          workspace_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          workspace_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signed_reports: {
+        Row: {
+          actor_id: string | null
+          assessment_id: string
+          created_at: string
+          id: string
+          key_id: string
+          manifest: Json
+          pdf_hash: string
+          signature: string
+          workspace_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          assessment_id: string
+          created_at?: string
+          id: string
+          key_id: string
+          manifest: Json
+          pdf_hash: string
+          signature: string
+          workspace_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          assessment_id?: string
+          created_at?: string
+          id?: string
+          key_id?: string
+          manifest?: Json
+          pdf_hash?: string
+          signature?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signed_reports_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signed_reports_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supplier_changes: {
         Row: {
@@ -190,6 +318,7 @@ export type Database = {
       suppliers: {
         Row: {
           bank_reference: string
+          branch_code: string
           category: string
           contact: string
           created_at: string
@@ -198,11 +327,13 @@ export type Database = {
           name: string
           registration: string
           reviewed_at: string | null
+          tax_reference: string
           version: number
           workspace_id: string
         }
         Insert: {
           bank_reference: string
+          branch_code?: string
           category?: string
           contact?: string
           created_at?: string
@@ -211,11 +342,13 @@ export type Database = {
           name: string
           registration?: string
           reviewed_at?: string | null
+          tax_reference?: string
           version?: number
           workspace_id: string
         }
         Update: {
           bank_reference?: string
+          branch_code?: string
           category?: string
           contact?: string
           created_at?: string
@@ -224,12 +357,42 @@ export type Database = {
           name?: string
           registration?: string
           reviewed_at?: string | null
+          tax_reference?: string
           version?: number
           workspace_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "suppliers_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_members: {
+        Row: {
+          created_at: string
+          role: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          role: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_members_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -302,6 +465,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_data: {
+        Args: { delete_check?: boolean; wid: string }
+        Returns: Json
+      }
       apply_workflow_operation: {
         Args: {
           entity_id: string
@@ -309,6 +476,20 @@ export type Database = {
           operation: string
           payload: Json
           request_id: string
+        }
+        Returns: Json
+      }
+      assess_invoice: {
+        Args: {
+          invoice_amount: number
+          invoice_branch: string
+          invoice_name: string
+          invoice_number: string
+          invoice_reference: string
+          invoice_tax: string
+          request_id: string
+          supplier: string
+          wid: string
         }
         Returns: Json
       }
@@ -321,6 +502,29 @@ export type Database = {
           request_id: string
           supplier: string
         }
+        Returns: Json
+      }
+      register_signed_report: {
+        Args: { manifest: Json; signature: string }
+        Returns: undefined
+      }
+      report_context: {
+        Args: { assessment: string; include_notes?: boolean }
+        Returns: Json
+      }
+      report_key_material: {
+        Args: { public_key: string; seed: string }
+        Returns: Json
+      }
+      report_public_keys: { Args: never; Returns: Json }
+      team_action: {
+        Args: { action: string; data: Json; wid: string }
+        Returns: Json
+      }
+      team_roster: { Args: { wid: string }; Returns: Json }
+      workspace_role: { Args: { wid: string }; Returns: string }
+      workspace_usage: {
+        Args: { requested_plan?: string; wid: string }
         Returns: Json
       }
     }

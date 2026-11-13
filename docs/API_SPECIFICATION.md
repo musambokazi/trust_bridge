@@ -1,0 +1,15 @@
+# Authenticated API
+
+Edge endpoints: POST `/functions/v1/check-invoice`, `manage-suppliers`, `get-assessment`, `sign-report`, `account-controls`. Send `Authorization: Bearer <user access token>` and the public publishable key in `apikey`. Platform JWT verification stays enabled, and the handlers additionally validate a confirmed user through Auth. Never use a service key in the app.
+
+- `check-invoice`: `{request_id,wid,supplier|null,invoice_number,invoice_name,invoice_amount,invoice_reference,invoice_tax,invoice_branch}`. Returns the server result with `riskTier`, `level`, `ruleVersion`, `findings`, `recommendedAction` and optional immutable comparison. Same request ID with changed input is rejected. Pending local work is not a server result.
+- `manage-suppliers`: create `{operation:"create",request_id,wid,payload:{name,category,registration,bank_reference,contact,tax_reference,branch_code}}`; update `{operation:"supplier",request_id,entity_id,expected_version,payload:{name,category,registration,contact,reviewed,reason,bank_reference?,tax_reference?,branch_code?}}`. Create retries reuse their request UUID; updates return synced/version or conflict/version. Server role/validation/audit rules apply even to direct database calls.
+- `get-assessment`: `{id}`. Returns only a result accessible under the caller's current workspace membership.
+- `sign-report`: `{id,includeNotes:boolean}`. Renders the server record and returns `{manifest,signature,context,pdfBase64}`. The signed canonical manifest binds SHA-256 hashes of PDF and snapshot, IDs, issue time and trusted key fingerprint. It does not sign arbitrary client-uploaded PDFs.
+- `account-controls`: `{action:"delete",confirmation:"DELETE MY ACCOUNT",password}`. Requires confirmed identity, MFA when enabled, a current-password check, and membership/retention checks. Passwords are never logged or returned. Profile/avatar/owned workspaces are removed only for that same authenticated user.
+
+User-scoped RPCs: `apply_workflow_operation` (versioned checklist/reference edits), `team_action` (owner invite/revoke/role/remove or intended-email accept), `team_roster`, `workspace_role`, `workspace_usage`, `report_public_keys`, `account_data`. Existing `compare_invoice` remains compatible, authenticated and quota-limited for earlier APKs. All writes still enforce permissions in PostgreSQL.
+
+Signing material and signed-record registration RPCs are service-only. Ordinary clients cannot invoke them. Errors exposed by Edge handlers are generic and contain no request body, credential, reference value or SQL statement. Test API guards with the collection in tests/TrustBridge.postman_collection.json using a dedicated test account.
+
+Independent verification: export the public key registry through an authenticated app session and distribute its fingerprint through a trusted channel. With Node 24 and mobile dependencies installed, run `node scripts/verify-report.mjs report.zip trusted-public-keys.json`. The CLI never trusts a public key merely because it accompanied the report.

@@ -46,7 +46,7 @@ export default function CheckInvoice() {
   const numberRef = useRef<React.ComponentRef<typeof TextInput>>(null),
     amountRef = useRef<React.ComponentRef<typeof TextInput>>(null),
     nameRef = useRef<React.ComponentRef<typeof TextInput>>(null),
-    bankRef = useRef<React.ComponentRef<typeof TextInput>>(null);
+    bankRef = useRef<React.ComponentRef<typeof TextInput>>(null), taxRef = useRef<React.ComponentRef<typeof TextInput>>(null),branchRef=useRef<React.ComponentRef<typeof TextInput>>(null);
   const supplier = suppliers.find((s) => s.id === input.supplierId);
   const set = (key: keyof InvoiceInput, value: string) => {
     setInput((v) => ({ ...v, [key]: value }));
@@ -187,9 +187,13 @@ export default function CheckInvoice() {
             autoCapitalize="characters"
             autoCorrect={false}
             maxLength={80}
-            returnKeyType="done"
-            onSubmitEditing={submit}
+            returnKeyType="next"
+            submitBehavior="submit"
+            onSubmitEditing={()=>taxRef.current?.focus()}
           />
+          <Input dark label="Tax reference on invoice" value={input.taxReference??""} onChangeText={v=>set("taxReference",v)} maxLength={100} ref={taxRef} returnKeyType="next" submitBehavior="submit" onSubmitEditing={()=>branchRef.current?.focus()} />
+          <Input dark label="Branch code on invoice" value={input.branchCode??""} onChangeText={v=>set("branchCode",v)} maxLength={20} ref={branchRef} keyboardType="number-pad" returnKeyType="done" onSubmitEditing={()=>{void submit();}} />
+          <Muted>Leave unavailable tax or branch details blank. Missing fields are flagged; a match requires complete independently reviewed reference details.</Muted>
           <Txt style={[styles.mutedOnPaper, { color: c.muted }]}>
             Checks are saved on this device before syncing. Offline checks remain unverified until the server returns a result.
           </Txt>
@@ -255,6 +259,7 @@ export default function CheckInvoice() {
                 <Icon name="close" />
               </Pressable>
             </View>
+            <Pressable accessibilityRole="button" accessibilityLabel="Supplier not listed" onPress={()=>{setInput(v=>({...v,supplierId:"unknown",supplierName:""}));setPicker(false);}} style={{paddingVertical:18}}><Txt>Supplier not listed</Txt><Muted>Record an elevated-concern assessment without inventing a supplier baseline.</Muted></Pressable>
             {suppliers.map((s) => (
               <Pressable
                 key={s.id}

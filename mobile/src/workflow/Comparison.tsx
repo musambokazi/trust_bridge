@@ -12,7 +12,7 @@ export function Comparison({ item }: { item: Assessment }) {
   {comparisonRows(item).map(row => <View key={row.field} style={{ gap: 8, paddingBottom: 16, borderBottomWidth: 1, borderColor: c.line }}>
    <Txt style={{ fontWeight: "600" }}>{row.label}</Txt>
    <View style={{ flexDirection: "row", gap: 16 }}><Txt selectable style={{ flex: 1, minWidth: 0 }}>{row.reference}</Txt><Txt selectable style={{ flex: 1, minWidth: 0, color: row.matches === false ? c.orange : c.white }}>{row.invoice}</Txt></View>
-   <Txt style={{ color: row.matches === false ? c.orange : c.muted }}>{row.matches === undefined ? "Not compared" : row.matches ? "Match" : "Different"}</Txt>
+   <Txt style={{ color: row.matches === false ? c.orange : c.muted }}>{row.matches == null ? "Not compared" : row.matches ? "Match" : "Different"}</Txt>
   </View>)}
   <Muted>Bank references are masked. The match is calculated from the complete values on the server; equal final digits alone never prove a match.</Muted>
  </View>;

@@ -30,6 +30,16 @@ jobs:
           cache: npm
           cache-dependency-path: mobile/package-lock.json
       - run: npm ci
+      - name: Check runtime dependency advisories
+        run: npm audit --omit=dev --audit-level=moderate
+      - name: Install Edge Function dependencies
+        working-directory: supabase/functions
+        run: npm ci
+      - name: Check Edge Functions and report signing dependencies
+        working-directory: supabase/functions
+        run: |
+          npm run check
+          npm audit --omit=dev --audit-level=moderate
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test

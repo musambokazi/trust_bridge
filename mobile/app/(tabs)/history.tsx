@@ -17,17 +17,17 @@ import { color as c } from "../../src/theme";
 export default function History() {
   const { filter } = useLocalSearchParams<{ filter?: string }>();
   const [selected, setSelected] = useState(
-    filter === "review" ? "review" : "all",
+    ["review","elevated","clear"].includes(filter??"") ? filter! : "all",
   );
   const [query, setQuery] = useState("");
   const { assessments } = useDemo();
   useEffect(() => {
-    setSelected(filter === "review" ? "review" : "all");
+    setSelected(["review","elevated","clear"].includes(filter??"") ? filter! : "all");
   }, [filter]);
   const results = assessments.filter(
     (a) =>
       (selected === "all" ||
-        (selected === "review" ? a.level !== "clear" : a.level === "clear")) &&
+        (selected === "review" ? a.level === "review" : selected === "elevated"?a.level === "elevated":a.level === "clear")) &&
       `${a.invoiceNumber} ${a.supplierName}`
         .toLowerCase()
         .includes(query.toLowerCase()),
@@ -66,14 +66,16 @@ export default function History() {
             flexDirection: "row",
             borderBottomWidth: 1,
             borderBottomColor: c.line,
-            gap: 24,
+            gap: 16,
+            flexWrap:"wrap",
           }}
           accessibilityRole="tablist"
         >
           {[
             ["all", "All checks"],
-            ["review", "Needs review"],
-            ["clear", "No discrepancies"],
+            ["review", "Review Required"],
+            ["elevated","Elevated Concern"],
+            ["clear", "Low Concern"],
           ].map(([id, title]) => (
             <Pressable
               key={id}

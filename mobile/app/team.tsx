@@ -1,0 +1,28 @@
+import React,{useEffect,useState} from 'react';
+import {View,Pressable} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {AccountGate} from '../src/backend/AccountGate';
+import {useAuth} from '../src/backend/AuthState';
+import {useDemo} from '../src/state/DemoState';
+import {supabase} from '../src/backend/client';
+import {Button,Heading,Input,Muted,Page,ScreenHeader,Txt} from '../src/components/ui';
+type Member={user_id:string;role:string;name:string;username:string};type Invite={id:string;email:string;role:string;expires_at:string};
+function Content(){const auth=useAuth(),state=useDemo();const [email,setEmail]=useState(''),[role,setRole]=useState('reviewer'),[code,setCode]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false),[members,setMembers]=useState<Member[]>([]),[invites,setInvites]=useState<Invite[]>([]),[remove,setRemove]=useState('');
+ const wid=auth.workspace?.id,owner=auth.workspace?.owner_id===auth.session?.user.id;
+ async function refresh(){if(!wid)return;const r=await supabase.rpc('team_roster',{wid});if(r.error)throw Error('Unable to refresh team access. Connect and complete two-factor sign-in if enabled.');setMembers(r.data.members??[]);setInvites(r.data.invitations??[]);}
+ useEffect(()=>{void refresh().catch(e=>setNotice(e.message));},[wid]);
+ async function act(task:()=>Promise<void>){setBusy(true);setNotice('');try{await task();}catch(e){setNotice(e instanceof Error?e.message:'Unable to continue.');}finally{setBusy(false);}}
+ async function operation(action:string,data:Record<string,unknown>){const r=await supabase.rpc('team_action',{wid,action,data});if(r.error)throw Error('Team change rejected. Check owner permissions, invitation details and two-factor sign-in.');return r.data;}
+ return <SafeAreaView style={{flex:1}}><ScreenHeader back title="Workspace and team"/><Page><Heading>{auth.workspace?.name}</Heading><Muted>Your role: {auth.workspace?.role??(owner?'owner':'viewer')}. Owners manage invitations and membership. Admins manage supplier references. Reviewers submit assessments and save checklists. Viewers have read-only access. No role authorises a payment.</Muted>
+ <Txt style={{fontSize:21,fontWeight:'600'}}>Your workspaces</Txt>
+ {auth.workspaces.map(w=><Button key={w.id} secondary title={(w.id===wid?'Current: ':'Switch to ')+w.name} disabled={busy||state.pendingCount>0||w.id===wid} onPress={()=>{void act(()=>auth.switchWorkspace(w.id!));}}/>)}
+ <Muted>Switching requires a connection and no pending work in this workspace. Each workspace has a separate encrypted cache. Removal takes effect on the server immediately; a disconnected device may retain previously cached records until it reconnects or signs out.</Muted>
+ <Input dark label="Invitation code" value={code} onChangeText={setCode} maxLength={64} autoCapitalize="none"/>
+ <Button secondary title="Accept invitation for my confirmed email" disabled={busy||code.length!==64||state.pendingCount>0} onPress={()=>{void act(async()=>{await operation('accept',{code});setCode('');await auth.refresh();setNotice('Invitation accepted. Choose the new workspace above.');});}}/>
+ {owner&&<><Txt style={{fontSize:21,fontWeight:'600'}}>Invite a teammate</Txt><Input dark label="Teammate email address" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" maxLength={254}/><View style={{flexDirection:'row',flexWrap:'wrap',gap:16}}>{['viewer','reviewer','admin'].map(r=><Pressable key={r} accessibilityRole="radio" accessibilityLabel={r+' invitation role'} accessibilityState={{checked:role===r}} onPress={()=>setRole(r)} style={{paddingVertical:12}}><Txt>{role===r?'●':'○'} {r}</Txt></Pressable>)}</View><Button title="Create invitation code" disabled={busy} onPress={()=>{void act(async()=>{const r=await operation('invite',{email,role});await refresh();setNotice('Share this code privately with '+email+'. Expires '+r.expires_at+'\n'+r.code);});}}/><Muted>Codes expire after 48 hours and work only for the intended confirmed email. Creating a code does not send an email or add anyone automatically.</Muted></>}
+ <Txt style={{fontSize:21,fontWeight:'600'}}>Members</Txt><Muted>The workspace owner always retains owner access.</Muted>
+ {members.length?members.map(m=><View key={m.user_id} style={{gap:10,paddingVertical:14}}><Txt>{m.name||m.username||m.user_id} · {m.role}</Txt>{owner&&<><View style={{flexDirection:'row',flexWrap:'wrap',gap:14}}>{['viewer','reviewer','admin'].map(r=><Button key={r} secondary title={'Set '+r} disabled={busy||m.role===r} onPress={()=>{void act(async()=>{await operation('role',{user_id:m.user_id,role:r});await refresh();});}}/>)}</View><Button secondary title={remove===m.user_id?'Confirm removal from workspace':'Remove member…'} disabled={busy} onPress={()=>{if(remove!==m.user_id)setRemove(m.user_id);else void act(async()=>{await operation('remove',{user_id:m.user_id});setRemove('');await refresh();});}}/></>}</View>):<Muted>No additional members are listed.</Muted>}
+ {owner&&invites.map(i=><View key={i.id} style={{gap:10}}><Txt>{i.email} · {i.role} · expires {new Date(i.expires_at).toLocaleString()}</Txt><Button secondary title={'Revoke invitation for '+i.email} disabled={busy} onPress={()=>{void act(async()=>{await operation('revoke',{id:i.id});await refresh();});}}/></View>)}
+ <Button secondary title="Refresh workspace access" disabled={busy} onPress={()=>{void act(async()=>{await auth.refresh();await refresh();});}}/>{!!notice&&<Txt selectable accessibilityRole="alert">{notice}</Txt>}</Page></SafeAreaView>;
+}
+export default function Team(){return <AccountGate><Content/></AccountGate>;}

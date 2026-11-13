@@ -272,7 +272,7 @@ export function AssessmentRow({ item }: { item: Assessment }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${item.invoiceNumber}, ${item.supplierName}, ${review ? "Needs review" : "No discrepancies detected"}`}
+      accessibilityLabel={`${item.invoiceNumber}, ${item.supplierName}, ${item.level==="elevated"?"Elevated Concern":review ? "Needs review" : "Low Concern"}`}
       onPress={() => router.push(`/assessment/${item.id}`)}
       style={({ pressed }) => [
         styles.assessmentRow,

@@ -3,7 +3,7 @@ export type Profile = {
   phone: string; phone_country: string; text_scale: number; avatar_path: string | null; created_at?: string;
 };
 export type Workspace = {
-  id?: string; owner_id: string; kind: "individual" | "company"; name: string;
+  id?: string; role?: "owner" | "admin" | "reviewer" | "viewer"; owner_id: string; kind: "individual" | "company"; name: string;
   registration: string; tax_number: string; address: string; country: string;
   contact_name: string; contact_role: string; email: string; alternate_email: string;
   phone: string; alternate_phone: string; industry: string; offering: string;

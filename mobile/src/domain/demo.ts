@@ -1,6 +1,6 @@
 // Fictional UI fixtures. This module is NOT the trusted production assessment engine.
 export type Supplier = {
-  version?: number;
+  version?: number; taxReference?: string; branchCode?: string;
   id: string;
   name: string;
   initials: string;
@@ -12,7 +12,7 @@ export type Supplier = {
   contact: string;
 };
 export type InvoiceInput = {
-  supplierId: string;
+  supplierId: string; taxReference?: string; branchCode?: string;
   invoiceNumber: string;
   supplierName: string;
   amount: string;
@@ -25,13 +25,13 @@ export type Finding = {
   mismatch: boolean;
 };
 export type Assessment = {
-  comparison?: { supplierName: string; invoiceName: string; supplierVersion: number; supplierReviewedAt: string | null; capturedAt: string; rows: { field: string; label: string; reference: string; invoice: string; matches: boolean }[] };
+  comparison?: { supplierName: string; invoiceName: string; supplierVersion: number; supplierReviewedAt: string | null; capturedAt: string; rows: { field: string; label: string; reference: string; invoice: string; matches: boolean | null }[] };
   id: string;
   invoiceNumber: string;
   supplierName: string;
   amount: number;
   date: string;
-  level: "review" | "clear" | "unknown";
+  level: "review" | "clear" | "unknown" | "elevated"; riskTier?: "low" | "review" | "elevated"; recommendedAction?: string; ruleVersion?: string;
   findings: Finding[];
   approvedReference?: string;
   submittedReference: string;

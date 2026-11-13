@@ -3,7 +3,7 @@
     "name": "TrustBridge",
     "slug": "trustbridge",
     "scheme": "trustbridge",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#101112",
@@ -46,7 +46,7 @@
     },
     "android": {
       "package": "za.co.devpeeps.trustbridge",
-      "versionCode": 8,
+      "versionCode": 9,
       "adaptiveIcon": {
         "foregroundImage": "./assets/branding/adaptive-icon.png",
         "backgroundColor": "#000000"

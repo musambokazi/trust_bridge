@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Pressable, TextInput, View } from "react-native";
+import { Pressable, TextInput, View, Platform } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Linking from "expo-linking";
@@ -32,6 +32,8 @@ export default function SignIn() {
       const result = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       setPassword("");
       if (result.error) throw Error("Unable to sign in. Check your credentials and confirm your email first.");
+      const aal=await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if(aal.data?.nextLevel==="aal2"&&aal.data.currentLevel!=="aal2"){router.replace("/two-factor");return;}
       await finish();
       router.replace("/");
     } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to sign in."); }
@@ -65,7 +67,7 @@ export default function SignIn() {
         </> : <>
           <Input dark label="Email address" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => pass.current?.focus()} />
           <Input ref={pass} dark label="Password" value={password} onChangeText={setPassword} autoCapitalize="none" autoComplete="current-password" captureSensitive secureTextEntry={!visible} returnKeyType="go" onSubmitEditing={login}
-            suffix={<Pressable accessibilityRole="button" accessibilityLabel={visible ? "Hide password" : "Show password"} onPress={() => { pass.current?.focus(); setVisible(!visible); }} style={{ padding: 12 }}><Icon name={visible ? "eye-off-outline" : "eye-outline"} /></Pressable>}
+            suffix={<Pressable onPointerDown={event=>{if(Platform.OS==="web")event.preventDefault();}} accessibilityRole="button" accessibilityLabel={visible ? "Hide password" : "Show password"} onPress={() => { pass.current?.focus(); setVisible(!visible); }} style={{ padding: 12 }}><Icon name={visible ? "eye-off-outline" : "eye-outline"} /></Pressable>}
           />
           <Button title="Sign in" loading={busy} onPress={login} />
           <Button secondary title="Create an account" onPress={() => router.push("/sign-up")} />

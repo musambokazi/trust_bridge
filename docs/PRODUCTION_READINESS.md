@@ -1,4 +1,4 @@
-# TrustBridge connected release 1.0.5
+# TrustBridge connected validation release 1.0.8
 
 This is a connected validation release, not a declaration that the product is ready for unrestricted public use. Source stays on main. Runtime remains 1.0.1. Password capture protection and biometric unlock require the new 1.0.5 binary and isolated native compatibility channel. Older releases remain available and do not receive incompatible bundles.
 
@@ -11,7 +11,7 @@ This is a connected validation release, not a declaration that the product is re
 - Supabase email/password signup and sign-in. Confirmation is enabled on the project. No anonymous sign-in or offline authentication bypass.
 - Separate individual and company registration. Password values are sent only to Supabase Auth, never profile/workspace tables or the encrypted pending registration draft.
 - Username, contact and workspace details are completed after verified sign-in. A device retains an encrypted registration draft while waiting for confirmation; it is matched to the verified email before use.
-- Own-account profiles/workspaces/suppliers/assessments only. RLS enabled on all exposed tables; no anonymous grants. Company registration is not shared membership or verification.
+- Private account profiles and authorised owner/member workspaces/suppliers/assessments only. RLS enabled on all exposed tables; no anonymous grants. Company registration is not shared membership or verification.
 - Private avatars restricted to an account's own fixed path, JPEG only, maximum 2 MiB. Selected images are resized before upload. Signed URLs expire after five minutes.
 - Native sessions and account caches use OS-backed SecureStore. Browser sessions use sessionStorage and have different protection properties.
 - Saved account/workspace data can be viewed offline after sign-in. The client never treats an offline pending check as verified.
@@ -42,7 +42,7 @@ This is a connected validation release, not a declaration that the product is re
 
 ## Intentional limits
 
-- One owner-controlled workspace per account; no invitations or cross-company sharing.
+- One primary owned workspace per account, plus explicitly invited shared workspaces with live roles and separate caches. Offline copies cannot receive immediate revocation.
 - No independent bank ownership, supplier identity, company tax or registration verification.
 - New references remain unverified. The UI does not expose an unsupported 'verified' badge.
 - Supplier creation and profile changes require connectivity. The encrypted offline outbox covers invoice checks, supplier edits and review checklists with version conflict handling, but not arbitrary profile/registration edits.
@@ -75,3 +75,12 @@ Reference: https://supabase.com/docs/guides/auth/redirect-urls (native deep-link
 ## Workflow phases 2–6 (2026-11-12)
 
 The v1.0.7 workflow adds immutable comparison snapshots, server-controlled supplier audit history, validated reviewer checklists, an account-scoped conflict-aware outbox and local masked PDF exports. Live rolled-back database integration tests pass; the Supabase security advisor reports no findings after these migrations. This does not remove the public-launch requirements above, including organisation-controlled signing, SMTP acceptance and installed-device testing. See FEATURE_PHASES.md for cache/export limits and validation scope.
+
+
+## Implemented requirement closure (v1.0.8)
+
+Tax-reference and branch-code entry/import/comparison, explicit three-tier rules and unknown-supplier assessments are implemented. Team invitations and roles, MFA step-up, server-written activity, workspace usage/quota controls, masked data export and guarded password-confirmed deletion are connected to PostgreSQL. Authenticated Edge Functions now provide invoice checking, supplier management, assessment reads, signed reports and deletion.
+
+ML-DSA-65 report signing is live. A dedicated temporary account exercised the actual Edge/DB/Vault workflow; the server PDF and signature verified locally, and a changed manifest failed. The fixture account was removed through the password-confirmed deletion endpoint. The PDF renderer embeds licensed DejaVu fonts, with bounded multi-page layout checked separately. This is tamper evidence, not an absolute tamper-proof, invoice-authenticity, FIPS-module-certification or legal-signature guarantee.
+
+Public/store readiness remains blocked by the requirements above. Live paid billing is disabled; plan requests do not take money. Organisation signing supports four CI secrets but those keys have not been provided. No legal/operator information, customer interviews, SMTP delivery acceptance, physical-device results or restore evidence has been invented. See REQUIREMENTS.md, SECURITY_PLAN.md, TEST_PLAN.md and BUSINESS_VALIDATION.md.

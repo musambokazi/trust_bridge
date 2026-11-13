@@ -1,3 +1,4 @@
+import {MfaGate} from "../src/security/MfaGate";
 import React from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -9,7 +10,7 @@ import { UpdateNotice } from "../src/components/UpdateNotice";
 import { color as c } from "../src/theme";
 export default function RootLayout() {
   return (
-    <AuthProvider><DemoProvider><DeviceSecurity>
+    <AuthProvider><DemoProvider><DeviceSecurity><MfaGate>
       <View style={{ flex: 1, backgroundColor: c.bg }}>
         <StatusBar style="light" />
         <UpdateNotice />
@@ -21,6 +22,6 @@ export default function RootLayout() {
           }}
         />
       </View>
-    </DeviceSecurity></DemoProvider></AuthProvider>
+    </MfaGate></DeviceSecurity></DemoProvider></AuthProvider>
   );
 }

@@ -1,0 +1,18 @@
+{
+  "name": "trustbridge-edge",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "deno check --config deno.json --node-modules-dir=manual check-invoice/index.ts manage-suppliers/index.ts get-assessment/index.ts sign-report/index.ts account-controls/index.ts"
+  },
+  "dependencies": {
+    "@noble/hashes": "2.4.0",
+    "@noble/post-quantum": "0.7.1",
+    "@pdf-lib/fontkit": "1.1.1",
+    "@supabase/supabase-js": "2.119.0",
+    "pdf-lib": "1.17.1"
+  },
+  "devDependencies": {
+    "deno": "2.9.6"
+  }
+}

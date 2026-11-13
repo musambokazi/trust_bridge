@@ -32,7 +32,7 @@ do $$ declare result jsonb; payload jsonb := '{"name":"New Supplier","category":
  if result->>'status'<>'conflict' then raise exception 'Stale review overwrite'; end if;
  begin update public.suppliers set name='Forged'; raise exception 'Direct update allowed'; exception when insufficient_privilege then null; end;
  begin delete from public.supplier_changes; raise exception 'Audit deletion allowed'; exception when insufficient_privilege then null; end;
- begin insert into public.assessment_reviews values('40000000-0000-4000-8000-000000000011',auth.uid(),true,true,true,'reviewed','Forged',99,now()); raise exception 'Direct review write allowed'; exception when insufficient_privilege then null; end;
+ begin insert into public.assessment_reviews(assessment_id,user_id,contact_checked,documents_checked,discrepancies_resolved,status,notes,version,updated_at) values('40000000-0000-4000-8000-000000000011',auth.uid(),true,true,true,'reviewed','Forged',99,now()); raise exception 'Direct review write allowed'; exception when insufficient_privilege then null; end;
  begin perform count(*) from private.workflow_receipts; raise exception 'Private receipt read allowed'; exception when insufficient_privilege then null; end;
 end $$;
 select set_config('request.jwt.claims','{"sub":"10000000-0000-4000-8000-000000000012","role":"authenticated"}',true);

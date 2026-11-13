@@ -9,7 +9,7 @@ import { useDemo } from "../../src/state/DemoState";
 export default function TabsLayout() {
   const { ready, accountReady, session, profile, workspace } = useAuth();
   const { loading } = useDemo();
-  if (!ready || !accountReady || loading) return <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator color={c.orange} /></View>;
+  if (!ready || !accountReady) return <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator color={c.orange} /></View>;
   if (!session) return <Redirect href="/welcome" />;
   if (!profile || !workspace) return <Redirect href="/sign-in" />;
   return (
@@ -19,6 +19,7 @@ export default function TabsLayout() {
     >
       <Slot />
       <FloatingMenu />
+      {loading&&<View style={{position:"absolute",top:0,left:0,right:0,bottom:0,backgroundColor:c.bg,justifyContent:"center",alignItems:"center"}}><ActivityIndicator color={c.orange}/></View>}
     </SafeAreaView>
   );
 }

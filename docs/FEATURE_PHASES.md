@@ -38,3 +38,8 @@ Phase 1 needs a new native APK, v1.0.6, with runtime 1.0.1 and isolated preview/
 Live Supabase migrations and rolled-back integration tests cover ownership/anonymous denial, unforgeable audit entries, same-suffix mismatch, snapshot immutability, incomplete checklist rejection, payload-bound idempotency and stale-version conflicts. Browser tests intercept API responses and exercise offline restoration, sync, supplier conflict resolution and PDF printing. They do not prove mail delivery or native device behaviour.
 
 v1.0.7 adds Expo Network, Print and Sharing, so both preview and production need new APKs. Runtime remains 1.0.1. Earlier releases are preserved and isolated by their native compatibility channels. Installed-device PDF sharing, cache cleanup, connectivity transitions and the existing native OCR/security flows remain part of release acceptance.
+
+
+## Follow-up requirement closure (v1.0.8)
+
+The original hackathon blueprint is now extended with tax/branch comparisons, Low/Review/Elevated tiers, unknown-supplier assessments, team roles and MFA, server activity, server quotas and local verification of ML-DSA-65 server-rendered PDF bundles. Unsigned draft printouts remain clearly labelled. See REQUIREMENTS.md for exact implemented behaviour and external acceptance boundaries.

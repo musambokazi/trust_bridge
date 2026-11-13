@@ -4,7 +4,7 @@ import { extractInvoiceText, normalizeInvoiceAmount } from "../src/invoices/extr
 
 test("extracts labelled invoice fields without selecting a trusted supplier", () => {
   const result = extractInvoiceText("Supplier: Ubuntu Office\nInvoice No: INV-1043\nSubtotal: R 1000.00\nVAT: 150.00\nTotal Due: R 1,150.00\nAccount number: 1234 5678");
-  assert.deepEqual(result.fields, { invoiceNumber: "INV-1043", supplierName: "Ubuntu Office", amount: "1150.00", bankReference: "1234 5678" });
+  assert.deepEqual(result.fields, { invoiceNumber: "INV-1043", supplierName: "Ubuntu Office", amount: "1150.00", bankReference: "1234 5678",taxReference:"",branchCode:"" });
   assert.ok(result.warnings.some(v => v.includes("every field")));
 });
 
@@ -32,3 +32,5 @@ test("supports labels on separate lines and rejects conflicts and excessive text
   assert.throws(() => extractInvoiceText("a".repeat(50001)), /50,000/);
   assert.ok(extractInvoiceText("Supplier: Test\u202e Ltd").warnings.some(w => w.includes("Hidden")));
 });
+
+test("extracts labelled tax and branch fields and clears absent identity suggestions",()=>{const f=extractInvoiceText("VAT number: 1234567890\nBranch code: 250655").fields;assert.equal(f.taxReference,"1234567890");assert.equal(f.branchCode,"250655");const empty=extractInvoiceText("Invoice number: NEXT").fields;assert.equal(empty.taxReference,"");assert.equal(empty.branchCode,"");});

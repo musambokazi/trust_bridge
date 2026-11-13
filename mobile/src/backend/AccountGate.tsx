@@ -7,5 +7,5 @@ export function AccountGate({ children }: { children: React.ReactNode }) {
  if (!ready || !accountReady) return <ActivityIndicator style={{ flex: 1 }} />;
  if (!session || !profile || !workspace) return <Redirect href="/sign-in" />;
  // Changing account remounts form state as well as clearing provider caches.
- return <View key={session.user.id} style={{ flex: 1 }}>{children}</View>;
+ return <View key={session.user.id+":"+workspace.id} style={{ flex: 1 }}>{children}</View>;
 }

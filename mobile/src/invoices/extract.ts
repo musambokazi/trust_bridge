@@ -1,6 +1,6 @@
-export type DraftFields = { invoiceNumber: string; supplierName: string; amount: string; bankReference: string };
+export type DraftFields = { invoiceNumber: string; supplierName: string; amount: string; bankReference: string;taxReference:string;branchCode:string };
 export type Extraction = { fields: DraftFields; warnings: string[] };
-export const emptyDraft: DraftFields = { invoiceNumber: "", supplierName: "", amount: "", bankReference: "" };
+export const emptyDraft: DraftFields = { invoiceNumber: "", supplierName: "", amount: "", bankReference: "",taxReference:"",branchCode:"" };
 
 export function normalizeInvoiceAmount(value: string): string | null {
   let s = value.trim().replace(/^(?:ZAR\s*|R\s*)/i, "").replace(/[\s\u00a0]/g, "");
@@ -44,6 +44,8 @@ export function extractInvoiceText(raw: string): Extraction {
   const numbers = labelled(/^(?:tax\s+)?invoice\s*(?:number|no\.?|#)\s*[:#-]?\s*(.*)$/i);
   const names = labelled(/^(?:supplier(?:\s+name)?|issued\s+by|from|company\s+name)\s*:\s*(.*)$/i);
   const references = labelled(/^(?:bank\s+reference|(?:bank\s+)?account\s+(?:number|no\.?))\s*[:#-]?\s*(.*)$/i);
+  const taxes = labelled(/^(?:supplier\s+)?(?:tax|VAT)\s+(?:reference|number|no\.?)\s*[:#-]?\s*(.*)$/i);
+  const branches=labelled(/^(?:bank\s+)?branch\s+code\s*[:#-]?\s*(.*)$/i);
   const amounts = labelled(/^(?:amount\s+(?:due|payable)|grand\s+total|total\s+(?:due|payable|incl(?:usive)?\.?\s*(?:vat|tax))|invoice\s+total|total)\s*[:=-]?\s*(.*)$/i);
   function single(values: string[], label: string, max: number) {
     if (values.length > 1) { warnings.push(`Conflicting ${label} values found. Enter the correct value manually.`); return ""; }
@@ -54,6 +56,8 @@ export function extractInvoiceText(raw: string): Extraction {
   fields.invoiceNumber = single(numbers.filter(v => /^[\p{L}\p{N}][\p{L}\p{N}._/\s-]*$/u.test(v)), "invoice number", 80);
   fields.supplierName = single(names, "supplier name", 160);
   fields.bankReference = single(references.filter(v => /^[\p{L}\p{N}][\p{L}\p{N}\s./-]{3,79}$/u.test(v)), "bank reference", 80);
+  fields.taxReference=single(taxes.filter(v=>/^[\p{L}\p{N}][\p{L}\p{N}\s./-]*$/u.test(v)),"tax reference",100);
+  fields.branchCode=single(branches.filter(v=>/^[0-9 -]{1,20}$/.test(v)),"branch code",20);
   const foreign = /\b(?:USD|EUR|GBP|AUD|CAD|JPY|BWP|NAD|ZMW)\b|[$€£¥]/i.test(text);
   if (foreign) warnings.push("A non-ZAR currency was found. Do not convert it automatically; confirm the currency and enter a ZAR amount only if appropriate.");
   else {

@@ -106,6 +106,7 @@ export default function Home() {
             </Txt>
           </Pressable>
         </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="View elevated concern assessments" onPress={()=>router.push({pathname:"/history",params:{filter:"elevated"}})}><Txt style={{color:c.orange}}>{assessments.filter(a=>a.level==="elevated").length} Elevated Concern · hold payment and escalate</Txt></Pressable>
         <View>
           <SectionTitle
             title="Your latest checks"

@@ -81,14 +81,15 @@ jobs:
       - run: npm ci
       - run: node ../scripts/configure-expo-profile.mjs
       - run: node ../scripts/ensure-expo-channel.mjs
-      - name: Generate the internal demo signing fixture
+      - name: Prepare isolated signing credentials
+        env:
+          TRUSTBRIDGE_KEYSTORE_BASE64: ${{ secrets.TRUSTBRIDGE_KEYSTORE_BASE64 }}
+          TRUSTBRIDGE_KEYSTORE_PASSWORD: ${{ secrets.TRUSTBRIDGE_KEYSTORE_PASSWORD }}
+          TRUSTBRIDGE_KEY_ALIAS: ${{ secrets.TRUSTBRIDGE_KEY_ALIAS }}
+          TRUSTBRIDGE_KEY_PASSWORD: ${{ secrets.TRUSTBRIDGE_KEY_PASSWORD }}
         run: |
           npx --no-install expo prebuild --platform android --no-install
-          node - <<'NODE'
-          const fs = require('node:fs');
-          if (!fs.existsSync('android/app/debug.keystore')) throw Error('Missing template preview key');
-          fs.writeFileSync('credentials.json', JSON.stringify({ android: { keystore: { keystorePath: 'android/app/debug.keystore', keystorePassword: 'android', keyAlias: 'androiddebugkey', keyPassword: 'android' } } }));
-          NODE
+          node ../scripts/prepare-signing.mjs
       - name: Build standalone APK on Expo EAS
         run: npx --yes eas-cli@27.2.0 build --platform android --profile "$APP_VARIANT" --non-interactive --wait --json > eas-build.json
       - name: Download the finished APK

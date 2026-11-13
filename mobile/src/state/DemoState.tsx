@@ -27,13 +27,14 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
  const current = useRef(cache), account = useRef<string | null>(null), epoch = useRef(0), workspaceRef = useRef(workspace);
  workspaceRef.current = workspace;
  const damaged = useRef(false), writes = useRef(Promise.resolve()), flight = useRef<{ generation: number; task: Promise<void> } | null>(null);
- const valid = (id: string, generation: number) => account.current === id && epoch.current === generation;
+ const cacheWorkspace=useRef<string|undefined>(workspace?.id),sessionId=useRef(uid);sessionId.current=uid;
+ const valid = (id: string, generation: number) => account.current === id && epoch.current === generation && sessionId.current===id && cacheWorkspace.current===workspaceRef.current?.id;
  async function persist(update: (c: Cache) => Cache, id: string, generation = epoch.current) {
   const task = writes.current.then(async () => {
    if (!valid(id, generation)) throw Error("Account changed. Reopen this screen.");
    if (damaged.current) throw Error("Saved outbox could not be read. It has been preserved; do not clear app data.");
    const next = compact(update(current.current));
-   await secureStorage.setItem("workspace-" + id, JSON.stringify(next));
+   await secureStorage.setItem("workspace-" + id + "-" + cacheWorkspace.current, JSON.stringify(next));
    if (valid(id, generation)) { current.current = next; setCache(next); }
   });
   writes.current = task.catch(() => {}); await task;
@@ -54,7 +55,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     if (!alive()) return;
     if (item.status === "blocked") continue;
     const at = now();
-    const result = await supabase.rpc("compare_invoice", { request_id: item.id, supplier: item.input.supplierId, invoice_number: item.input.invoiceNumber, invoice_name: item.input.supplierName, invoice_amount: Number(item.input.amount), invoice_reference: item.input.bankReference });
+    const result = await supabase.functions.invoke("check-invoice", { body: { request_id: item.id, wid, supplier: item.input.supplierId === "unknown" ? null : item.input.supplierId, invoice_number: item.input.invoiceNumber, invoice_name: item.input.supplierName, invoice_amount: Number(item.input.amount), invoice_reference: item.input.bankReference, invoice_tax:item.input.taxReference??"",invoice_branch:item.input.branchCode??"" } });
     if (!alive()) return;
     if (result.error) {
      const status = operationError(result.error.code);
@@ -82,27 +83,28 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
    }
    const [s, a, r, h] = await Promise.all([
     supabase.from("suppliers").select("*").eq("workspace_id", wid).order("name").limit(150),
-    supabase.from("assessments").select("result").eq("user_id", id).order("created_at", { ascending: false }).limit(150),
-    supabase.from("assessment_reviews").select("*").eq("user_id", id).order("updated_at", { ascending: false }).limit(100),
+    supabase.from("assessments").select("result").eq("workspace_id", wid).order("created_at", { ascending: false }).limit(150),
+    supabase.from("assessment_reviews").select("*").eq("workspace_id", wid).order("updated_at", { ascending: false }).limit(100),
     supabase.from("supplier_changes").select("*").eq("workspace_id", wid).order("created_at", { ascending: false }).limit(100),
    ]);
    if (!alive()) return;
    if (s.error || a.error || r.error || h.error) { setReachable(false); setSyncMessage("Connected data could not be refreshed. Showing saved records."); return; }
-   const suppliers: Supplier[] = (s.data ?? []).map(v => ({ id: v.id, name: v.name, initials: v.name.split(/\s+/).map((x: string) => x[0]).slice(0, 2).join(""), category: v.category, registration: v.registration, contact: v.contact, version: v.version, bankReference: v.bank_reference.slice(-4), verified: !!v.reviewed_at, verifiedOn: v.reviewed_at ? new Date(v.reviewed_at).toLocaleDateString() : undefined }));
+   const suppliers: Supplier[] = (s.data ?? []).map(v => ({ id: v.id, name: v.name, initials: v.name.split(/\s+/).map((x: string) => x[0]).slice(0, 2).join(""), category: v.category, registration: v.registration, contact: v.contact, version: v.version,taxReference:(v.tax_reference??"").slice(-4),branchCode:v.branch_code??"", bankReference: v.bank_reference.slice(-4), verified: !!v.reviewed_at, verifiedOn: v.reviewed_at ? new Date(v.reviewed_at).toLocaleDateString() : undefined }));
    await persist(c => ({ ...c, suppliers, assessments: [...c.assessments.filter(x => c.pending.some(p => p.id === x.id)), ...(a.data ?? []).map(x => x.result as Assessment)], reviews: r.data ?? [], history: h.data ?? [], lastSync: now() }), id, generation);
    setReachable(true); setSyncMessage(current.current.pending.length + current.current.operations.length ? "Some saved items still need sync or attention." : "Synced with your account.");
   } catch { if (alive()) { setReachable(false); setSyncMessage("Unable to finish sync. Saved work has been retained."); } }
  }
  useEffect(() => {
-  const generation = ++epoch.current; account.current = uid ?? null; flight.current = null; damaged.current = false;
+  const generation = ++epoch.current; cacheWorkspace.current=workspace?.id; account.current = uid ?? null; flight.current = null; damaged.current = false;
   current.current = empty(); setCache(current.current); setLoading(true); setSyncing(false); setReachable(null); setSyncMessage("");
   if (!uid) { setLoading(false); return; }
   void (async () => {
-   try { const saved = await secureStorage.getItem("workspace-" + uid); if (saved && valid(uid, generation)) { const parsed = hydrate(saved); current.current = parsed; setCache(parsed); } }
+   try { let saved = await secureStorage.getItem("workspace-" + uid + "-" + workspace?.id);
+    if(!saved&&workspace?.owner_id===uid){const legacy=await secureStorage.getItem("workspace-"+uid);if(legacy){saved=legacy;await secureStorage.setItem("workspace-"+uid+"-"+workspace.id,legacy);await secureStorage.removeItem("workspace-"+uid);}} if (saved && valid(uid, generation)) { const parsed = hydrate(saved); current.current = parsed; setCache(parsed); } }
    catch { if (valid(uid, generation)) { damaged.current = true; setSyncMessage("The saved outbox could not be read. It has been preserved. Do not clear app data; contact support."); } }
    finally { if (valid(uid, generation)) setLoading(false); }
   })();
- }, [uid]);
+ }, [uid,workspace?.id]);
  useEffect(() => {
   if (loading) return;
   void refresh();
@@ -114,9 +116,10 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
  async function check(input: InvoiceInput) {
   const id = account.current, generation = epoch.current;
   if (!id || !workspaceRef.current?.id || loading) throw Error("Finish account setup first.");
-  if (!current.current.suppliers.some(s => s.id === input.supplierId)) throw Error("Add or sync the supplier before creating a check.");
+  if (input.supplierId !== "unknown" && !current.current.suppliers.some(s => s.id === input.supplierId)) throw Error("Add or sync the supplier before creating a check.");
   if (Object.keys(validateInvoice(input)).length) throw Error("Check the invoice fields.");
   if (current.current.pending.length + current.current.operations.length >= 50) throw Error("Sync or resolve pending work before adding more.");
+  if(workspaceRef.current?.role === "viewer")throw Error("A reviewer role is required to check invoices.");
   const requestId = randomUUID(), at = new Date().toISOString();
   const item: Assessment = { id: requestId, invoiceNumber: input.invoiceNumber, supplierName: input.supplierName, supplierId: input.supplierId, amount: Number(input.amount), date: at, level: "unknown", submittedReference: input.bankReference.slice(-4), findings: [{ field: "sync", title: "Waiting for server comparison", detail: "Saved on this device. Connect and sync to receive a server comparison.", mismatch: true }] };
   await persist(c => ({ ...c, pending: [...c.pending, { id: requestId, input: { ...input }, at, status: "waiting", attempts: 0 }], assessments: [item, ...c.assessments] }), id, generation);
@@ -159,7 +162,9 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   await persist(c => ({ ...c, operations: keepLocal ? c.operations.map(o => o.id === op.id ? { ...o, id: randomUUID(), version, status: "waiting", error: undefined, serverVersion: undefined, attempts: 0 } : o) : c.operations.filter(o => o.id !== op.id) }), id, generation);
   await refresh();
  }
+ const displayed=cacheWorkspace.current===workspace?.id&&account.current===uid?cache:empty();
+ const isLoading=loading||cacheWorkspace.current!==workspace?.id||account.current!==uid;
  const connection = network.isConnected === false || network.isInternetReachable === false ? "Offline" : reachable === true ? "Server reachable" : reachable === false ? "Server unavailable or sign-in needs attention" : "Checking connection";
- return <Context.Provider value={{ enteredWorkspace: !!session && !!profile && !!workspace, loading, assessments: cache.assessments, suppliers: cache.suppliers, check, refresh, syncMessage, pendingCount: cache.pending.length + cache.operations.length, syncing, pending: cache.pending, operations: cache.operations, reviews: cache.reviews, history: cache.history, recent: cache.recent, lastSync: cache.lastSync, connection, queueSupplier: (id, version, draft) => queue("supplier", id, version, draft), queueReview: (id, version, draft) => queue("review", id, version, draft), retry, resolve, discard, name: profile?.first_name ?? "Your workspace", scale: Number(profile?.text_scale ?? 1) }}>{children}</Context.Provider>;
+ return <Context.Provider value={{ enteredWorkspace: !!session && !!profile && !!workspace, loading:isLoading, assessments: displayed.assessments, suppliers: displayed.suppliers, check, refresh, syncMessage, pendingCount: displayed.pending.length + displayed.operations.length, syncing, pending: displayed.pending, operations: displayed.operations, reviews: displayed.reviews, history: displayed.history, recent: displayed.recent, lastSync: displayed.lastSync, connection, queueSupplier: (id, version, draft) => queue("supplier", id, version, draft), queueReview: (id, version, draft) => queue("review", id, version, draft), retry, resolve, discard, name: profile?.first_name ?? "Your workspace", scale: Number(profile?.text_scale ?? 1) }}>{children}</Context.Provider>;
 }
 export function useDemo() { const value = useContext(Context); if (!value) throw Error("Missing workspace provider"); return value; }
