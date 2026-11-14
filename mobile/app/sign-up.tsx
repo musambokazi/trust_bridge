@@ -2,7 +2,9 @@ import React, { useRef, useState } from "react";
 import { FlatList, InputAccessoryView, Keyboard, Modal, Platform, Pressable, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Eyebrow, Heading, Icon, Input, Muted, Page, ScreenHeader, Txt } from "../src/components/ui";
+import { Button, Icon, Input, Muted, Txt } from "../src/components/ui";
+import { TermsConsent } from "../src/auth/TermsConsent";
+import { AuthFrame, auth } from "../src/auth/AuthFrame";
 import { defaultPhoneRegion, normalizePhone, phoneRegions } from "../src/domain/phone";
 import * as Linking from "expo-linking";
 import { supabase, secureStorage } from "../src/backend/client";
@@ -115,17 +117,21 @@ export default function SignUp() {
     finally { setBusy(false); }
   }
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScreenHeader back title="Create an account" />
-      <Page style={{ paddingBottom: 32 }}>
-        <View style={{ gap: 12 }}>
-          <Eyebrow>STEP {step + 1} OF {reviewStep + 1}</Eyebrow>
-          <Heading>{step === 0 ? "Choose your account type" : step === passwordStep ? "Set a password" : step === reviewStep ? "Review your details" : titles[step - 1]}</Heading>
-          <Muted>Your details are saved to your private account after email verification. Company registration does not grant access to another company’s workspace.</Muted>
-        </View>
-        {step === 0 && <View style={{ gap: 10 }}>
-          {(["individual", "company"] as const).map((value) => <Button key={value} title={value === "company" ? "Company" : "Individual"} secondary={kind !== value} icon={kind === value ? "checkmark" : undefined} onPress={() => { if (kind !== value) { setData({}); setPhoneCountries({}); } setKind(value); }} />)}
-          <Muted>{kind === "company" ? "For a registered business and its authorised contact." : "For a person using TrustBridge in their own name."}</Muted>
+    <>
+      <AuthFrame
+        back
+        eyebrow={kind === "company" ? "YOUR BUSINESS STARTS HERE" : "A CLEARER WAY TO CHECK"}
+        title={step === 0 ? "Let’s get\nyou started." : step === passwordStep ? "Make it\nsecure." : step === reviewStep ? "Ready when\nyou are." : titles[step - 1]!}
+        description={step === 0 ? "Choose how you’ll use TrustBridge. We’ll take it one step at a time." : step === passwordStep ? "Choose a strong password that only you know." : step === reviewStep ? "Check your details, then accept the terms to finish." : kind === "company" ? "Add your business details and authorised contact." : "A few details to make this workspace yours."}
+        progress={{ current: step + 1, total: reviewStep + 1 }}
+        action={!session ? { label: "Sign in", onPress: () => router.replace("/sign-in") } : undefined}
+      >
+        <Txt style={auth.formTitle}>{step === 0 ? "Choose your account type" : step === passwordStep ? "Set a password" : step === reviewStep ? "Review your details" : titles[step - 1]}</Txt>
+        {step === 0 && <View style={{ gap: 12 }}>
+          {(["individual", "company"] as const).map(value => <Pressable key={value} accessibilityRole="button" accessibilityLabel={value === "company" ? "Company" : "Individual"} accessibilityState={{ selected: kind === value }} onPress={() => { if (kind !== value) { setData({}); setPhoneCountries({}); } setKind(value); }} style={({ pressed }) => [auth.choice, kind === value && auth.choiceSelected, pressed && { opacity: 0.8 }]}>
+            <View style={auth.choiceTop}><Txt style={auth.choiceTitle}>{value === "company" ? "Company" : "Individual"}</Txt><View accessible={false} style={[auth.choiceMarker, kind === value && { borderColor: c.orange }]}>{kind === value && <View style={auth.choiceDot}/>}</View></View>
+            <Txt style={auth.choiceDescription}>{value === "company" ? "For your business, its suppliers and the people authorised to review them." : "For your own supplier checks, with a workspace in your name."}</Txt>
+          </Pressable>)}
         </View>}
         {fields.map((field, index) => {
           const following = fields[index + 1];
@@ -180,20 +186,19 @@ export default function SignUp() {
           <Txt>{kind === "company" ? "Company account" : "Individual account"}</Txt>
           {groups.flat().filter(({ key }) => !!data[key]?.trim()).map(({ key, label, type }) => <View key={key}><Muted>{label}</Muted><Txt>{type === "phone" ? normalizePhone(data[key] ?? "", regionFor(key)) : data[key]?.trim()}</Txt>{type === "phone" && <Muted>Country: {regionFor(key)[1]}</Muted>}</View>)}
           <Muted>Review your details before creating your account. Your phone is stored in international format.</Muted>
-          <Button secondary title="Read Privacy notice" onPress={() => router.push("/settings/privacy-notice")} />
-          <Button secondary title="Read Terms of service" onPress={() => router.push("/settings/terms")} />
-          <Button secondary title={accepted ? "Accepted privacy notice and terms" : "Accept privacy notice and terms"} onPress={() => setAccepted(!accepted)} />
+          <TermsConsent accepted={accepted} disabled={busy || submitted} onChange={value => { setAccepted(value); setError(""); }} />
         </View>}
         {submitted && <View style={{ gap: 10 }}>
           <Txt accessibilityRole="alert">Check your email to confirm your account. Then sign in to finish saving your details.</Txt>
           <Button secondary title="Go to sign in" onPress={() => router.replace("/sign-in")} />
         </View>}
-        {!!error && <Txt accessibilityRole="alert">{error}</Txt>}
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-          {step > 0 ? <Button secondary title="Previous" onPress={() => { setError(""); setStep(step - 1); }} /> : <View />}
-          {step < reviewStep ? <Button title="Next" onPress={next} /> : <Button title={session ? "Save account" : "Create account"} loading={busy} onPress={submitAccount} />}
+        {!!error && <Txt accessibilityRole="alert" style={auth.notice}>{error}</Txt>}
+        <View style={auth.nav}>
+          {step > 0 ? <View style={auth.navItem}><Button secondary title="Previous" onPress={() => { setError(""); setStep(step - 1); }} /></View> : <View />}
+          <View style={auth.navItem}>{step < reviewStep ? <Button title="Next" icon="arrow-forward" onPress={next} /> : <Button title={session ? "Save account" : "Create account"} disabled={!accepted || submitted} loading={busy} onPress={submitAccount} />}</View>
         </View>
-      </Page>
+        {step === 0 && <Txt style={auth.footnote}>Your information is saved to your private account after email verification.</Txt>}
+      </AuthFrame>
       <Modal visible={picker !== null} animationType="none" onRequestClose={() => setPicker(null)}>
         <SafeAreaView style={{ flex: 1, backgroundColor: c.bg, paddingHorizontal: 20, gap: 12 }}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
@@ -222,6 +227,6 @@ export default function SignUp() {
           />
         </SafeAreaView>
       </Modal>
-    </SafeAreaView>
+    </>
   );
 }

@@ -1,9 +1,9 @@
 import React, { useRef, useState } from "react";
 import { Pressable, TextInput, View, Platform } from "react-native";
 import { router } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { AuthFrame, auth } from "../src/auth/AuthFrame";
 import * as Linking from "expo-linking";
-import { Button, Heading, Icon, Input, Muted, Page, ScreenHeader, Txt } from "../src/components/ui";
+import { Button, Icon, Input, Muted, Txt } from "../src/components/ui";
 import { useAuth } from "../src/backend/AuthState";
 import { secureStorage, supabase } from "../src/backend/client";
 import type { AccountDraft } from "../src/backend/types";
@@ -49,33 +49,37 @@ export default function SignIn() {
     finally { setBusy(false); }
   }
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScreenHeader title="Your account" />
-      <Page>
-        <Heading>{session ? "Finish setting up your account." : "Welcome back."}</Heading>
-        {!!message && <Muted>{message}</Muted>}
-        {session ? <>
-          <Muted>You are signed in as {session.user.email}. A profile and workspace are required before you can continue.</Muted>
-          <Button title="Finish saved registration" loading={busy} onPress={async () => {
-            setBusy(true);
-            try { await finish(); if (profile && workspace) router.replace("/"); else setNotice("If setup is still incomplete, select Complete account details."); }
-            catch (error) { setNotice(error instanceof Error ? error.message : "Unable to finish setup."); }
-            finally { setBusy(false); }
-          }} />
-          <Button secondary title="Complete account details" onPress={() => router.push("/sign-up")} />
-          <Button secondary title="Sign out" onPress={() => { void signOut().catch(() => setNotice("Unable to sign out.")); }} />
-        </> : <>
-          <Input dark label="Email address" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => pass.current?.focus()} />
-          <Input ref={pass} dark label="Password" value={password} onChangeText={setPassword} autoCapitalize="none" autoComplete="current-password" captureSensitive secureTextEntry={!visible} returnKeyType="go" onSubmitEditing={login}
+    <AuthFrame
+      eyebrow="VERIFY BEFORE YOU PAY"
+      title={session ? "One last step." : "Welcome\nback."}
+      description={session ? "Finish your details to open your workspace." : "Your suppliers. Your checks. One clear place."}
+      action={!session ? { label: "Sign up", accessibilityLabel: "Create an account", onPress: () => router.push("/sign-up") } : undefined}
+    >
+      <Txt style={auth.formTitle}>{session ? "Finish setting up your account." : "Sign in to your workspace"}</Txt>
+      {!!message && <Txt style={auth.notice}>{message}</Txt>}
+      {session ? <>
+        <Muted>You are signed in as {session.user.email}. Complete your profile and workspace to continue.</Muted>
+        <Button title="Finish saved registration" loading={busy} onPress={async () => {
+          setBusy(true);
+          try { await finish(); if (profile && workspace) router.replace("/"); else setNotice("If setup is still incomplete, select Complete account details."); }
+          catch (error) { setNotice(error instanceof Error ? error.message : "Unable to finish setup."); }
+          finally { setBusy(false); }
+        }} />
+        <Button secondary title="Complete account details" onPress={() => router.push("/sign-up")} />
+        <Button secondary title="Sign out" onPress={() => { void signOut().catch(() => setNotice("Unable to sign out.")); }} />
+      </> : <>
+        <View style={auth.fields}>
+          <Input dark label="Email address" placeholder="you@company.co.za" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => pass.current?.focus()} />
+          <Input ref={pass} dark label="Password" placeholder="Enter your password" value={password} onChangeText={setPassword} autoCapitalize="none" autoComplete="current-password" captureSensitive secureTextEntry={!visible} returnKeyType="go" onSubmitEditing={login}
             suffix={<Pressable onPointerDown={event=>{if(Platform.OS==="web")event.preventDefault();}} accessibilityRole="button" accessibilityLabel={visible ? "Hide password" : "Show password"} onPress={() => { pass.current?.focus(); setVisible(!visible); }} style={{ padding: 12 }}><Icon name={visible ? "eye-off-outline" : "eye-outline"} /></Pressable>}
           />
-          <Button title="Sign in" loading={busy} onPress={login} />
-          <Button secondary title="Create an account" onPress={() => router.push("/sign-up")} />
-          <Pressable accessibilityRole="button" onPress={() => { if (!busy) void resetPassword(); }} style={{ minHeight: 44, justifyContent: "center" }}><Txt>Forgot password?</Txt></Pressable>
-          <Muted>First sign-in requires a connection. After sign-in, your last saved workspace can be opened offline on this device.</Muted>
-        </>}
-        {!!notice && <Txt accessibilityRole="alert">{notice}</Txt>}
-      </Page>
-    </SafeAreaView>
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="Forgot password?" disabled={busy} onPress={() => { void resetPassword(); }} style={{ alignSelf: "flex-end", minHeight: 44, justifyContent: "center", marginTop: -12 }}><Txt style={{ fontSize: 13 }}>Forgot password?</Txt></Pressable>
+        <Button title="Sign in" icon="arrow-forward" loading={busy} onPress={login} />
+        <View style={auth.footer}><Muted>New to TrustBridge?</Muted><Pressable accessibilityRole="button" accessibilityLabel="Go to sign up" onPress={() => router.push("/sign-up")} style={auth.footerLink}><Txt style={auth.footerLinkText}>Create an account</Txt></Pressable></View>
+        <Txt style={auth.footnote}>First sign-in needs a connection. Your saved workspace stays available offline afterwards.</Txt>
+      </>}
+      {!!notice && <Txt accessibilityRole="alert" style={auth.notice}>{notice}</Txt>}
+    </AuthFrame>
   );
 }

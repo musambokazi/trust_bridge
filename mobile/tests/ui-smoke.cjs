@@ -94,7 +94,11 @@ const server = http.createServer((req, res) => {
     await p.waitForURL("**/welcome");
     for (let i = 0; i < 3; i++) await p.getByRole("button", { name: "Next", exact: true }).click();
     await p.getByRole("button", { name: "Continue to account" }).click();
+    await p.getByRole("button", { name: "Create an account", exact: true }).waitFor();
+    if(process.env.UI_SCREENSHOT_DIR){fs.mkdirSync(process.env.UI_SCREENSHOT_DIR,{recursive:true});await p.screenshot({path:path.join(process.env.UI_SCREENSHOT_DIR,"auth-sign-in.png")});}
     await p.getByRole("button", { name: "Create an account", exact: true }).click();
+    await p.getByRole("button", { name: "Individual", exact: true }).waitFor();
+    if(process.env.UI_SCREENSHOT_DIR)await p.screenshot({path:path.join(process.env.UI_SCREENSHOT_DIR,"auth-account-type.png")});
     const next = () => p.getByRole("button", { name: "Next", exact: true }).click();
     const fill = async (entries) => { for (const [label, value] of entries) await p.getByLabel(label, { exact: true }).filter({ visible: true }).fill(value); };
     await next();
@@ -117,7 +121,15 @@ const server = http.createServer((req, res) => {
     await fill([["Password", "StrongPass123!"], ["Confirm password", "StrongPass123!"]]);
     await next();
     await p.getByText("+27820000000", { exact: true }).waitFor();
-    await p.getByRole("button", { name: "Accept privacy notice and terms", exact: true }).click();
+    if(process.env.UI_SCREENSHOT_DIR)await p.screenshot({path:path.join(process.env.UI_SCREENSHOT_DIR,"auth-review.png")});
+    const consent = p.getByRole("checkbox", { name: "I accept the Terms of Service and acknowledge the Privacy Notice", exact: true });
+    assert.equal(await consent.getAttribute("aria-checked"), "false");
+    assert.equal(await p.getByRole("button", { name: "Create account", exact: true }).isDisabled(), true);
+    await consent.click();
+    assert.equal(await consent.getAttribute("aria-checked"), "true");
+    await consent.click();
+    assert.equal(await p.getByRole("button", { name: "Create account", exact: true }).isDisabled(), true);
+    await consent.click();
     await p.getByRole("button", { name: "Create account", exact: true }).click();
     await p.getByRole("button", { name: "Go to sign in" }).click();
     assert.equal(signups, 1);
