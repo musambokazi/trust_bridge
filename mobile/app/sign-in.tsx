@@ -9,7 +9,7 @@ import { secureStorage, supabase } from "../src/backend/client";
 import type { AccountDraft } from "../src/backend/types";
 
 export default function SignIn() {
-  const { session, profile, workspace, completeAccount, signOut, refresh, message } = useAuth();
+  const { session, completeAccount, signOut, refresh, message } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
@@ -19,11 +19,13 @@ export default function SignIn() {
   async function finish() {
     const saved = await secureStorage.getItem("registration-draft");
     if (saved) {
-      const draft = JSON.parse(saved) as AccountDraft;
+      let draft: AccountDraft;
+      try { draft = JSON.parse(saved) as AccountDraft; }
+      catch { throw Error("Saved registration could not be read. Select Complete account details to continue."); }
       const { data } = await supabase.auth.getUser();
-      if (data.user?.email?.toLowerCase() === draft.email.toLowerCase()) await completeAccount(draft);
+      if (typeof draft?.email === "string" && data.user?.email?.toLowerCase() === draft.email.toLowerCase()) await completeAccount(draft);
     }
-    await refresh();
+    return refresh();
   }
   async function login() {
     if (busy) return;
@@ -60,13 +62,14 @@ export default function SignIn() {
       {session ? <>
         <Muted>You are signed in as {session.user.email}. Complete your profile and workspace to continue.</Muted>
         <Button title="Finish saved registration" loading={busy} onPress={async () => {
-          setBusy(true);
-          try { await finish(); if (profile && workspace) router.replace("/"); else setNotice("If setup is still incomplete, select Complete account details."); }
+          if (busy) return;
+          setBusy(true); setNotice("");
+          try { if (await finish()) router.replace("/"); else setNotice("No complete account could be loaded. Check your connection or select Complete account details."); }
           catch (error) { setNotice(error instanceof Error ? error.message : "Unable to finish setup."); }
           finally { setBusy(false); }
         }} />
-        <Button secondary title="Complete account details" onPress={() => router.push("/sign-up")} />
-        <Button secondary title="Sign out" onPress={() => { void signOut().catch(() => setNotice("Unable to sign out.")); }} />
+        <Button secondary title="Complete account details" disabled={busy} onPress={() => router.push("/sign-up")} />
+        <Button secondary title="Sign out" disabled={busy} onPress={() => { void signOut().catch(() => setNotice("Unable to sign out.")); }} />
       </> : <>
         <View style={auth.fields}>
           <Input dark label="Email address" placeholder="you@company.co.za" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => pass.current?.focus()} />

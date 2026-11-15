@@ -21,7 +21,7 @@ const server = http.createServer((req, res) => {
     p.setDefaultTimeout(20_000);
     const errors = []; p.on("pageerror", (error) => errors.push(error.message));
     const uid = "11111111-1111-4111-8111-111111111111", wid = "22222222-2222-4222-8222-222222222222";
-    let profile = null, workspace = null, suppliers = [], results = [], reviews = [], audit = [], offline = false, signups = 0;
+    let profile = null, workspace = null, suppliers = [], results = [], reviews = [], audit = [], offline = false, signups = 0, workspaceAttempts = 0, failFirstWorkspaceReload = true;
     const receipts = new Map();
     const {ml_dsa65}=await import('@noble/post-quantum/ml-dsa.js');
     const {canonical,hash}=await import('../src/reports/integrity.ts');
@@ -44,7 +44,16 @@ const server = http.createServer((req, res) => {
         if (req.method() === "PATCH") profile = { ...profile, ...body };
         json = profile ? [profile] : [];
       } else if (url.pathname === "/rest/v1/workspaces") {
-        if (req.method() === "POST") { assert.equal(url.searchParams.has("on_conflict"), false); workspace = { ...body, id: wid }; }
+        if (req.method() === "GET" && workspace && url.searchParams.get("select") === "*" && failFirstWorkspaceReload) {
+          failFirstWorkspaceReload = false;
+          await route.fulfill({status:403,contentType:"application/json",body:JSON.stringify({message:"Workspace reload denied"})}); return;
+        }
+        if (req.method() === "POST") {
+          assert.equal(url.searchParams.has("on_conflict"), false);
+          workspaceAttempts++;
+          if (workspaceAttempts <= 2) { await route.fulfill({status:403,contentType:"application/json",body:JSON.stringify({code:"42501",message:"Workspace save failed"})}); return; }
+          workspace = { ...body, id: wid };
+        }
         if (req.method() === "PATCH") { assert.equal(url.searchParams.get("id"), "eq." + wid); workspace = { ...workspace, ...body }; }
         if (url.searchParams.get("select") === "id") { json = workspace ? { id: wid } : null; } else
         json = workspace ? [workspace] : [];
@@ -150,7 +159,23 @@ const server = http.createServer((req, res) => {
     await p.waitForFunction(() => Array.from(document.querySelectorAll('input[aria-label="Password"]')).filter(el => el.offsetParent !== null).every(el => el.type === "password"));
     assert.equal(await p.getByLabel("Email address", { exact: true }).filter({ visible: true }).evaluate(el => el.type), "email");
     await p.getByRole("button", { name: "Sign in", exact: true }).click();
+    await p.getByRole("alert").filter({hasText:"Could not save workspace details"}).waitFor();
+    assert.equal(signups, 1);
+    assert.ok(await p.evaluate(() => sessionStorage.getItem("registration-draft")));
+    // An interrupted registration must survive relaunch and a failed retry.
+    await p.reload();
+    await p.getByRole("button", { name: "Finish saved registration", exact: true }).click();
+    await p.getByRole("alert").filter({hasText:"Could not save workspace details"}).waitFor();
+    assert.equal(workspaceAttempts, 2);
+    assert.ok(await p.evaluate(() => sessionStorage.getItem("registration-draft")));
+    await p.getByRole("button", { name: "Finish saved registration", exact: true }).click();
+    await p.getByRole("alert").filter({hasText:"Your details were saved, but could not be loaded"}).waitFor();
+    assert.ok(await p.evaluate(() => sessionStorage.getItem("registration-draft")));
+    await p.getByRole("button", { name: "Finish saved registration", exact: true }).click();
     await p.getByText("Good to see you, Test.", { exact: true }).waitFor();
+    assert.equal(workspaceAttempts, 3);
+    assert.equal(signups, 1);
+    assert.equal(await p.evaluate(() => sessionStorage.getItem("registration-draft")), null);
     assert.equal(profile.phone, "+27820000000");
     assert.equal(workspace.kind, "individual");
     const tabs = () => p.getByRole("tablist").last();

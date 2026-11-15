@@ -9,7 +9,7 @@ type Auth = {
   session: Session | null; ready: boolean; accountReady: boolean; profile: Profile | null; workspace: Workspace | null;
   workspaces: Workspace[]; switchWorkspace: (id: string) => Promise<void>;
   message: string; avatarUrl: string | null;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<boolean>;
   saveProfile: (changes: Partial<Profile>) => Promise<void>;
   completeAccount: (draft: AccountDraft) => Promise<void>;
   signOut: () => Promise<void>;
@@ -29,18 +29,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const uid = session?.user.id;
   async function refresh() {
     const id = currentId.current;
-    if (!id) return;
+    if (!id) return false;
     const [p, w] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", id).maybeSingle(),
       supabase.from("workspaces").select("*").order("name"),
     ]);
-    if (currentId.current !== id) return;
-    if (p.error || w.error) { setMessage("Connection unavailable. Showing your last saved account information."); return; }
+    if (currentId.current !== id) return false;
+    if (p.error || w.error) { setMessage("Connection unavailable. Showing your last saved account information."); return false; }
     const list=w.data??[];
     const selected=list.find(v=>v.id===activeWorkspace.current)??list.find(v=>v.owner_id===id)??list[0]??null;
     let selectedRole="viewer";
     if(selected){const role=await supabase.rpc("workspace_role",{wid:selected.id});selectedRole=typeof role.data==="string"?role.data:selected.owner_id===id?"owner":"viewer";}
-    if(currentId.current!==id)return;
+    if(currentId.current!==id)return false;
     const chosen=selected?{...selected,role:selectedRole as Workspace["role"]}:null;
     activeWorkspace.current=chosen?.id??null;
     setProfile(p.data);setWorkspace(chosen);setWorkspaces(list);setMessage("");
@@ -49,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const signed = await supabase.storage.from("avatars").createSignedUrl(p.data.avatar_path, 300);
       if (currentId.current === id) setAvatarUrl(signed.data?.signedUrl ?? null);
     } else setAvatarUrl(null);
+    return currentId.current === id && !!p.data && !!chosen;
   }
   useEffect(() => {
     let active = true;
@@ -99,8 +100,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (p.error) throw Error(p.error.code === "23505" ? "That username is taken. Choose another." : "Could not save profile details.");
     const w = await saveRegistrationWorkspace(supabase, id, draft.workspace);
     if (w.error) throw Error("Could not save workspace details. You can retry without creating another account.");
+    if (!await refresh()) throw Error("Your details were saved, but could not be loaded. Reconnect and retry Finish saved registration.");
     await secureStorage.removeItem("registration-draft");
-    await refresh();
   }
   async function switchWorkspace(nextId:string){
     const id=currentId.current;if(!id)throw Error("Sign in first.");
