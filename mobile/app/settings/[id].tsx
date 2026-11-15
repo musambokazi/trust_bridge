@@ -10,6 +10,7 @@ import { chooseAvatar } from "../../src/backend/avatar";
 import { useDemo } from "../../src/state/DemoState";
 import { useDeviceSecurity } from "../../src/security/DeviceSecurity";
 import { color as c } from "../../src/theme";
+import { SelectField } from "../../src/components/SelectField";
 
 function goBack() {
   if (router.canGoBack()) router.back();
@@ -25,8 +26,8 @@ function TextLink({ title, description, onPress }: { title: string; description:
       onPress={onPress}
       style={({ pressed }) => [layout.textLink, pressed && { opacity: 0.7 }]}
     >
-      <Txt style={layout.linkLabel}>{title}</Txt>
-      <Muted>{description}</Muted>
+      <View style={{ flex: 1, gap: 4 }}><Txt style={layout.linkLabel}>{title}</Txt><Muted>{description}</Muted></View>
+      <Icon name="chevron-forward" color={c.muted} size={16}/>
     </Pressable>
   );
 }
@@ -123,11 +124,7 @@ export default function SettingScreen() {
         {id === "display" && (
           <>
             <Muted>Adjust the body text to suit you.</Muted>
-            <View style={layout.scale}>
-              <Button secondary title="A−" disabled={busy || scale <= 0.85} onPress={() => { void act(() => saveProfile({ text_scale: Math.max(0.85, +(scale - 0.05).toFixed(2)) })); }} />
-              <Txt accessibilityLiveRegion="polite">{Math.round(scale * 100)}%</Txt>
-              <Button secondary title="A+" disabled={busy || scale >= 1.3} onPress={() => { void act(() => saveProfile({ text_scale: Math.min(1.3, +(scale + 0.05).toFixed(2)) })); }} />
-            </View>
+            <SelectField label="Text size" value={String(Math.round(scale * 100))} options={Array.from({length:10},(_,index)=>{const value=String(85+index*5);return {label:value+"%",value};})} disabled={busy} onChange={value=>{void act(()=>saveProfile({text_scale:Number(value)/100}));}}/>
             <Txt>Sample text: Review invoice details before making a payment.</Txt>
           </>
         )}
@@ -149,7 +146,7 @@ const layout = StyleSheet.create({
   back: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
   title: { flex: 1, fontSize: 21, lineHeight: 28, fontWeight: "600" },
   page: { paddingTop: 16, paddingBottom: 32 },
-  textLink: { minHeight: 48, justifyContent: "center", gap: 4 },
+  textLink: { minHeight: 68, flexDirection: "row", alignItems: "center", gap: 16, paddingVertical: 14, borderBottomWidth: 1, borderColor: c.line },
   linkLabel: { fontWeight: "600" },
   section: { gap: 6, borderTopWidth: 1, borderColor: c.line, paddingTop: 16 },
   sectionTitle: { fontWeight: "600" },

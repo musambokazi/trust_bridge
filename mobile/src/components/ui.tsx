@@ -80,6 +80,12 @@ export function Page({
 export function Eyebrow({ children }: { children: React.ReactNode }) {
   return <Txt style={styles.eyebrow}>{children}</Txt>;
 }
+export function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return <View style={{ gap: 16, borderTopWidth: 1, borderColor: c.line, paddingTop: 20, marginTop: 4 }}>
+    <Txt accessibilityRole="header" style={{ fontSize: 16, fontWeight: "600" }}>{title}</Txt>
+    {children}
+  </View>;
+}
 export function Heading({ children }: { children: React.ReactNode }) {
   return (
     <Txt accessibilityRole="header" style={styles.heading}>

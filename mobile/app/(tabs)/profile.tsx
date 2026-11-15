@@ -13,7 +13,14 @@ import {
 import { useAuth } from "../../src/backend/AuthState";
 import { useDemo } from "../../src/state/DemoState";
 import { color as c } from "../../src/theme";
-import { settings, profileSettings } from "../../src/settings";
+import { settings } from "../../src/settings";
+
+const groups = [
+  { title: "Account & security", items: ["account", "security"] },
+  { title: "Workspace & data", items: ["workspace", "sync"] },
+  { title: "Preferences", items: ["display"] },
+  { title: "Help & legal", items: ["privacy", "about"] },
+] as const;
 
 function SettingsRow({
   title, description, icon, onPress,
@@ -39,7 +46,7 @@ function SettingsRow({
         <Txt style={{ fontSize: 17 * scale, lineHeight: 23 * scale }}>
           {title}
         </Txt>
-        <Muted>{description}</Muted>
+        <Txt style={{ color: c.muted, fontSize: 12 * scale, lineHeight: 18 * scale }}>{description}</Txt>
       </View>
       <Icon name="chevron-forward" size={16} color={c.muted} />
     </Pressable>
@@ -70,8 +77,10 @@ export default function Profile() {
             <Muted>{workspace?.name} · {workspace?.kind === "company" ? "Company" : "Individual"}</Muted>
           </View>
         </View>
-        <SettingsRow title="Sync centre" description="Pending work, conflicts and last successful sync" icon="sync-outline" onPress={() => router.push("/sync")} />
-        {profileSettings.map((id) => (
+        {groups.map(group => <View key={group.title} style={layout.group}>
+          <Txt accessibilityRole="header" style={layout.groupTitle}>{group.title}</Txt>
+          <View style={layout.groupBody}>{group.items.map((id, index) => <View key={id} style={index ? layout.divider : undefined}>
+          {id === "sync" ? <SettingsRow title="Sync centre" description="Pending work, conflicts and last successful sync" icon="sync-outline" onPress={() => router.push("/sync")} /> : (
           <SettingsRow
             key={id}
             title={settings[id].title}
@@ -79,7 +88,8 @@ export default function Profile() {
             icon={settings[id].icon}
             onPress={() => router.push({ pathname: "/settings/[id]", params: { id } })}
           />
-        ))}
+          )}</View>)}</View>
+        </View>)}
         <View style={layout.footer}><DemoNote /></View>
       </Page>
     </>
@@ -87,12 +97,16 @@ export default function Profile() {
 }
 
 const layout = StyleSheet.create({
-  profile: { flexDirection: "row", alignItems: "center", gap: 16, margin: 12, marginBottom: 18, padding: 16, borderWidth: 1, borderColor: c.line, backgroundColor: c.surface, borderRadius: 20 },
+  profile: { flexDirection: "row", alignItems: "center", gap: 16, marginBottom: 26, padding: 18, borderWidth: 1, borderColor: c.line, backgroundColor: c.surface, borderRadius: 20 },
   avatar: { width: 58, height: 58, borderRadius: 29, backgroundColor: c.bg, alignItems: "center", justifyContent: "center" },
   camera: { position: "absolute", right: -3, bottom: -3, width: 24, height: 24, borderRadius: 12, backgroundColor: c.orange, alignItems: "center", justifyContent: "center" },
   title: { fontSize: 22, lineHeight: 28, fontWeight: "600" },
-  page: { gap: 0, paddingTop: 0, paddingHorizontal: 12 },
-  row: { flexDirection: "row", alignItems: "center", gap: 16, minHeight: 76, paddingHorizontal: 12, paddingVertical: 12, borderRadius: 12 },
+  page: { gap: 0, paddingTop: 16, paddingHorizontal: 20 },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, minHeight: 76, paddingHorizontal: 14, paddingVertical: 14 },
+  group: { gap: 10, marginBottom: 24 },
+  groupTitle: { fontSize: 13, color: c.muted, fontWeight: "600", paddingHorizontal: 4 },
+  groupBody: { backgroundColor: c.surface, borderRadius: 18, overflow: "hidden", borderWidth: 1, borderColor: c.line },
+  divider: { borderTopWidth: 1, borderColor: c.line },
   icon: { width: 32, alignItems: "center" },
   copy: { flex: 1, gap: 3 },
   pressed: { backgroundColor: c.surface },
