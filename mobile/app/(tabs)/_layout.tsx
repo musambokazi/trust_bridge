@@ -6,11 +6,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { FloatingMenu } from "../../src/components/FloatingMenu";
 import { color as c } from "../../src/theme";
 import { useDemo } from "../../src/state/DemoState";
+import { useExitOnBack } from "../../src/navigation/useExitOnBack";
 export default function TabsLayout() {
-  const { ready, accountReady, session, profile, workspace } = useAuth();
+  const { ready, accountReady, session, profile, workspace, hasSeenWelcome } = useAuth();
+  useExitOnBack();
   const { loading } = useDemo();
   if (!ready || !accountReady) return <View style={{ flex: 1, justifyContent: "center" }}><ActivityIndicator color={c.orange} /></View>;
-  if (!session) return <Redirect href="/welcome" />;
+  if (!session) return <Redirect href={hasSeenWelcome ? "/sign-in" : "/welcome"} />;
   if (!profile || !workspace) return <Redirect href="/sign-in" />;
   return (
     <SafeAreaView

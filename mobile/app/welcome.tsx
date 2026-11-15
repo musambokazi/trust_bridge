@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Page, ScreenHeader, Txt } from "../src/components/ui";
 import { color as c } from "../src/theme";
+import { useAuth } from "../src/backend/AuthState";
 
 const slides = [
   { title: "Check before you pay.", body: "TrustBridge helps you review a supplier invoice before money leaves your account.", image: require("../assets/welcome/invoice.png") },
@@ -13,6 +14,7 @@ const slides = [
 ] as const;
 
 export default function Welcome() {
+  const { completeWelcome } = useAuth();
   const [step, setStep] = useState(0);
   const [width, setWidth] = useState(0);
   const [reduced, setReduced] = useState(false);
@@ -77,7 +79,7 @@ export default function Welcome() {
           {step > 0 ? <Pressable accessibilityRole="button" disabled={from !== null} onPress={() => move(step - 1)} style={styles.previous}>
             <Txt>Previous</Txt>
           </Pressable> : <View />}
-          <Pressable accessibilityRole="button" disabled={!width || from !== null} onPress={() => last ? router.push("/sign-in") : move(step + 1)} style={styles.next}>
+          <Pressable accessibilityRole="button" disabled={!width || from !== null} onPress={() => last ? void completeWelcome().then(() => router.replace("/sign-in")) : move(step + 1)} style={styles.next}>
             <Txt style={{ color: c.ink, fontWeight: "700" }}>{last ? "Continue to account" : "Next"}</Txt>
           </Pressable>
         </View>

@@ -111,6 +111,9 @@ const server = http.createServer((req, res) => {
     for (let i = 0; i < 3; i++) await p.getByRole("button", { name: "Next", exact: true }).click();
     await p.getByRole("button", { name: "Continue to account" }).click();
     await p.getByRole("button", { name: "Create an account", exact: true }).waitFor();
+    assert.equal(await p.evaluate(() => sessionStorage.getItem("welcome-completed")), "yes");
+    await p.reload();
+    await p.getByRole("button", { name: "Create an account", exact: true }).waitFor();
     if(process.env.UI_SCREENSHOT_DIR){fs.mkdirSync(process.env.UI_SCREENSHOT_DIR,{recursive:true});await p.screenshot({path:path.join(process.env.UI_SCREENSHOT_DIR,"auth-sign-in.png")});}
     await p.getByRole("button", { name: "Create an account", exact: true }).click();
     await p.getByRole("button", { name: "Individual", exact: true }).waitFor();
@@ -189,6 +192,17 @@ const server = http.createServer((req, res) => {
     assert.equal(await p.evaluate(() => sessionStorage.getItem("registration-draft")), null);
     assert.equal(profile.phone, "+27820000000");
     assert.equal(workspace.kind, "individual");
+    // Reopening an old auth URL or pressing browser Back cannot reopen onboarding.
+    const origin = new URL(p.url()).origin;
+    for (const route of ["/welcome", "/sign-in", "/sign-up"]) {
+      await p.goto(origin + route);
+      await p.getByText("Good to see you, Test.", { exact: true }).waitFor();
+      assert.equal(await p.getByRole("button", { name: "Create an account", exact: true }).count(), 0);
+    }
+    await p.goBack();
+    await p.getByText("Good to see you, Test.", { exact: true }).waitFor();
+    await p.reload();
+    await p.getByText("Good to see you, Test.", { exact: true }).waitFor();
     if (process.env.UI_DUPLICATE_SIGNUP) {
       console.log("PASS: existing-account signup recovery prefills sign-in, retains the draft across failed saves and reload, finishes the workspace and opens Home without another signup.");
       return;

@@ -13,12 +13,15 @@ type Auth = {
   saveProfile: (changes: Partial<Profile>) => Promise<void>;
   completeAccount: (draft: AccountDraft) => Promise<void>;
   signOut: () => Promise<void>;
+  hasSeenWelcome: boolean; completeWelcome: () => Promise<void>;
 };
 const Context = createContext<Auth | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [accountReady, setAccountReady] = useState(false);
   const [ready, setReady] = useState(false);
+  const [welcomeReady, setWelcomeReady] = useState(false);
+  const [hasSeenWelcome, setHasSeenWelcome] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [workspaces,setWorkspaces]=useState<Workspace[]>([]);const activeWorkspace=useRef<string|null>(null);
@@ -53,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
   useEffect(() => {
     let active = true;
+    void secureStorage.getItem("welcome-completed").then(value => { if (active) setHasSeenWelcome(value === "yes"); }).catch(() => {}).finally(() => { if (active) setWelcomeReady(true); });
     void supabase.auth.getSession().then(({ data, error }) => {
       if (active) { setSession(data.session); setMessage(error ? "Session could not be restored. Please sign in." : ""); setReady(true); }
     }).catch(() => { if (active) { setReady(true); setMessage("Could not read the saved session."); } });
@@ -65,6 +69,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     return () => { active = false; data.subscription.unsubscribe(); app.remove(); };
   }, []);
+  async function completeWelcome() {
+    try { await secureStorage.setItem("welcome-completed", "yes"); }
+    catch { setMessage("Your welcome preference could not be saved on this device."); }
+    setHasSeenWelcome(true);
+  }
   useEffect(() => {
     currentId.current = uid ?? null;
     setProfile(null); setWorkspace(null);setWorkspaces([]);activeWorkspace.current=null; setAvatarUrl(null); setAccountReady(false);
@@ -126,7 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     setProfile(null); setWorkspace(null); setAvatarUrl(null);
   }
-  return <Context.Provider value={{ session, ready, accountReady, profile, workspace, message, avatarUrl, refresh, saveProfile, completeAccount, signOut, workspaces, switchWorkspace }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ session, ready: ready && welcomeReady, accountReady, profile, workspace, message, avatarUrl, refresh, saveProfile, completeAccount, signOut, workspaces, switchWorkspace, hasSeenWelcome, completeWelcome }}>{children}</Context.Provider>;
 }
 export function useAuth() {
   const context = useContext(Context);
