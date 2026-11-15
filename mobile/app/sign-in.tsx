@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Pressable, TextInput, View, Platform } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { AuthFrame, auth } from "../src/auth/AuthFrame";
 import * as Linking from "expo-linking";
 import { Button, Icon, Input, Muted, Txt } from "../src/components/ui";
@@ -10,7 +10,8 @@ import type { AccountDraft } from "../src/backend/types";
 
 export default function SignIn() {
   const { session, completeAccount, signOut, refresh, message } = useAuth();
-  const [email, setEmail] = useState("");
+  const params = useLocalSearchParams<{ email?: string }>();
+  const [email, setEmail] = useState(typeof params.email === "string" ? params.email : "");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const [notice, setNotice] = useState("");

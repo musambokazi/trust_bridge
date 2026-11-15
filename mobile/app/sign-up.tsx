@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Icon, Input, Muted, Txt } from "../src/components/ui";
 import { TermsConsent } from "../src/auth/TermsConsent";
+import { registrationError } from "../src/auth/registrationError";
 import { AuthFrame, auth } from "../src/auth/AuthFrame";
 import { defaultPhoneRegion, normalizePhone, phoneRegions } from "../src/domain/phone";
 import * as Linking from "expo-linking";
@@ -45,6 +46,7 @@ export default function SignUp() {
   const [visible, setVisible] = useState(false);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [error, setError] = useState("");
+  const [signInRecovery, setSignInRecovery] = useState(false);
   const groups = kind === "company" ? company : individual;
   const titles = kind === "company" ? ["Company details", "Business contacts", "Business activity"] : ["Personal details", "Contact details"];
   const passwordStep = groups.length + 1;
@@ -72,14 +74,15 @@ export default function SignUp() {
       return;
     }
     if (step === passwordStep) { setVisible(false); setConfirmationVisible(false); }
-    setError("");
+    setError(""); setSignInRecovery(false);
     Keyboard.dismiss();
     setStep(step + 1);
   }
   async function submitAccount() {
     if (busy || submitted) return;
     if (!accepted) { setError("Read and accept the privacy notice and terms before creating your account."); return; }
-    setBusy(true); setError("");
+    if (!session && (score !== rules.length || confirmation !== password)) { setStep(passwordStep); setError("Enter matching passwords that meet all four requirements."); return; }
+    setBusy(true); setError(""); setSignInRecovery(false);
     try {
       const phone = normalizePhone(data.phone ?? "", regionFor("phone"));
       const username = (data.username ?? "").trim().toLowerCase();
@@ -108,8 +111,13 @@ export default function SignUp() {
         const result = await supabase.auth.signUp({
           email, password, options: { emailRedirectTo: Linking.createURL("auth-callback") },
         });
+        if (result.error) {
+          const recovery = registrationError(result.error);
+          setSignInRecovery(recovery.action === "sign-in");
+          if (recovery.action === "password") setStep(passwordStep);
+          throw Error(recovery.message);
+        }
         setPassword(""); setConfirmation("");
-        if (result.error) throw Error("Registration could not be completed. Try again later or sign in if you already have an account.");
         if (result.data.session) { await completeAccount(draft); router.replace("/"); }
         else setSubmitted(true);
       }
@@ -192,9 +200,10 @@ export default function SignUp() {
           <Button secondary title="Go to sign in" onPress={() => router.replace("/sign-in")} />
         </View>}
         {!!error && <Txt accessibilityRole="alert" style={auth.notice}>{error}</Txt>}
+        {signInRecovery && <Button title="Sign in to finish setup" onPress={() => router.replace({ pathname: "/sign-in", params: { email: (data.email ?? "").trim().toLowerCase() } })} />}
         <View style={auth.nav}>
           {step > 0 ? <View style={auth.navItem}><Button secondary title="Previous" onPress={() => { setError(""); setStep(step - 1); }} /></View> : <View />}
-          <View style={auth.navItem}>{step < reviewStep ? <Button title="Next" icon="arrow-forward" onPress={next} /> : <Button title={session ? "Save account" : "Create account"} disabled={!accepted || submitted} loading={busy} onPress={submitAccount} />}</View>
+          <View style={auth.navItem}>{step < reviewStep ? <Button title="Next" icon="arrow-forward" onPress={next} /> : <Button title={session ? "Save account" : "Create account"} disabled={!accepted || submitted || signInRecovery} loading={busy} onPress={submitAccount} />}</View>
         </View>
         {step === 0 && <Txt style={auth.footnote}>Your information is saved to your private account after email verification.</Txt>}
       </AuthFrame>

@@ -35,7 +35,11 @@ const server = http.createServer((req, res) => {
       if (offline) { await route.abort("internetdisconnected"); return; }
       const req = route.request(), url = new URL(req.url()), body = req.postDataJSON();
       let json = {}, status = 200;
-      if (url.pathname === "/auth/v1/signup") { signups++; json = { user: { ...user, email_confirmed_at: null }, session: null }; }
+      if (url.pathname === "/auth/v1/signup") {
+        signups++;
+        if (process.env.UI_DUPLICATE_SIGNUP) { status = 422; json = { code: "user_already_exists", msg: "User already registered" }; }
+        else json = { user: { ...user, email_confirmed_at: null }, session: null };
+      }
       else if (url.pathname === "/auth/v1/token") json = { access_token: token, refresh_token: "test-refresh", expires_in: 3600, token_type: "bearer", user };
       else if (url.pathname === "/auth/v1/user") json = user;
       else if (url.pathname === "/auth/v1/logout") json = {};
@@ -147,7 +151,14 @@ const server = http.createServer((req, res) => {
     assert.equal(await p.getByRole("button", { name: "Create account", exact: true }).isDisabled(), true);
     await consent.click();
     await p.getByRole("button", { name: "Create account", exact: true }).click();
-    await p.getByRole("button", { name: "Go to sign in" }).click();
+    if (process.env.UI_DUPLICATE_SIGNUP) {
+      await p.getByRole("alert").filter({hasText:"An account already exists for this email"}).waitFor();
+      assert.ok(await p.evaluate(() => sessionStorage.getItem("registration-draft")));
+      assert.equal(await p.getByRole("button", { name: "Create account", exact: true }).isDisabled(), true);
+      await p.getByRole("button", { name: "Sign in to finish setup", exact: true }).click();
+      await p.waitForURL("**/sign-in?email=*");
+      assert.equal(await p.getByLabel("Email address", { exact: true }).filter({ visible: true }).inputValue(), "qa@example.com");
+    } else await p.getByRole("button", { name: "Go to sign in" }).click();
     assert.equal(signups, 1);
     await fill([["Email address", "qa@example.com"], ["Password", "StrongPass123!"]]);
     await p.getByRole("button", { name: "Show password", exact: true }).click();
@@ -178,6 +189,10 @@ const server = http.createServer((req, res) => {
     assert.equal(await p.evaluate(() => sessionStorage.getItem("registration-draft")), null);
     assert.equal(profile.phone, "+27820000000");
     assert.equal(workspace.kind, "individual");
+    if (process.env.UI_DUPLICATE_SIGNUP) {
+      console.log("PASS: existing-account signup recovery prefills sign-in, retains the draft across failed saves and reload, finishes the workspace and opens Home without another signup.");
+      return;
+    }
     const tabs = () => p.getByRole("tablist").last();
     await tabs().getByRole("tab", { name: "Suppliers", exact: true }).click();
     await p.getByRole("button", { name: "Add supplier" }).click();
