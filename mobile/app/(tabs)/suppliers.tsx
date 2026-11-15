@@ -1,5 +1,6 @@
+import { FocusInput as TextInput } from "../../src/components/KeyboardScroll";
 import React, { useState } from "react";
-import { Pressable, TextInput, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { router } from "expo-router";
 import {
   DemoNote,

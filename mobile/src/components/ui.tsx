@@ -1,12 +1,11 @@
 import React from "react";
+import { KeyboardScroll } from "./KeyboardScroll";
 import { AuthKeyboardContext } from "../auth/keyboard";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
   Image,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -63,18 +62,7 @@ export function Page({
   style?: StyleProp<ViewStyle>;
 }) {
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        contentContainerStyle={[styles.page, style]}
-      >
-        {children}
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <KeyboardScroll contentContainerStyle={[styles.page, style]}>{children}</KeyboardScroll>
   );
 }
 export function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -223,6 +211,7 @@ export const Input = React.forwardRef<
           ref={localRef}
           secureTextEntry={captureSensitive ? props.secureTextEntry !== false || !protectedFocus : props.secureTextEntry}
           onFocus={(event) => { protect(); revealInput(localRef.current); onFocus?.(event); }}
+          onContentSizeChange={event => { if (localRef.current?.isFocused()) revealInput(localRef.current); props.onContentSizeChange?.(event); }}
           onBlur={(event) => { release(); onBlur?.(event); }}
           accessibilityLabel={label}
           placeholderTextColor={dark ? c.muted : "#757B80"}

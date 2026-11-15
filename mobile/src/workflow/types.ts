@@ -11,6 +11,7 @@ export function validateReview(draft: ReviewDraft) {
   return "";
 }
 export function validateSupplierEdit(draft: SupplierEdit) {
+  if (draft.category === "Other") return "Enter your custom category before saving.";
   if (!draft.name.trim() || draft.name.length > 160 || draft.category.length > 100 || draft.registration.length > 100 || draft.contact.length > 254) return "Check the supplier fields and their lengths.";
   if (draft.bank_reference !== undefined && (draft.bank_reference.trim().length < 4 || draft.bank_reference.length > 80)) return "Use a bank reference between 4 and 80 characters, or leave it empty to keep the current reference.";
   if (draft.reason.trim().length < 5 || draft.reason.length > 500) return "Explain the change in 5 to 500 characters.";

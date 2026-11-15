@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef } from "react";
-import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, View, type TextInput } from "react-native";
-import { AuthKeyboardContext } from "./keyboard";
+import React from "react";
+import { Pressable, StyleSheet, View } from "react-native";
+import { KeyboardScroll } from "../components/KeyboardScroll";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Brand, Txt } from "../components/ui";
@@ -19,34 +19,8 @@ type Props = {
 /** One scroll surface keeps the hero and focused fields together on small phones. */
 export function AuthFrame({ title, description, eyebrow, back, action, progress, children }: Props) {
   const insets = useSafeAreaInsets();
-  const scroll = useRef<React.ComponentRef<typeof ScrollView>>(null);
-  const focused = useRef<React.ComponentRef<typeof TextInput> | null>(null);
-  const offset = useRef(0);
-  const reveal = useCallback(() => {
-    if (Platform.OS === "web") return;
-    const input = focused.current;
-    if (!input?.isFocused()) return;
-    scroll.current?.measureInWindow((_x, top, _width, height) => {
-      input.measureInWindow((_ix, y, _iw, ih) => {
-        if (!input.isFocused()) return;
-        const bottom = Math.min(top + height, Keyboard.metrics()?.screenY ?? top + height) - 24;
-        const delta = y + ih > bottom ? y + ih - bottom : y < top + 16 ? y - top - 16 : 0;
-        if (delta) scroll.current?.scrollTo({ y: Math.max(0, offset.current + delta), animated: true });
-      });
-    });
-  }, []);
-  const focus = useCallback((input: React.ComponentRef<typeof TextInput> | null) => {
-    focused.current = input;
-    requestAnimationFrame(reveal);
-  }, [reveal]);
-  useEffect(() => {
-    const shown = Keyboard.addListener("keyboardDidShow", reveal);
-    return () => shown.remove();
-  }, [reveal]);
   return <SafeAreaView edges={["top", "left", "right"]} style={auth.screen}>
-    <KeyboardAvoidingView style={auth.flex} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-      <ScrollView ref={scroll} style={auth.flex} onLayout={() => requestAnimationFrame(reveal)} onScroll={event => { offset.current = event.nativeEvent.contentOffset.y; }} scrollEventThrottle={16} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentContainerStyle={[auth.scroll, { paddingBottom: insets.bottom + 32 }]}>
-        <AuthKeyboardContext.Provider value={focus}>
+    <KeyboardScroll contentContainerStyle={[auth.scroll, { paddingBottom: insets.bottom + 32 }]}>
         <View style={auth.canvas}>
           <View style={auth.bar}>
             <Brand />
@@ -74,9 +48,7 @@ export function AuthFrame({ title, description, eyebrow, back, action, progress,
             {children}
           </View>
         </View>
-        </AuthKeyboardContext.Provider>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </KeyboardScroll>
   </SafeAreaView>;
 }
 

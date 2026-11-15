@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { FlatList, InputAccessoryView, Keyboard, Modal, Platform, Pressable, TextInput, View } from "react-native";
+import { FlatList, InputAccessoryView, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, TextInput, View } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Icon, Input, Muted, Txt } from "../src/components/ui";
@@ -209,6 +209,7 @@ export default function SignUp() {
       </AuthFrame>
       <Modal visible={picker !== null} animationType="none" onRequestClose={() => setPicker(null)}>
         <SafeAreaView style={{ flex: 1, backgroundColor: c.bg, paddingHorizontal: 20, gap: 12 }}>
+        <KeyboardAvoidingView style={{flex:1,gap:12}} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
             <Txt accessibilityRole="header" style={{ fontWeight: "700" }}>Choose a country code</Txt>
             <Pressable accessibilityRole="button" onPress={() => setPicker(null)} style={{ minHeight: 44, justifyContent: "center", paddingHorizontal: 12 }}><Txt>Close</Txt></Pressable>
@@ -233,6 +234,7 @@ export default function SignUp() {
               style={{ minHeight: 50, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8, paddingVertical: 10, borderBottomWidth: 1, borderColor: c.line }}
             ><Txt style={{ flex: 1 }}>{item[1]}</Txt><Muted>+{item[2]}</Muted></Pressable>}
           />
+        </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
     </>

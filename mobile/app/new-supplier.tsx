@@ -37,6 +37,7 @@ export default function NewSupplier() {
       <Input dark label="Trusted contact" value={contact} onChangeText={setContact} maxLength={254} placeholder="Known phone number or email" />
       </FormSection>
       <Button title="Save supplier" loading={busy} onPress={async () => {
+        if (category === "Other") { setNotice("Enter your custom category before saving."); return; }
         if (!name.trim() || bank.trim().length < 4) { setNotice("Enter a supplier name and a bank reference of at least four characters."); return; }
         setBusy(true);
         try {
