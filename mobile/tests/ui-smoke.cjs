@@ -18,6 +18,7 @@ const server = http.createServer((req, res) => {
   try {
     browser = await chromium.launch({ headless: true, args: ["--no-sandbox"], ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}) });
     p = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    p.setDefaultTimeout(20_000);
     const errors = []; p.on("pageerror", (error) => errors.push(error.message));
     const uid = "11111111-1111-4111-8111-111111111111", wid = "22222222-2222-4222-8222-222222222222";
     let profile = null, workspace = null, suppliers = [], results = [], reviews = [], audit = [], offline = false, signups = 0;
@@ -43,7 +44,9 @@ const server = http.createServer((req, res) => {
         if (req.method() === "PATCH") profile = { ...profile, ...body };
         json = profile ? [profile] : [];
       } else if (url.pathname === "/rest/v1/workspaces") {
-        if (req.method() === "POST") workspace = { ...body, id: wid };
+        if (req.method() === "POST") { assert.equal(url.searchParams.has("on_conflict"), false); workspace = { ...body, id: wid }; }
+        if (req.method() === "PATCH") { assert.equal(url.searchParams.get("id"), "eq." + wid); workspace = { ...workspace, ...body }; }
+        if (url.searchParams.get("select") === "id") { json = workspace ? { id: wid } : null; } else
         json = workspace ? [workspace] : [];
       } else if (url.pathname === "/rest/v1/suppliers") {
         if (req.method() === "POST") suppliers.push({ ...body, version: 1, id: "33333333-3333-4333-8333-333333333333" });
@@ -110,12 +113,16 @@ const server = http.createServer((req, res) => {
     await fill([["Email address", "qa@example.com"], ["Cell phone number", "0820000000"]]);
     await next();
     await p.getByLabel("Password", { exact: true }).filter({ visible: true }).focus();
-    await p.getByRole("button", { name: "Show passwords", exact: true }).click();
+    await p.getByRole("button", { name: "Show password", exact: true }).click();
     await p.waitForFunction(() => Array.from(document.querySelectorAll('input[aria-label="Password"]')).some(el => el.offsetParent !== null && el.type === "text"));
     assert.equal(await p.getByLabel("Confirm password", { exact: true }).evaluate(el => el.type), "password");
     await p.getByLabel("Confirm password", { exact: true }).focus();
     await p.waitForFunction(() => Array.from(document.querySelectorAll('input[aria-label="Password"]')).filter(el => el.offsetParent !== null).every(el => el.type === "password"));
-    await p.getByRole("button", { name: "Hide passwords", exact: true }).click();
+    await p.getByRole("button", { name: "Show confirm password", exact: true }).click();
+    await p.waitForFunction(() => document.querySelector('input[aria-label="Confirm password"]')?.type === "text");
+    await p.getByRole("button", { name: "Hide confirm password", exact: true }).click();
+    await p.waitForFunction(() => document.querySelector('input[aria-label="Confirm password"]')?.type === "password");
+    await p.getByRole("button", { name: "Hide password", exact: true }).click();
     await fill([["Password", "short"], ["Confirm password", "short"]]);
     await next(); await p.getByRole("alert").filter({ hasText: "Meet all four" }).waitFor();
     await fill([["Password", "StrongPass123!"], ["Confirm password", "StrongPass123!"]]);
@@ -255,6 +262,8 @@ const server = http.createServer((req, res) => {
     assert.equal(results.length, 1);
     await p.getByRole("button", { name: "Back to assessment history" }).click();
     await tabs().getByRole("tab", { name: "Home", exact: true }).click();
+    // Let the offline attempt finish before simulating reconnection.
+    await p.waitForLoadState("networkidle");
     offline = false;
     await p.getByRole("button", { name: "Sync now", exact: true }).click();
     await p.getByText("Synced with your account.", { exact: false }).waitFor();

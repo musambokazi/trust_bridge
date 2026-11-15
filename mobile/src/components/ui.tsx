@@ -1,4 +1,5 @@
 import React from "react";
+import { AuthKeyboardContext } from "../auth/keyboard";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -194,6 +195,7 @@ export const Input = React.forwardRef<
   TextInputProps & { label: string; error?: string; prefix?: React.ReactNode; suffix?: React.ReactNode; dark?: boolean; captureSensitive?: boolean }
 >(function Input({ label, error, prefix, suffix, dark = false, captureSensitive = false, style, onFocus, onBlur, ...props }, ref) {
   const localRef = React.useRef<React.ComponentRef<typeof TextInput>>(null);
+  const revealInput = React.useContext(AuthKeyboardContext);
   React.useImperativeHandle(ref, () => localRef.current!, []);
   const { protect, release, captureError, protectedFocus } = usePasswordCapture(captureSensitive, localRef);
   return (
@@ -214,7 +216,7 @@ export const Input = React.forwardRef<
           {...props}
           ref={localRef}
           secureTextEntry={captureSensitive ? props.secureTextEntry !== false || !protectedFocus : props.secureTextEntry}
-          onFocus={(event) => { protect(); onFocus?.(event); }}
+          onFocus={(event) => { protect(); revealInput(localRef.current); onFocus?.(event); }}
           onBlur={(event) => { release(); onBlur?.(event); }}
           accessibilityLabel={label}
           placeholderTextColor={dark ? c.muted : "#757B80"}

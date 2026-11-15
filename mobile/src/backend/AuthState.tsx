@@ -3,6 +3,7 @@ import { AppState } from "react-native";
 import type { Session } from "@supabase/supabase-js";
 import { supabase, secureStorage } from "./client";
 import type { AccountDraft, Profile, Workspace } from "./types";
+import { saveRegistrationWorkspace } from "./saveRegistrationWorkspace";
 
 type Auth = {
   session: Session | null; ready: boolean; accountReady: boolean; profile: Profile | null; workspace: Workspace | null;
@@ -96,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const id = data.user.id;
     const p = await supabase.from("profiles").upsert({ ...draft.profile, id }, { onConflict: "id" });
     if (p.error) throw Error(p.error.code === "23505" ? "That username is taken. Choose another." : "Could not save profile details.");
-    const w = await supabase.from("workspaces").upsert({ ...draft.workspace, owner_id: id }, { onConflict: "owner_id" });
+    const w = await saveRegistrationWorkspace(supabase, id, draft.workspace);
     if (w.error) throw Error("Could not save workspace details. You can retry without creating another account.");
     await secureStorage.removeItem("registration-draft");
     await refresh();

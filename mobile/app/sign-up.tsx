@@ -43,7 +43,7 @@ export default function SignUp() {
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [visible, setVisible] = useState(false);
-  const activePassword = useRef<"password" | "confirmation">("password");
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [error, setError] = useState("");
   const groups = kind === "company" ? company : individual;
   const titles = kind === "company" ? ["Company details", "Business contacts", "Business activity"] : ["Personal details", "Contact details"];
@@ -71,7 +71,7 @@ export default function SignUp() {
       setError(score !== rules.length ? "Meet all four password requirements." : "The passwords do not match.");
       return;
     }
-    if (step === passwordStep) setVisible(false);
+    if (step === passwordStep) { setVisible(false); setConfirmationVisible(false); }
     setError("");
     Keyboard.dismiss();
     setStep(step + 1);
@@ -170,9 +170,8 @@ export default function SignUp() {
           </View>;
         })}
         {step === passwordStep && <>
-          <Input ref={(input) => { inputRefs.current.password = input; }} onFocus={() => { activePassword.current = "password"; }} returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => inputRefs.current.confirmation?.focus()} dark label="Password" captureSensitive secureTextEntry={!visible} value={password} onChangeText={(value) => { setPassword(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
-          <Input ref={(input) => { inputRefs.current.confirmation = input; }} onFocus={() => { activePassword.current = "confirmation"; }} returnKeyType="next" submitBehavior="submit" onSubmitEditing={next} dark label="Confirm password" captureSensitive secureTextEntry={!visible} value={confirmation} onChangeText={(value) => { setConfirmation(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
-          <Button secondary title={visible ? "Hide passwords" : "Show passwords"} onPress={() => { inputRefs.current[activePassword.current]?.focus(); setVisible(!visible); }} />
+          <Input ref={(input) => { inputRefs.current.password = input; }} returnKeyType="next" submitBehavior="submit" onSubmitEditing={() => inputRefs.current.confirmation?.focus()} suffix={<Pressable onPointerDown={event => { if (Platform.OS === "web") event.preventDefault(); }} accessibilityRole="button" accessibilityLabel={visible ? "Hide password" : "Show password"} onPress={() => { inputRefs.current.password?.focus(); setVisible(!visible); }} style={{ padding: 12 }}><Icon name={visible ? "eye-off-outline" : "eye-outline"} /></Pressable>} dark label="Password" captureSensitive secureTextEntry={!visible} value={password} onChangeText={(value) => { setPassword(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
+          <Input ref={(input) => { inputRefs.current.confirmation = input; }} returnKeyType="next" submitBehavior="submit" onSubmitEditing={next} suffix={<Pressable onPointerDown={event => { if (Platform.OS === "web") event.preventDefault(); }} accessibilityRole="button" accessibilityLabel={confirmationVisible ? "Hide confirm password" : "Show confirm password"} onPress={() => { inputRefs.current.confirmation?.focus(); setConfirmationVisible(!confirmationVisible); }} style={{ padding: 12 }}><Icon name={confirmationVisible ? "eye-off-outline" : "eye-outline"} /></Pressable>} dark label="Confirm password" captureSensitive secureTextEntry={!confirmationVisible} value={confirmation} onChangeText={(value) => { setConfirmation(value); setError(""); }} autoCapitalize="none" autoComplete="off" maxLength={128} />
           <View style={{ gap: 6 }}>
             <Txt accessibilityLiveRegion="polite">Password strength: {strength}</Txt>
             <View style={{ flexDirection: "row", gap: 4 }} aria-hidden>
