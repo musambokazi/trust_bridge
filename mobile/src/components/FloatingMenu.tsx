@@ -22,7 +22,8 @@ const tabs = [
 // Compact floating shape from Bible Diaries/Exegomai; measured sliding indicator
 // follows VIMBA's approach. Fresh implementation, no source assets copied.
 export function FloatingMenu() {
-  const path = usePathname();
+  const pathname = usePathname();
+  const path = pathname === "/invoice-details" ? "/check" : pathname;
   const inset = useSafeAreaInsets();
   const active = Math.max(
     0,

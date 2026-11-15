@@ -23,3 +23,10 @@ banks require manual branch-code entry. Codes remain strings to preserve leading
 zeroes. Selecting a bank never changes the account/payment reference.
 
 OSK is listed by name only: an authoritative standalone bank logo could not be verified. The council-site banknote photograph was rejected rather than presented as a logo.
+
+Display renditions use transparent canvases instead of white backing plates.
+Definition/clip-path rectangles and genuine white mark details are retained.
+Raster-only sources have connected near-white backing removed; neutral dark
+ink uses a white display rendition for contrast on the app's dark surfaces.
+SVG sources retain their original mark colours; native PNGs are the dark-surface
+renditions. These display treatments do not imply endorsement.

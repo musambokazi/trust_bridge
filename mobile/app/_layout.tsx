@@ -1,3 +1,4 @@
+import { InvoiceDraftProvider } from "../src/invoices/InvoiceDraftState";
 import {MfaGate} from "../src/security/MfaGate";
 import React from "react";
 import { Stack } from "expo-router";
@@ -10,13 +11,13 @@ import { UpdateNotice } from "../src/components/UpdateNotice";
 import { color as c } from "../src/theme";
 export default function RootLayout() {
   return (
-    <AuthProvider><DemoProvider><DeviceSecurity><MfaGate>
+    <AuthProvider><InvoiceDraftProvider><DemoProvider><DeviceSecurity><MfaGate>
       <View style={{ flex: 1, backgroundColor: c.bg }}>
         <StatusBar style="light" />
         <UpdateNotice />
         <SessionNavigator />
       </View>
-    </MfaGate></DeviceSecurity></DemoProvider></AuthProvider>
+    </MfaGate></DeviceSecurity></DemoProvider></InvoiceDraftProvider></AuthProvider>
   );
 }
 
@@ -26,6 +27,7 @@ function SessionNavigator() {
   const complete = !!session && !!profile && !!workspace;
   return <View style={{ flex: 1 }}><Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg }, animation: "slide_from_right" }}>
     <Stack.Screen name="(tabs)" />
+    <Stack.Protected guard={complete}><Stack.Screen name="invoice-details" /></Stack.Protected>
     <Stack.Protected guard={!session && !hasSeenWelcome}><Stack.Screen name="welcome" /></Stack.Protected>
     <Stack.Protected guard={!complete}>
       <Stack.Screen name="sign-in" />

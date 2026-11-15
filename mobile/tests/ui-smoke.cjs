@@ -237,19 +237,25 @@ const server = http.createServer((req, res) => {
     assert.equal(suppliers[0].branch_code,"051001");
     await p.getByRole("button", { name: /QA Supplies/ }).click();
     await p.getByRole("button", { name: "Check an invoice for this supplier" }).click();
-    await p.getByRole("button", { name: "Import invoice photo, PDF or text", exact: true }).click();
+    assert.equal(await p.getByLabel("Invoice number", { exact: true }).count(), 0);
+    await p.getByRole("button", { name: "Upload invoice", exact: true }).waitFor();
+    await p.getByRole("button", { name: "Scan physical invoice", exact: true }).waitFor();
+    if(process.env.UI_SCREENSHOT_DIR)await p.screenshot({path:path.join(process.env.UI_SCREENSHOT_DIR,"invoice-capture.png")});
     await p.getByRole("button", { name: "Paste invoice text", exact: true }).click();
     await p.getByLabel("Copied invoice text", { exact: true }).fill("Supplier: QA Supplies\nInvoice No: INV-QA\nTotal Due: R100.00\nBank reference: REF9999");
     await p.getByRole("button", { name: "Extract invoice fields", exact: true }).click();
-    const applyImport = p.getByRole("button", { name: "Use reviewed invoice fields", exact: true });
-    assert.equal(await applyImport.isDisabled(), true);
-    assert.equal(await p.getByLabel("Extracted invoice number", { exact: true }).inputValue(), "INV-QA");
-    await p.getByLabel("Extracted bank reference", { exact: true }).fill("REF9999");
+    await p.waitForURL("**/invoice-details");
+    assert.equal(await p.getByRole("button", { name: "Compare invoice details", exact: true }).isDisabled(), true);
+    assert.equal(await p.getByLabel("Invoice number", { exact: true }).inputValue(), "INV-QA");
+    assert.equal(await p.getByLabel("Amount (ZAR)", { exact: true }).inputValue(), "100.00");
+    assert.ok(!p.url().includes("REF9999"));
+    assert.equal(await tabs().getByRole("tab", { name: "Check", exact: true }).getAttribute("aria-selected"), "true");
+    if(process.env.UI_SCREENSHOT_DIR)await p.screenshot({path:path.join(process.env.UI_SCREENSHOT_DIR,"invoice-details.png")});
+    await p.getByLabel("Bank reference on invoice", { exact: true }).fill("REF9998");
     await p.getByRole("checkbox", { name: "I checked these details against the original invoice", exact: true }).click();
-    await applyImport.click();
-    await p.getByText("Reviewed fields added. Confirm the supplier record and compare when ready.", { exact: true }).waitFor();
-    assert.equal(await p.getByLabel("Invoice number", { exact: true }).filter({ visible: true }).inputValue(), "INV-QA");
-    assert.equal(await p.getByLabel("Amount (ZAR)", { exact: true }).filter({ visible: true }).inputValue(), "100.00");
+    await p.getByLabel("Bank reference on invoice", { exact: true }).fill("REF9999");
+    assert.equal(await p.getByRole("button", { name: "Compare invoice details", exact: true }).isDisabled(), true);
+    await p.getByRole("checkbox", { name: "I checked these details against the original invoice", exact: true }).click();
     await p.getByRole("button", { name: "Compare invoice details" }).click();
     await p.getByText("Bank reference changed", { exact: true }).waitFor();
     assert.equal(results.length, 1);
@@ -344,20 +350,28 @@ const server = http.createServer((req, res) => {
     await p.getByText("@test_person", { exact: true }).waitFor();
     assert.equal(await p.getByRole("button", { name: "Sign in", exact: true }).count(), 0);
     await tabs().getByRole("tab", { name: "Check", exact: true }).click();
+    await p.getByRole("button", { name: "Paste invoice text", exact: true }).click();
+    await p.getByLabel("Copied invoice text", { exact: true }).fill("Supplier: QA Supplies\nInvoice No: INV-OFFLINE\nTotal Due: R200.00\nBank reference: REF7777");
+    await p.getByRole("button", { name: "Extract invoice fields", exact: true }).click();
+    await p.waitForURL("**/invoice-details");
     await p.getByRole("button", { name: "Select supplier", exact: true }).click();
     await p.getByRole("button", { name: "QA Supplies Revised", exact: true }).click();
     await fill([["Invoice number", "INV-OFFLINE"], ["Amount (ZAR)", "200"], ["Supplier name on invoice", "QA Supplies"], ["Bank reference on invoice", "REF7777"]]);
+    await p.getByRole("checkbox", { name: "I checked these details against the original invoice", exact: true }).click();
     await p.getByRole("button", { name: "Compare invoice details" }).click();
     await p.getByText("Waiting for server comparison", { exact: true }).first().waitFor();
     assert.equal(results.length, 1);
     await p.getByRole("button", { name: "Back to assessment history" }).click();
     await tabs().getByRole("tab", { name: "Home", exact: true }).click();
-    // Let the offline attempt finish before simulating reconnection.
-    await p.waitForLoadState("networkidle");
+    // Wait for the actual sync task, including encrypted storage writes, rather
+    // than network-idle: reconnecting during that task reuses its promise.
+    await p.getByRole("button", { name: "Open sync centre", exact: true }).click();
+    await p.getByRole("button", { name: "Sync saved work now", exact: true }).waitFor();
     offline = false;
-    await p.getByRole("button", { name: "Sync now", exact: true }).click();
-    await p.getByText("Synced with your account.", { exact: false }).waitFor();
+    await p.getByRole("button", { name: "Sync saved work now", exact: true }).click();
+    await p.getByText("Synced with your account.", { exact: false }).filter({ visible: true }).first().waitFor();
     assert.equal(results.length, 2);
+    await p.getByRole("button", { name: "Go back", exact: true }).click();
     await p.getByRole("button", { name: "Sync now", exact: true }).click();
     assert.equal(results.length, 2);
     for (const width of [320, 390, 768]) {

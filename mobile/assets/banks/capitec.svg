@@ -51,18 +51,12 @@
 	.st10{clip-path:url(#SVGID_23_);}
 	.st11{clip-path:url(#SVGID_25_);fill:url(#SVGID_26_);}
 </style>
-<rect
-   style="fill:#ffffff;stroke-width:14.2857"
-   id="rect1"
-   width="536.50793"
-   height="515.43658"
-   x="-11.346088"
-   y="-8.1043491" /><g
+<g
    id="g57"
    transform="matrix(0.71428451,0,0,0.71428451,114.26577,124.84291)">
-	
-	
-	
+
+
+
 	<g
    id="g58"
    transform="matrix(5.4945148,0,0,5.4945148,-69.312858,36.978219)"><g
@@ -81,7 +75,7 @@
    style="overflow:visible"
    id="use1" />
 		</clipPath>
-		
+
 			<linearGradient
    id="SVGID_3_"
    gradientUnits="userSpaceOnUse"
@@ -132,7 +126,7 @@
    style="overflow:visible"
    id="use5" />
 		</clipPath>
-		
+
 			<linearGradient
    id="SVGID_6_"
    gradientUnits="userSpaceOnUse"
@@ -227,7 +221,7 @@
    style="overflow:visible"
    id="use15" />
 					</clipPath>
-					
+
 						<linearGradient
    id="SVGID_11_"
    gradientUnits="userSpaceOnUse"
@@ -315,7 +309,7 @@
    style="overflow:visible"
    id="use25" />
 					</clipPath>
-					
+
 						<linearGradient
    id="SVGID_16_"
    gradientUnits="userSpaceOnUse"
@@ -429,7 +423,7 @@
    style="overflow:visible"
    id="use40" />
 					</clipPath>
-					
+
 						<linearGradient
    id="SVGID_21_"
    gradientUnits="userSpaceOnUse"
@@ -500,7 +494,7 @@
    style="overflow:visible"
    id="use44" />
 					</clipPath>
-					
+
 						<linearGradient
    id="SVGID_26_"
    gradientUnits="userSpaceOnUse"
